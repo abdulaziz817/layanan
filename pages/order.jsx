@@ -162,7 +162,7 @@ export default function OrderForm() {
     setError("");
     setIsSubmitting(true);
 
-    const waNumber = "087860592111";
+    const waNumber = "6287860592111";
     const detailService = selectedSubService === "Lainnya" ? customSubService : selectedSubService;
 
     const encodedMessage = encodeURIComponent(
