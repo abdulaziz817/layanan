@@ -39,7 +39,6 @@ export default function OrderForm() {
       "Logo",
       "Logo Animasi",
       "Kartu Nama",
-      "Undangan Digital",
       "Undangan Cetak",
       "Kemasan Produk",
       "Label Produk",
@@ -82,7 +81,7 @@ export default function OrderForm() {
       "Website Pemerintahan",
       "Aplikasi Formulir Digital",
       "Aplikasi Multi-User",
-      "Progressive Web App (PWA)",
+      "Undangan Digital",
       "Sistem Absensi Online",
       "Web untuk Linktree",
       "Aplikasi Kalkulator Custom",
@@ -91,6 +90,7 @@ export default function OrderForm() {
       "Lainnya"
     ],
     "Preset Fotografi": [
+      "Editing Foto",
       "Lightroom Preset",
       "Mobile Preset",
       "Preset Pernikahan",

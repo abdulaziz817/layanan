@@ -2,19 +2,19 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'  // Next 13+ app router
+import { useRouter } from 'next/navigation'
 
 export default function Navbar() {
   const router = useRouter()
   const [menuOpen, setMenuOpen] = useState(false)
-  const [pendingAnchor, setPendingAnchor] = useState(null) // anchor yang mau discroll setelah navigasi
+  const [pendingAnchor, setPendingAnchor] = useState(null)
 
   const navigation = [
     { title: "Tentang", path: "/#cta" },
     { title: "Software", path: "/#toolkit" },
     { title: "Testimoni", path: "/#testimonials" },
   ]
-  // Fungsi untuk scroll smooth dengan offset
+
   const scrollToAnchor = (id) => {
     const element = document.getElementById(id)
     if (element) {
@@ -24,27 +24,24 @@ export default function Navbar() {
     }
   }
 
-  // Handle klik navigasi
   const handleNavClick = (path) => {
     setMenuOpen(false)
-    if (!path.startsWith('/#')) {
-      // Jika bukan anchor, langsung navigasi biasa
-      router.push(path)
+
+    if (path.startsWith('/#')) {
+      const id = path.replace('/#', '')
+      if (window.location.pathname === '/') {
+        scrollToAnchor(id)
+      } else {
+        setPendingAnchor(id)
+        router.push('/')
+      }
       return
     }
-    const id = path.replace('/#', '')
 
-    if (window.location.pathname === '/') {
-      // Jika sudah di home page, langsung scroll
-      scrollToAnchor(id)
-    } else {
-      // Jika di halaman lain, navigasi dulu ke home, lalu scroll nanti di useEffect
-      setPendingAnchor(id)
-      router.push('/')
-    }
+    if (window.location.pathname === path) return
+    router.push(path)
   }
 
-  // Setelah navigasi ke home selesai, scroll ke anchor kalau ada pendingAnchor
   useEffect(() => {
     if (pendingAnchor && window.location.pathname === '/') {
       scrollToAnchor(pendingAnchor)
@@ -58,7 +55,7 @@ export default function Navbar() {
         <h1 className="text-2xl font-bold text-gray-900 select-none">Layanan Nusantara</h1>
 
         {/* Desktop Nav */}
-        <nav className="hidden md:flex space-x-8 items-center">
+        <nav className="hidden md:flex space-x-4 items-center">
           {navigation.map((item, idx) => (
             <button
               key={idx}
@@ -68,7 +65,12 @@ export default function Navbar() {
               {item.title}
             </button>
           ))}
-          <Link href="/order" className="bg-gray-800 text-white px-5 py-2 rounded-md hover:bg-gray-700 transition duration-300">
+
+          {/* Tombol Pesan */}
+          <Link
+            href="/order"
+            className="bg-gray-800 text-white px-5 py-2 rounded-md hover:bg-gray-700 transition duration-300"
+          >
             Pesan Sekarang
           </Link>
         </nav>
@@ -80,16 +82,8 @@ export default function Navbar() {
           className={`md:hidden p-3 rounded-md text-gray-700 hover:text-black transition-transform duration-300
             ${menuOpen ? 'rotate-90' : 'rotate-0'}`}
         >
-          <svg
-            className="w-7 h-7"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M4 6h16M4 12h16M4 18h16" />
+          <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+            <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
       </div>
@@ -116,16 +110,8 @@ export default function Navbar() {
             className="absolute top-4 right-4 text-gray-500 hover:text-black transition duration-300 p-1"
             aria-label="Close menu"
           >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M6 18L18 6M6 6l12 12" />
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+              <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
 
@@ -141,6 +127,7 @@ export default function Navbar() {
             ))}
           </nav>
 
+          {/* Tombol Pesan - mobile */}
           <Link
             href="/order"
             onClick={() => setMenuOpen(false)}

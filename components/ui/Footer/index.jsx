@@ -1,7 +1,7 @@
 const socialInfo = [
   {
     name: "Portfolio",
-    href: "https://zizzzdul.netlify.app/",
+    href: "https://abdulaziznusantara.netlify.app/",
     icon: (
       // Logo bola dunia simple dengan warna abu-abu
       <svg
@@ -32,7 +32,7 @@ const socialInfo = [
   },
   {
     name: "Instagram",
-    href: "https://instagram.com/zizzzdul_",
+    href: "https://www.instagram.com/abdulaziz.nusantara/",
     icon: (
       <svg
         className="w-6 h-6"

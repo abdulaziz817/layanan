@@ -57,7 +57,7 @@ const CTA = () => {
                                     className="inline-block"
                                 >
                                     <NavLink
-                                        href="https://zizzzdul.netlify.app/"
+                                        href="https://abdulaziznusantara.netlify.app/"
                                         className="px-8 py-4 text-base font-semibold text-white bg-indigo-600 rounded-full shadow-lg transition duration-300 ease-in-out"
                                     >
                                         Lihat Portofolio Kami
