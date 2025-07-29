@@ -1,6 +1,12 @@
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
-  siteUrl: 'https://layanannusantara.netlify.app', // Ganti dengan URL websitemu
-  generateRobotsTxt: true, // otomatis bikin robots.txt
-  sitemapSize: 5000, 
+  siteUrl: 'https://layanannusantara.netlify.app',
+  generateRobotsTxt: true,
+  outDir: './public',
+  sitemapSize: 0, // PAKSA 1 file sitemap saja
+  exclude: ['/api/*', '/404'],
+  additionalPaths: async (config) => [
+    { loc: '/' },
+    { loc: '/order' }
+  ],
 };
