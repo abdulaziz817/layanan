@@ -1,4 +1,3 @@
-
 import Head from "next/head";
 import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
@@ -18,44 +17,6 @@ export default function OrderForm() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("");
-  const [duration, setDuration] = useState("");
-  const [durationPrice, setDurationPrice] = useState("");
-
-
-  const appPrices = {
-    "Chat GPT": {
-      "1 Bulan": "50000",
-      "3 Bulan": "38000",
-      "6 Bulan": "66000"
-    },
-    "Youtube Premium": {
-      "1 Bulan": "10000",
-      "3 Bulan": "25000"
-    },
-    "Netflix Premium": {
-      "1 Bulan": "15000",
-      "2 Bulan": "25000"
-    },
-    "Aplikasi Lainnya": {
-      "1 Bulan": "12000",
-      "3 Bulan": "30000"
-    }
-  };
-
-  const premiumDurations = [
-    "3 Hari",
-    "7 Hari",
-    "1 Bulan",
-    "2 Bulan",
-    "3 Bulan",
-    "4 Bulan",
-    "5 Bulan",
-    "6 Bulan",
-    "1 Tahun",
-  ];
-
-
-
 
   useEffect(() => {
     const tomorrow = new Date();
@@ -66,7 +27,7 @@ export default function OrderForm() {
     setMinDate(`${yyyy}-${mm}-${dd}`);
   }, []);
 
-  const servicesItems = ["Desain Grafis", "Web Development", "Preset Fotografi", "Aplikasi Premium"];
+  const servicesItems = ["Desain Grafis", "Web Development", "Preset Fotografi",];
 
   const serviceSubOptions = {
     "Desain Grafis": [
@@ -156,12 +117,7 @@ export default function OrderForm() {
       "Preset Matahari Terbenam",
       "Preset Flat Lay",
       "Lainnya"
-    ],
-    "Aplikasi Premium": [
-      "Youtube Premium",
-      "Chat GPT",
-      "Lainnya"
-    ],
+    ]
   };
 
   const formatRupiah = (value) => {
@@ -178,7 +134,6 @@ export default function OrderForm() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // VALIDASI UMUM
     if (name.trim().length < 3) {
       return setError("Nama harus minimal 3 karakter.");
     }
@@ -191,22 +146,12 @@ export default function OrderForm() {
     if (selectedSubService === "Lainnya" && customSubService.trim().length < 3) {
       return setError("Masukkan detail layanan jika memilih 'Lainnya'.");
     }
-
-    // KHUSUS "APLIKASI PREMIUM"
-    if (selectedService === "Aplikasi Premium") {
-      if (!duration) {
-        return setError("Silakan pilih durasi langganan.");
-      }
-    } else {
-      // VALIDASI NORMAL (untuk layanan selain Aplikasi Premium)
-      if (!budget.match(/^\d{1,3}(\.\d{3})*$/)) {
-        return setError("Budget harus berupa angka dengan format benar, contoh: 150.000.");
-      }
-      if (!deadline || new Date(deadline) <= new Date()) {
-        return setError("Deadline harus minimal 1 hari setelah tanggal hari ini.");
-      }
+    if (!budget.match(/^\d{1,3}(\.\d{3})*$/)) {
+      return setError("Budget harus berupa angka dengan format benar, contoh: 150.000.");
     }
-
+    if (!deadline || new Date(deadline) <= new Date()) {
+      return setError("Deadline harus minimal 1 hari setelah tanggal hari ini.");
+    }
     if (message.trim().length < 10) {
       return setError("Pesan harus minimal 10 karakter.");
     }
@@ -214,27 +159,24 @@ export default function OrderForm() {
       return setError("Pilih metode pembayaran yang diinginkan.");
     }
 
-    // Jika semua valid:
     setError("");
     setIsSubmitting(true);
 
     const waNumber = "6287860592111";
-    const detailService =
-      selectedSubService === "Lainnya" ? customSubService : selectedSubService;
+    const detailService = selectedSubService === "Lainnya" ? customSubService : selectedSubService;
 
     const encodedMessage = encodeURIComponent(
       `*Hai Layanan Nusantara!* 👋✨\n\n` +
-      `Saya ingin memesan layanan berikut:\n\n` +
+      `Saya sangat tertarik menggunakan jasa Layanan Nusantara. Berikut adalah detail lengkap pesanan saya:\n\n` +
       `👤 *Nama:* ${name}\n` +
       `📞 *Nomor WhatsApp:* ${phone}\n` +
-      `🛠️ *Layanan:* ${selectedService}${detailService ? ` - ${detailService}` : ""}\n` +
-      `${selectedService === "Aplikasi Premium"
-        ? `⏳ *Durasi Langganan:* ${duration}\n💰 *Harga:* Rp ${durationPrice}\n`
-        : `💰 *Budget:* Rp ${budget}\n⏰ *Deadline:* ${deadline}\n`
-      }` +
+      `🛠️ *Layanan yang Dipilih:* ${selectedService}${detailService ? ` - ${detailService}` : ""}\n` +
+      `💰 *Budget yang Disediakan:* Rp ${budget}\n` +
+      `⏰ *Deadline Pengerjaan:* ${deadline}\n` +
       `💳 *Metode Pembayaran:* ${paymentMethod}\n` +
-      `📝 *Pesan Tambahan:* ${message}\n\n` +
-      `Terima kasih!\n${name}`
+      `📝 *Pesan Tambahan:*\n${message}\n\n` +
+      `🙏 Saya sangat berharap tim Layanan Nusantara bisa segera memproses pesanan saya. Terima kasih banyak atas perhatian dan respons cepatnya. Semoga hari Anda menyenangkan!\n\n` +
+      `Salam hormat,\n${name}`
     );
 
     setTimeout(() => {
@@ -242,7 +184,6 @@ export default function OrderForm() {
       setIsSubmitting(false);
     }, 1000);
   };
-
 
   return (
     <>
@@ -345,61 +286,28 @@ export default function OrderForm() {
                     />
                   </div>
                 )}
-                {selectedService !== "Aplikasi Premium" && (
-                  <>
-                    <div>
-                      <label>Budget (Rp)</label>
-                      <Input
-                        type="text"
-                        value={budget}
-                        onChange={handleBudgetChange}
-                        placeholder="Contoh: 150.000"
-                        className="mt-2"
-                      />
-                    </div>
-
-                    <div>
-                      <label>Deadline (kapan selesai)</label>
-                      <input
-                        type="date"
-                        min={minDate}
-                        value={deadline}
-                        onChange={(e) => setDeadline(e.target.value)}
-                        className="mt-2 w-full border rounded-lg p-3"
-                      />
-                    </div>
-                  </>
-                )}
-
-                {selectedService === "Aplikasi Premium" && (
-                  <>
-                    <label>Pilih Durasi</label>
-                    <select
-                      className="w-full p-2 border rounded-lg mt-2"
-                      value={duration}
-                      onChange={(e) => {
-                        const dur = e.target.value;
-                        setDuration(dur);
-
-                        // 🔥 ambil harga asli sesuai aplikasi + durasi
-                        setDurationPrice(appPrices[selectedSubService][dur] || "-");
-                      }}
-                    >
-                      <option value="">-- Pilih Durasi --</option>
-
-                      {/* 🔥 durasi otomatis sesuai aplikasi */}
-                      {selectedSubService &&
-                        Object.keys(appPrices[selectedSubService]).map((dur) => (
-                          <option key={dur} value={dur}>{dur}</option>
-                        ))
-                      }
-                    </select>
-
-                    <p className="mt-2 font-semibold">
-                      Harga: Rp {durationPrice ? durationPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "-"}
-                    </p>
-                  </>
-                )}
+                <div>
+                  <label>Budget (Rp)</label>
+                  <Input
+                    type="text"
+                    value={budget}
+                    onChange={handleBudgetChange}
+                    placeholder="Contoh: 150.000"
+                    className="mt-2"
+                  />
+                </div>
+                <div>
+                  <label>Deadline (kapan selesai)</label>
+                  <input
+                    type="date"
+                    min={minDate}
+                    value={deadline}
+                    onChange={(e) => setDeadline(e.target.value)}
+                    className="mt-2 w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-600 cursor-pointer text-gray-700 font-medium"
+                    placeholder="Pilih tanggal deadline"
+                    aria-label="Pilih tanggal deadline"
+                  />
+                </div>
                 <div>
                   <label>Pesan Tambahan</label>
                   <textarea
