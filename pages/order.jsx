@@ -23,25 +23,25 @@ export default function OrderForm() {
 
 
   const appPrices = {
-    "Chat GPT": {
-      "1 Bulan (nogar)": "17000",
-      "1 Bulan (head nogar)": "20000",
-      "1 Bulan (fullgar)": "30000",
-      "3 Bulan (fullgar)": "54000"
+    "ChatGPT": {
+      "1 Bulan (No Garansi)": "17000",
+      "1 Bulan (Head No Garansi)": "20000",
+      "1 Bulan (Full Garansi)": "30000",
+      "3 Bulan (Full Garansi)": "54000"
     },
-    "Youtube Premium": {
-      "1 Bulan (indplan)": "35000",
-      "1 Bulan (famplan)": "30000",
-      "1 Bulan (student)": "26000",
-      "1 Bulan (student nogar)": "13000"
+    "YouTube Premium": {
+      "1 Bulan (IndPlan)": "35000",
+      "1 Bulan (Family Plan)": "30000",
+      "1 Bulan (Student)": "26000",
+      "1 Bulan (Student No Garansi)": "13000"
     },
     "Netflix Premium": {
-      "1 Bulan (standar)": "25000",
-      "1 Bulan (ultimate)": "31000"
+      "1 Bulan (Standard)": "25000",
+      "1 Bulan (Ultimate)": "31000"
     },
-    "Bstation Premium": {
-      "1 Bulan (garansi)": "12000",
-      "1 Bulan (fullgar)": "18000"
+    "Disney Hotstar": {
+      "1 Bulan": "20000",
+      "1 Tahun": "120000"
     },
     "Vidio": {
       "1 Bulan (Premier)": "25000",
@@ -53,28 +53,48 @@ export default function OrderForm() {
       "3 Bulan (VIP)": "40000"
     },
     "iQIYI": {
-      "1 Bulan (standard)": "15000",
-      "1 Bulan (premium)": "20000"
+      "1 Bulan (Standard)": "15000",
+      "1 Bulan (Premium)": "20000"
     },
-    "Disney Hotstar": {
-      "1 Bulan": "20000",
-      "1 Tahun": "120000"
-    },
-    "Spotify": {
-      "1 Bulan (premium)": "6000",
-      "1 Bulan (famplan)": "10000",
-      "1 Bulan (student)": "5000"
+    "Bstation Premium": {
+      "1 Bulan (Garansi)": "12000",
+      "1 Bulan (Full Garansi)": "18000"
     },
     "Viu Premium": {
       "1 Bulan": "12000",
       "1 Tahun": "120000"
     },
-    "Aplikasi Lainnya": {
-      "1 Bulan Termurah": "2000",
-      "1 Bulan Rata-rata": "16000",
-      "1 Tahun Termurah": "2000",
-      "1 Tahun Rata-rata": "30000"
+    "Spotify": {
+      "1 Bulan (Premium)": "6000",
+      "1 Bulan (Family Plan)": "10000",
+      "1 Bulan (Student)": "5000"
+    },
+    "Canva Pro": {
+      "1 Bulan (No Garansi)": "15000",
+      "1 Bulan (Full Garansi)": "25000",
+      "1 Tahun (Full Garansi)": "75000"
+    },
+    "CapCut Pro": {
+      "1 Bulan (Full Garansi)": "18000"
+    },
+    "Google Gemini": {
+      "1 Bulan (Full Garansi)": "25000"
+    },
+    "TikTok Premium": {
+      "1 Bulan (No Garansi)": "15000",
+      "1 Bulan (Full Garansi)": "20000"
+    },
+
+    "HBO GO": {
+      "1 Bulan (Full Garansi)": "25000"
+    },
+    "Apple Music": {
+      "1 Bulan (Student)": "6000",
+      "1 Bulan (Individual)": "9000",
+      "1 Bulan (Family)": "15000"
     }
+
+
   };
 
 
@@ -181,23 +201,34 @@ export default function OrderForm() {
     ],
     "Aplikasi Premium": [
       "🎬 Streaming Film",
-      "Netflix Premium",
-      "Disney Hotstar",
-      "Vidio",
-      "WeTV",
-      "iQIYI",
+
       "Bstation Premium",
+      "Disney Hotstar",
+      "HBO GO",
+      "iQIYI",
+      "Netflix Premium",
+      "Vidio",
       "Viu Premium",
+      "WeTV",
 
       "🎵 Musik",
+      "Apple Music",
       "Spotify",
 
       "🤖 AI",
-      "Chat GPT",
+      "ChatGPT",
+      "Google Gemini",
+
+      "🎨 Desain & Editing",
+      "Canva Pro",
+      "CapCut Pro",
 
       "▶️ Video Premium",
-      "Youtube Premium"
+      "TikTok Premium",
+      "YouTube Premium"
     ]
+
+
 
   };
 
@@ -354,55 +385,56 @@ export default function OrderForm() {
                   </select>
                 </div>
                 {selectedService && serviceSubOptions[selectedService] && (
-<div>
-  <label className="font-semibold text-gray-800">Detail Layanan</label>
-  <select
-    value={selectedSubService}
-    onChange={(e) => setSelectedSubService(e.target.value)}
-    className="
+                  <div>
+                    <label className="font-semibold text-gray-800">Detail Layanan</label>
+                    <select
+                      value={selectedSubService}
+                      onChange={(e) => setSelectedSubService(e.target.value)}
+                      className="
       mt-2 w-full border rounded-xl p-3 text-sm
       focus:outline-none focus:ring-2 focus:ring-indigo-600
       bg-white shadow-sm transition-all duration-200
     "
-  >
-    <option value="" className="text-gray-400 italic">
-      -- Pilih Detail Layanan --
-    </option>
+                    >
+                      <option value="" className="text-gray-400 italic">
+                        -- Pilih Detail Layanan --
+                      </option>
 
-    {/* Tambahan divider kategori */}
-    {serviceSubOptions[selectedService].map((subItem, idx) => {
-      const isCategory = [
-        "🎬 Streaming Film",
-        "🎵 Musik",
-        "🤖 AI",
-        "▶️ Video Premium"
-      ].includes(subItem);
+                      {/* Tambahan divider kategori */}
+                      {serviceSubOptions[selectedService].map((subItem, idx) => {
+                        const isCategory = [
+                          "🎬 Streaming Film",
+                          "🎵 Musik",
+                          "🤖 AI",
+                          "🎨 Desain & Editing",
+                          "▶️ Video Premium"
+                        ].includes(subItem);
 
-      return (
-        <option
-          key={idx}
-          value={subItem}
-          disabled={isCategory}
-          className={
-            isCategory
-              ? `
+                        return (
+                          <option
+                            key={idx}
+                            value={subItem}
+                            disabled={isCategory}
+                            className={
+                              isCategory
+                                ? `
                 text-xs uppercase tracking-wide 
                 bg-gradient-to-r from-indigo-100 to-indigo-50
                 text-indigo-700 font-bold py-2 cursor-not-allowed
                 border-t border-b border-indigo-200 mt-2
               `
-              : `
+                                : `
                 text-gray-900 pl-3
                 hover:bg-indigo-50
               `
-          }
-        >
-          {isCategory ? `── ${subItem} ──` : subItem}
-        </option>
-      );
-    })}
-  </select>
-</div>
+                            }
+                          >
+                            {isCategory ? `── ${subItem} ──` : subItem}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
 
                 )}
                 {selectedSubService === "Lainnya" && (
