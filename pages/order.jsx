@@ -24,36 +24,58 @@ export default function OrderForm() {
 
   const appPrices = {
     "Chat GPT": {
-      "1 Bulan": "50000",
-      "3 Bulan": "38000",
-      "6 Bulan": "66000"
+      "1 Bulan (nogar)": "17000",
+      "1 Bulan (head nogar)": "20000",
+      "1 Bulan (fullgar)": "30000",
+      "3 Bulan (fullgar)": "54000"
     },
     "Youtube Premium": {
-      "1 Bulan": "10000",
-      "3 Bulan": "25000"
+      "1 Bulan (indplan)": "35000",
+      "1 Bulan (famplan)": "30000",
+      "1 Bulan (student)": "26000",
+      "1 Bulan (student nogar)": "13000"
     },
     "Netflix Premium": {
-      "1 Bulan": "15000",
-      "2 Bulan": "25000"
+      "1 Bulan (standar)": "25000",
+      "1 Bulan (ultimate)": "31000"
+    },
+    "Bstation Premium": {
+      "1 Bulan (garansi)": "12000",
+      "1 Bulan (fullgar)": "18000"
+    },
+    "Vidio": {
+      "1 Bulan (Premier)": "25000",
+      "1 Bulan (Champions)": "30000",
+      "1 Tahun (Premier)": "150000"
+    },
+    "WeTV": {
+      "1 Bulan (VIP)": "15000",
+      "3 Bulan (VIP)": "40000"
+    },
+    "iQIYI": {
+      "1 Bulan (standard)": "15000",
+      "1 Bulan (premium)": "20000"
+    },
+    "Disney Hotstar": {
+      "1 Bulan": "20000",
+      "1 Tahun": "120000"
+    },
+    "Spotify": {
+      "1 Bulan (premium)": "6000",
+      "1 Bulan (famplan)": "10000",
+      "1 Bulan (student)": "5000"
+    },
+    "Viu Premium": {
+      "1 Bulan": "12000",
+      "1 Tahun": "120000"
     },
     "Aplikasi Lainnya": {
-      "1 Bulan": "12000",
-      "3 Bulan": "30000"
+      "1 Bulan Termurah": "2000",
+      "1 Bulan Rata-rata": "16000",
+      "1 Tahun Termurah": "2000",
+      "1 Tahun Rata-rata": "30000"
     }
   };
-
-  const premiumDurations = [
-    "3 Hari",
-    "7 Hari",
-    "1 Bulan",
-    "2 Bulan",
-    "3 Bulan",
-    "4 Bulan",
-    "5 Bulan",
-    "6 Bulan",
-    "1 Tahun",
-  ];
-
 
 
 
@@ -158,10 +180,25 @@ export default function OrderForm() {
       "Lainnya"
     ],
     "Aplikasi Premium": [
-      "Youtube Premium",
+      "🎬 Streaming Film",
+      "Netflix Premium",
+      "Disney Hotstar",
+      "Vidio",
+      "WeTV",
+      "iQIYI",
+      "Bstation Premium",
+      "Viu Premium",
+
+      "🎵 Musik",
+      "Spotify",
+
+      "🤖 AI",
       "Chat GPT",
-      "Lainnya"
-    ],
+
+      "▶️ Video Premium",
+      "Youtube Premium"
+    ]
+
   };
 
   const formatRupiah = (value) => {
@@ -317,21 +354,56 @@ export default function OrderForm() {
                   </select>
                 </div>
                 {selectedService && serviceSubOptions[selectedService] && (
-                  <div>
-                    <label>Detail Layanan</label>
-                    <select
-                      value={selectedSubService}
-                      onChange={(e) => setSelectedSubService(e.target.value)}
-                      className="mt-2 w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-indigo-600"
-                    >
-                      <option value="">-- Pilih Detail Layanan --</option>
-                      {serviceSubOptions[selectedService].map((subItem, idx) => (
-                        <option key={idx} value={subItem}>
-                          {subItem}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+<div>
+  <label className="font-semibold text-gray-800">Detail Layanan</label>
+  <select
+    value={selectedSubService}
+    onChange={(e) => setSelectedSubService(e.target.value)}
+    className="
+      mt-2 w-full border rounded-xl p-3 text-sm
+      focus:outline-none focus:ring-2 focus:ring-indigo-600
+      bg-white shadow-sm transition-all duration-200
+    "
+  >
+    <option value="" className="text-gray-400 italic">
+      -- Pilih Detail Layanan --
+    </option>
+
+    {/* Tambahan divider kategori */}
+    {serviceSubOptions[selectedService].map((subItem, idx) => {
+      const isCategory = [
+        "🎬 Streaming Film",
+        "🎵 Musik",
+        "🤖 AI",
+        "▶️ Video Premium"
+      ].includes(subItem);
+
+      return (
+        <option
+          key={idx}
+          value={subItem}
+          disabled={isCategory}
+          className={
+            isCategory
+              ? `
+                text-xs uppercase tracking-wide 
+                bg-gradient-to-r from-indigo-100 to-indigo-50
+                text-indigo-700 font-bold py-2 cursor-not-allowed
+                border-t border-b border-indigo-200 mt-2
+              `
+              : `
+                text-gray-900 pl-3
+                hover:bg-indigo-50
+              `
+          }
+        >
+          {isCategory ? `── ${subItem} ──` : subItem}
+        </option>
+      );
+    })}
+  </select>
+</div>
+
                 )}
                 {selectedSubService === "Lainnya" && (
                   <div className="mt-3">
@@ -370,36 +442,50 @@ export default function OrderForm() {
                     </div>
                   </>
                 )}
-
                 {selectedService === "Aplikasi Premium" && (
                   <>
-                    <label>Pilih Durasi</label>
+                    <label className="font-semibold text-gray-700">Pilih Durasi</label>
+
                     <select
-                      className="w-full p-2 border rounded-lg mt-2"
+                      className="w-full p-3 border rounded-xl mt-2 bg-white shadow-sm
+                 focus:ring-2 focus:ring-blue-500 transition-all"
                       value={duration}
                       onChange={(e) => {
                         const dur = e.target.value;
                         setDuration(dur);
-
-                        // 🔥 ambil harga asli sesuai aplikasi + durasi
                         setDurationPrice(appPrices[selectedSubService][dur] || "-");
                       }}
                     >
                       <option value="">-- Pilih Durasi --</option>
 
-                      {/* 🔥 durasi otomatis sesuai aplikasi */}
                       {selectedSubService &&
                         Object.keys(appPrices[selectedSubService]).map((dur) => (
-                          <option key={dur} value={dur}>{dur}</option>
-                        ))
-                      }
+                          <option key={dur} value={dur}>
+                            {dur}
+                          </option>
+                        ))}
                     </select>
 
-                    <p className="mt-2 font-semibold">
-                      Harga: Rp {durationPrice ? durationPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "-"}
-                    </p>
+                    {/* 🔥 HARGA PREMIUM RINGAN */}
+                    <div
+                      className="mt-5 p-5 rounded-2xl border shadow
+                 bg-gradient-to-br from-white to-blue-50
+                 text-center animate-price"
+                    >
+                      <p className="text-sm tracking-wide text-gray-500 uppercase font-medium">
+                        Harga
+                      </p>
+
+                      <p className="text-3xl font-bold mt-1 text-blue-700">
+                        Rp{" "}
+                        {durationPrice
+                          ? durationPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                          : "-"}
+                      </p>
+                    </div>
                   </>
                 )}
+
                 <div>
                   <label>Pesan Tambahan</label>
                   <textarea
@@ -421,6 +507,7 @@ export default function OrderForm() {
                     <option value="OVO">OVO</option>
                     <option value="GoPay">GoPay</option>
                     <option value="Dana">Dana</option>
+                    <option value="Paypal">Paypal</option>
                   </select>
                 </div>
                 <div>
