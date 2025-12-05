@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Brush, Code, Camera } from 'lucide-react'
+import { Brush, Code, Camera, Star } from 'lucide-react'
 
 const layanan = [
   {
@@ -18,6 +18,13 @@ const layanan = [
     icon: Camera,
     title: "Preset Fotografi",
     desc: "Foto berkualitas dengan editing menarik.",
+  },
+
+  // ➕ ITEM BARU DITAMBAHKAN DI SINI
+  {
+    icon: Star,
+    title: "Aplikasi Premium Harga Terbaik",
+    desc: "Layanan aplikasi premium murah meriah akses full.",
   },
 ]
 
@@ -60,12 +67,15 @@ const IconGrid = () => {
         className="grid grid-cols-1 md:grid-cols-3 gap-10"
       >
         {layanan.map((item, index) => (
-          <motion.div
-            key={index}
-            variants={cardVariants}
-            whileHover={{ scale: 1.03 }}
-            className="group relative bg-white border border-gray-200 rounded-3xl p-8 text-center transition-all duration-700 ease-in-out shadow-lg hover:shadow-[0_10px_40px_rgba(99,102,241,0.5)]"
-          >
+   <motion.div
+  key={index}
+  variants={cardVariants}
+  whileHover={{ scale: 1.03 }}
+  className={`group relative bg-white border border-gray-200 rounded-3xl p-8 text-center transition-all duration-700 ease-in-out shadow-lg hover:shadow-[0_10px_40px_rgba(99,102,241,0.5)]
+    ${index === 3 ? "md:col-span-3 md:max-w-md mx-auto" : ""}
+  `}
+>
+
             <div className="flex justify-center mb-6">
               <div className="w-16 h-16 flex items-center justify-center rounded-full bg-gray-100 transition-colors duration-500 shadow-md">
                 <item.icon className="w-9 h-9 text-black" />

@@ -387,15 +387,15 @@ export default function OrderForm() {
                 {selectedService && serviceSubOptions[selectedService] && (
                   <div>
                     <label className="font-semibold text-gray-800">Detail Layanan</label>
-                    <select
-                      value={selectedSubService}
-                      onChange={(e) => setSelectedSubService(e.target.value)}
-                      className="
-      mt-2 w-full border rounded-xl p-3 text-sm
-      focus:outline-none focus:ring-2 focus:ring-indigo-600
-      bg-white shadow-sm transition-all duration-200
-    "
-                    >
+                  <select
+  value={selectedSubService}
+  onChange={(e) => setSelectedSubService(e.target.value)}
+  className="
+    mt-2 w-full border border-gray-300 rounded-lg p-3
+    focus:outline-none focus:ring-2 focus:ring-indigo-600
+    bg-white shadow-sm text-sm
+  "
+>
                       <option value="" className="text-gray-400 italic">
                         -- Pilih Detail Layanan --
                       </option>
@@ -478,9 +478,12 @@ export default function OrderForm() {
                   <>
                     <label className="font-semibold text-gray-700">Pilih Durasi</label>
 
-                    <select
-                      className="w-full p-3 border rounded-xl mt-2 bg-white shadow-sm
-                 focus:ring-2 focus:ring-blue-500 transition-all"
+                   <select
+  className="
+    w-full mt-2 p-3 border border-gray-300 rounded-lg
+    bg-white shadow-sm text-sm
+    focus:outline-none focus:ring-2 focus:ring-indigo-600
+  "
                       value={duration}
                       onChange={(e) => {
                         const dur = e.target.value;
