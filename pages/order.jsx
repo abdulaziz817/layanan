@@ -20,7 +20,12 @@ export default function OrderForm() {
   const [paymentMethod, setPaymentMethod] = useState("");
   const [duration, setDuration] = useState("");
   const [durationPrice, setDurationPrice] = useState("");
-  const [showQris, setShowQris] = useState(false); // ⬅️ Tambahkan ini
+  const [showQris, setShowQris] = useState(false);
+  const [showGopay, setShowGopay] = useState(false);
+  const [showPaypal, setShowPaypal] = useState(false);
+  const [showBCA, setShowBCA] = useState(false);
+
+
 
 
   const appPrices = {
@@ -522,6 +527,7 @@ export default function OrderForm() {
                   </>
                 )}
 
+
                 <div>
                   <label>Pesan Tambahan</label>
                   <textarea
@@ -594,22 +600,134 @@ export default function OrderForm() {
                   )}
 
 
+                  {showGopay && (
+                    <div className="mt-4 w-full p-6 rounded-2xl border border-gray-100 shadow-sm bg-white">
+                      <div className="flex flex-col items-center">
+
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-lg font-semibold text-gray-900">GoPay Payment</h3>
+                          <span className="px-2 py-0.5 text-[10px] rounded-md bg-gray-100 text-gray-500">
+                            Secure
+                          </span>
+                        </div>
+
+                        <span className="text-xs text-gray-500 mt-1">
+                          Transfer ke nomor GoPay berikut
+                        </span>
+
+                        <div className="mt-5 w-full p-4 rounded-xl bg-gray-50 border flex justify-between items-center">
+                          <span className="font-semibold text-gray-900 text-base">
+                            087860592111
+                          </span>
+
+                          <button
+                            onClick={() => navigator.clipboard.writeText("087860592111")}
+                            className="text-sm px-3 py-1.5 rounded-lg bg-gray-900 text-white hover:bg-black transition active:scale-[0.97]"
+                          >
+                            Copy
+                          </button>
+                        </div>
+
+                        <p className="text-[11px] text-gray-400 mt-3">
+                          Pastikan nomor benar sebelum transfer
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {showPaypal && (
+                    <div className="mt-4 w-full p-6 rounded-2xl border border-gray-100 shadow-sm bg-white">
+                      <div className="flex flex-col items-center">
+
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-lg font-semibold text-gray-900">Paypal Payment</h3>
+                          <span className="px-2 py-0.5 text-[10px] rounded-md bg-gray-100 text-gray-500">
+                            Secure
+                          </span>
+                        </div>
+
+                        <span className="text-xs text-gray-500 mt-1">
+                          Kirim pembayaran ke email berikut
+                        </span>
+
+                        <div className="mt-5 w-full p-4 rounded-xl bg-gray-50 border flex justify-between items-center">
+                          <span className="font-semibold text-gray-900 text-base">
+                            yourpaypal@email.com
+                          </span>
+
+                          <button
+                            onClick={() => navigator.clipboard.writeText("yourpaypal@email.com")}
+                            className="text-sm px-3 py-1.5 rounded-lg bg-gray-900 text-white hover:bg-black transition active:scale-[0.97]"
+                          >
+                            Copy
+                          </button>
+                        </div>
+
+                        <p className="text-[11px] text-gray-400 mt-3">
+                          Pastikan email benar sebelum kirim
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+
+                  {showBCA && (
+                    <div className="mt-4 w-full p-6 rounded-2xl border border-gray-100 shadow-sm bg-white">
+                      <div className="flex flex-col items-center">
+
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-lg font-semibold text-gray-900">BCA Transfer</h3>
+                          <span className="px-2 py-0.5 text-[10px] rounded-md bg-gray-100 text-gray-500">
+                            Secure
+                          </span>
+                        </div>
+
+                        <span className="text-xs text-gray-500 mt-1">
+                          Transfer melalui bank BCA ke nomor berikut
+                        </span>
+
+                        <div className="mt-5 w-full p-4 rounded-xl bg-gray-50 border flex justify-between items-center">
+                          <div>
+                            <p className="font-semibold text-gray-900 text-base">1234567890</p>
+                            <p className="text-xs text-gray-500 -mt-0.5">a.n Abdul Aziz</p>
+                          </div>
+
+                          <button
+                            onClick={() => navigator.clipboard.writeText("1234567890")}
+                            className="text-sm px-3 py-1.5 rounded-lg bg-gray-900 text-white hover:bg-black transition active:scale-[0.97]"
+                          >
+                            Copy
+                          </button>
+                        </div>
+
+                        <p className="text-[11px] text-gray-400 mt-3">
+                          Gunakan transfer antar bank bila berbeda bank
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+
                   <select
                     value={paymentMethod}
                     onChange={(e) => {
                       const val = e.target.value;
                       setPaymentMethod(val);
-                      setShowQris(val === "QRIS"); // ⬅️ FIXED
+
+                      setShowQris(val === "QRIS");
+                      setShowGopay(val === "GoPay");
+                      setShowPaypal(val === "Paypal");
+                      setShowBCA(val === "Transfer Bank");
                     }}
                     className="mt-2 w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-indigo-600"
                   >
                     <option value="">-- Pilih Metode Pembayaran --</option>
                     <option value="QRIS">QRIS</option>
-                    <option value="Transfer Bank">Transfer Bank</option>
-                    <option value="OVO">OVO</option>
+                    <option value="Transfer Bank">Transfer Bank (BCA)</option>
                     <option value="GoPay">GoPay</option>
                     <option value="Paypal">Paypal</option>
                   </select>
+
 
                 </div>
                 <div>
