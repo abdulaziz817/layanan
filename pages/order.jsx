@@ -20,6 +20,7 @@ export default function OrderForm() {
   const [paymentMethod, setPaymentMethod] = useState("");
   const [duration, setDuration] = useState("");
   const [durationPrice, setDurationPrice] = useState("");
+  const [showQris, setShowQris] = useState(false); // ⬅️ Tambahkan ini
 
 
   const appPrices = {
@@ -387,15 +388,15 @@ export default function OrderForm() {
                 {selectedService && serviceSubOptions[selectedService] && (
                   <div>
                     <label className="font-semibold text-gray-800">Detail Layanan</label>
-                  <select
-  value={selectedSubService}
-  onChange={(e) => setSelectedSubService(e.target.value)}
-  className="
+                    <select
+                      value={selectedSubService}
+                      onChange={(e) => setSelectedSubService(e.target.value)}
+                      className="
     mt-2 w-full border border-gray-300 rounded-lg p-3
     focus:outline-none focus:ring-2 focus:ring-indigo-600
     bg-white shadow-sm text-sm
   "
->
+                    >
                       <option value="" className="text-gray-400 italic">
                         -- Pilih Detail Layanan --
                       </option>
@@ -478,8 +479,8 @@ export default function OrderForm() {
                   <>
                     <label className="font-semibold text-gray-700">Pilih Durasi</label>
 
-                   <select
-  className="
+                    <select
+                      className="
     w-full mt-2 p-3 border border-gray-300 rounded-lg
     bg-white shadow-sm text-sm
     focus:outline-none focus:ring-2 focus:ring-indigo-600
@@ -532,18 +533,84 @@ export default function OrderForm() {
                 </div>
                 <div>
                   <label>Metode Pembayaran</label>
+                  {showQris && (
+                    <div className="
+    mt-4 w-full p-6 rounded-2xl 
+    border border-gray-100 
+    shadow-sm bg-white
+  ">
+                      <div className="flex flex-col items-center">
+
+                        {/* TITLE */}
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            QRIS Payment
+                          </h3>
+                          <span className="px-2 py-0.5 text-[10px] rounded-md bg-gray-100 text-gray-500">
+                            Secure
+                          </span>
+                        </div>
+
+                        <span className="text-xs text-gray-500 mt-1">
+                          Scan untuk melanjutkan pembayaran
+                        </span>
+
+                        {/* QR WRAPPER */}
+                        <div className="
+        mt-5 p-4 rounded-2xl bg-gray-50 border
+        w-48 h-48 flex items-center justify-center
+        shadow-inner
+      ">
+                          <img
+                            src="/image/qiris.jpg"
+                            alt="QRIS"
+                            className="w-full h-full object-contain rounded-xl"
+                          />
+                        </div>
+
+
+
+                        {/* DOWNLOAD BUTTON */}
+                        <a
+                          href="/image/qiris.jpg"
+                          download
+                          className="
+          mt-6 w-full text-center py-2.5 text-[15px] font-medium
+          rounded-xl bg-gray-900 text-white
+          hover:bg-black transition-all active:scale-[0.98]
+          shadow-md
+        "
+                        >
+                          Download QR
+                        </a>
+
+                        {/* FOOTNOTE */}
+                        <p className="text-[11px] text-gray-400 mt-3">
+                          Pastikan QR terlihat jelas sebelum di-scan
+                        </p>
+
+                      </div>
+                    </div>
+                  )}
+
+
                   <select
                     value={paymentMethod}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setPaymentMethod(val);
+                      setShowQris(val === "QRIS"); // ⬅️ FIXED
+                    }}
                     className="mt-2 w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-indigo-600"
                   >
                     <option value="">-- Pilih Metode Pembayaran --</option>
+                    <option value="QRIS">QRIS</option>
                     <option value="Transfer Bank">Transfer Bank</option>
                     <option value="OVO">OVO</option>
                     <option value="GoPay">GoPay</option>
-                    <option value="Dana">Dana</option>
                     <option value="Paypal">Paypal</option>
                   </select>
+
                 </div>
                 <div>
                   <Button
