@@ -317,6 +317,15 @@ export default function OrderForm() {
     }, 1000);
   };
 
+  const handlePaymentChange = (method) => {
+  setPaymentMethod(method);
+
+  setShowQris(method === "QRIS");
+  setShowGopay(method === "GoPay");
+  setShowPaypal(method === "PayPal");
+  setShowBCA(method === "BCA");
+};
+
 
   return (
     <>
@@ -538,7 +547,20 @@ export default function OrderForm() {
                   />
                 </div>
                 <div>
-                  <label>Metode Pembayaran</label>
+  <label>Metode Pembayaran</label>
+  <select
+    className="mt-2 w-full border rounded-lg p-3 focus:ring-2 focus:ring-indigo-600"
+    value={paymentMethod}
+    onChange={(e) => handlePaymentChange(e.target.value)}
+  >
+    <option value="">-- Pilih Metode Pembayaran --</option>
+    <option value="QRIS">QRIS</option>
+    <option value="GoPay">GoPay</option>
+    <option value="PayPal">PayPal</option>
+    <option value="BCA">BCA</option>
+  </select>
+</div>
+
                   {showQris && (
                     <div className="
     mt-4 w-full p-6 rounded-2xl 
@@ -688,7 +710,7 @@ export default function OrderForm() {
 
                         <div className="mt-5 w-full p-4 rounded-xl bg-gray-50 border flex justify-between items-center">
                           <div>
-                            <p className="font-semibold text-gray-900 text-base">1234567890</p>
+                            <p className="font-semibold text-gray-900 text-base">AKAN segera hadir</p>
                             <p className="text-xs text-gray-500 -mt-0.5">a.n Abdul Aziz</p>
                           </div>
 
@@ -708,28 +730,7 @@ export default function OrderForm() {
                   )}
 
 
-                  <select
-                    value={paymentMethod}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setPaymentMethod(val);
-
-                      setShowQris(val === "QRIS");
-                      setShowGopay(val === "GoPay");
-                      setShowPaypal(val === "Paypal");
-                      setShowBCA(val === "Transfer Bank");
-                    }}
-                    className="mt-2 w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-indigo-600"
-                  >
-                    <option value="">-- Pilih Metode Pembayaran --</option>
-                    <option value="QRIS">QRIS</option>
-                    <option value="Transfer Bank">Transfer Bank (BCA)</option>
-                    <option value="GoPay">GoPay</option>
-                    <option value="Paypal">Paypal</option>
-                  </select>
-
-
-                </div>
+                  
                 <div>
                   <Button
                     type="submit"
