@@ -330,7 +330,21 @@ export default function OrderForm() {
     setShowBCA(method === "BCA");
   };
 
+const today = new Date();
+const month = today.getMonth() + 1;
+const day = today.getDate();
 
+// Promo 40% 25 Des – 2 Jan
+const isPromo =
+  (month === 12 && day >= 25) || (month === 1 && day <= 2);
+
+// ❄ Efek salju akhir tahun
+const isSnowEvent =
+  (month === 12 && day >= 20) || (month === 1 && day <= 5);
+
+
+
+  
   return (
     <>
       <Head>
@@ -365,18 +379,21 @@ export default function OrderForm() {
   `}</style>
 
       </Head>
-      <div className="snow">
-        {Array.from({ length: 50 }).map((_, i) => (
-          <span
-            key={i}
-            style={{
-              left: Math.random() * 100 + "%",
-              animationDuration: 3 + Math.random() * 5 + "s",
-              animationDelay: Math.random() * 5 + "s",
-            }}
-          ></span>
-        ))}
-      </div>
+ {isSnowEvent && (
+        <div className="snow">
+          {Array.from({ length: 50 }).map((_, i) => (
+            <span
+              key={i}
+              style={{
+                left: Math.random() * 100 + "%",
+                animationDuration: 3 + Math.random() * 5 + "s",
+                animationDelay: Math.random() * 5 + "s",
+              }}
+            ></span>
+          ))}
+        </div>
+      )}
+
 
 
       <div className="pt-28 pb-12 bg-white min-h-screen">
@@ -557,16 +574,12 @@ export default function OrderForm() {
                         setDuration(dur);
 
                         const price = appPrices[selectedSubService][dur] || 0;
+                        
 
-                        // PROMO 40% (7 Desember – 25 Desember)
-                        const today = new Date();
-                        const month = today.getMonth() + 1;
-                        const day = today.getDate();
-                        const isPromo =
-                          (month === 12 && day >= 7 && day <= 25);
 
-                        const finalPrice = isPromo ? price - price * 0.4 : price;
-                        setDurationPrice(finalPrice);
+
+const finalPrice = isPromo ? price - price * 0.4 : price;
+setDurationPrice(finalPrice);
                       }}
 
                     >
@@ -580,43 +593,58 @@ export default function OrderForm() {
                         ))}
                     </select>
 
-                    {duration && (
-                      <div className="relative w-full text-center space-y-2 py-3">
+                  {duration && (
+  <div className="relative w-full text-center space-y-2 py-3">
 
-                        {/* Label Diskon di pojok kanan atas */}
-                        <div className="absolute right-2 top-2">
-                          <span className="text-red-500 text-[11px] font-semibold bg-red-50 px-2 py-0.5 rounded">
-                            40% OFF
-                          </span>
-                        </div>
+    {/* Label Diskon di pojok kanan atas — hanya tampil saat promo */}
+    {isPromo && (
+      <div className="absolute right-2 top-2">
+        <span className="text-red-500 text-[11px] font-semibold bg-red-50 px-2 py-0.5 rounded">
+          40% OFF
+        </span>
+      </div>
+    )}
 
-                        {/* Santaklos kecil elegan */}
-                        <div className="flex justify-center items-center gap-1 mb-1">
-                          <span className="text-[13px]">🎅</span>
-                          <p className="text-gray-600 text-xs font-medium">
-                            Event Akhir Tahun
-                          </p>
-                        </div>
+    {/* Santaklos kecil elegan */}
+    {isPromo && (
+      <div className="bg-red-100 border border-red-300 text-red-700 p-3 rounded-xl mb-3 flex items-center gap-2">
+        <span className="text-2xl">🎅</span>
+        <div>
+          <p className="font-bold text-red-700">Event Akhir Tahun</p>
+          <p className="text-sm text-red-600 font-medium">
+            Berlaku: 25 Desember – 2 Januari
+          </p>
+        </div>
+      </div>
+    )}
+
 
                         {/* Harga Normal */}
-                        {appPrices[selectedSubService] &&
-                          appPrices[selectedSubService][duration] && (
-                            <p className="text-gray-400 text-sm line-through">
-                              Rp {appPrices[selectedSubService][duration].toLocaleString()}
-                            </p>
-                          )}
+{/* Harga Normal */}
+<div className="mt-3 text-center">
 
-                        {/* Harga Setelah Diskon */}
-                        <p className="text-red-600 font-bold text-3xl leading-tight">
-                          Rp {durationPrice.toLocaleString()}
-                        </p>
+  {/* Jika promo aktif → tampil harga coret + harga diskon */}
+  {isPromo && (
+    <>
+      <p className="text-gray-400 text-sm line-through">
+        Rp {appPrices[selectedSubService][duration]?.toLocaleString() || "-"}
+      </p>
+      <p className="text-red-600 text-2xl font-bold">
+        Rp {durationPrice?.toLocaleString() || "-"}
+      </p>
+    </>
+  )}
+
+  {/* Jika promo TIDAK aktif → tampil harga normal */}
+  {!isPromo && null}  {/* <— harga tidak ditampilkan di sini */}
+</div>
 
 
 
-                        {/* Untuk tanggal event */}
-                        <p className="text-gray-400 text-[11px]">
-                          Berlaku: 7–12 Desember 2025
-                        </p>
+
+
+
+                      
                       </div>
                     )}
 
