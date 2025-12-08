@@ -28,6 +28,7 @@ export default function OrderForm() {
 
 
 
+
   const appPrices = {
     "ChatGPT": {
       "1 Bulan (No Garansi)": "17000",
@@ -102,6 +103,9 @@ export default function OrderForm() {
 
 
   };
+
+
+
 
 
 
@@ -331,7 +335,50 @@ export default function OrderForm() {
     <>
       <Head>
         <title>Pesan Layanan</title>
+        <style>{`
+    .snow {
+      pointer-events: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 9999;
+    }
+
+    .snow span {
+      position: absolute;
+      top: -10px;
+      width: 8px;
+      height: 8px;
+      background: white;
+      border-radius: 50%;
+      animation: fall linear infinite;
+      opacity: 0.8;
+    }
+
+    @keyframes fall {
+      0% { transform: translateY(0) rotate(0deg); }
+      100% { transform: translateY(110vh) rotate(360deg); }
+    }
+  `}</style>
+
       </Head>
+      <div className="snow">
+        {Array.from({ length: 50 }).map((_, i) => (
+          <span
+            key={i}
+            style={{
+              left: Math.random() * 100 + "%",
+              animationDuration: 3 + Math.random() * 5 + "s",
+              animationDelay: Math.random() * 5 + "s",
+            }}
+          ></span>
+        ))}
+      </div>
+
+
       <div className="pt-28 pb-12 bg-white min-h-screen">
         <div className="custom-screen text-gray-600">
           <motion.div
@@ -352,13 +399,18 @@ export default function OrderForm() {
               </p>
               {error && (
                 <motion.div
-                  className="bg-red-100 text-red-600 p-3 rounded-lg text-sm mb-4"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, ease: "easeOut" }}
+                  className="mb-6 w-full text-center bg-red-50 text-red-700 border border-red-300 py-3 px-4 rounded-lg font-medium"
                 >
                   {error}
                 </motion.div>
               )}
+
+
+
+
               <form onSubmit={handleSubmit} className="space-y-5 text-sm">
                 <div>
                   <label>Nama Lengkap</label>
@@ -503,8 +555,20 @@ export default function OrderForm() {
                       onChange={(e) => {
                         const dur = e.target.value;
                         setDuration(dur);
-                        setDurationPrice(appPrices[selectedSubService][dur] || "-");
+
+                        const price = appPrices[selectedSubService][dur] || 0;
+
+                        // PROMO 40% (7 Desember – 25 Desember)
+                        const today = new Date();
+                        const month = today.getMonth() + 1;
+                        const day = today.getDate();
+                        const isPromo =
+                          (month === 12 && day >= 7 && day <= 25);
+
+                        const finalPrice = isPromo ? price - price * 0.4 : price;
+                        setDurationPrice(finalPrice);
                       }}
+
                     >
                       <option value="">-- Pilih Durasi --</option>
 
@@ -515,6 +579,50 @@ export default function OrderForm() {
                           </option>
                         ))}
                     </select>
+
+                    {duration && (
+                      <div className="relative w-full text-center space-y-2 py-3">
+
+                        {/* Label Diskon di pojok kanan atas */}
+                        <div className="absolute right-2 top-2">
+                          <span className="text-red-500 text-[11px] font-semibold bg-red-50 px-2 py-0.5 rounded">
+                            40% OFF
+                          </span>
+                        </div>
+
+                        {/* Santaklos kecil elegan */}
+                        <div className="flex justify-center items-center gap-1 mb-1">
+                          <span className="text-[13px]">🎅</span>
+                          <p className="text-gray-600 text-xs font-medium">
+                            Event Akhir Tahun
+                          </p>
+                        </div>
+
+                        {/* Harga Normal */}
+                        {appPrices[selectedSubService] &&
+                          appPrices[selectedSubService][duration] && (
+                            <p className="text-gray-400 text-sm line-through">
+                              Rp {appPrices[selectedSubService][duration].toLocaleString()}
+                            </p>
+                          )}
+
+                        {/* Harga Setelah Diskon */}
+                        <p className="text-red-600 font-bold text-3xl leading-tight">
+                          Rp {durationPrice.toLocaleString()}
+                        </p>
+
+
+
+                        {/* Untuk tanggal event */}
+                        <p className="text-gray-400 text-[11px]">
+                          Berlaku: 7–12 Desember 2025
+                        </p>
+                      </div>
+                    )}
+
+
+
+
 
                     {/* 🔥 HARGA PREMIUM RINGAN */}
                     <div
@@ -755,7 +863,10 @@ export default function OrderForm() {
               </form>
             </motion.div>
           </motion.div>
+
         </div>
+        <div className="snow pointer-events-none"></div>
+
       </div>
     </>
   );
