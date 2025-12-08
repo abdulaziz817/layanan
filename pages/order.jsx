@@ -318,13 +318,13 @@ export default function OrderForm() {
   };
 
   const handlePaymentChange = (method) => {
-  setPaymentMethod(method);
+    setPaymentMethod(method);
 
-  setShowQris(method === "QRIS");
-  setShowGopay(method === "GoPay");
-  setShowPaypal(method === "PayPal");
-  setShowBCA(method === "BCA");
-};
+    setShowQris(method === "QRIS");
+    setShowGopay(method === "GoPay");
+    setShowPaypal(method === "PayPal");
+    setShowBCA(method === "BCA");
+  };
 
 
   return (
@@ -547,190 +547,193 @@ export default function OrderForm() {
                   />
                 </div>
                 <div>
-  <label>Metode Pembayaran</label>
-  <select
-    className="mt-2 w-full border rounded-lg p-3 focus:ring-2 focus:ring-indigo-600"
-    value={paymentMethod}
-    onChange={(e) => handlePaymentChange(e.target.value)}
-  >
-    <option value="">-- Pilih Metode Pembayaran --</option>
-    <option value="QRIS">QRIS</option>
-    <option value="GoPay">GoPay</option>
-    <option value="PayPal">PayPal</option>
-    <option value="BCA">BCA</option>
-  </select>
-</div>
+                  <label>Metode Pembayaran</label>
+                  <select
+                    className="mt-2 w-full border rounded-lg p-3 focus:ring-2 focus:ring-indigo-600"
+                    value={paymentMethod}
+                    onChange={(e) => handlePaymentChange(e.target.value)}
+                  >
+                    <option value="">-- Pilih Metode Pembayaran --</option>
+                    <option value="QRIS">QRIS</option>
+                    <option value="BCA">BCA</option>
+                    <option value="GoPay">GoPay</option>
+                    <option value="PayPal">PayPal</option>
 
-                  {showQris && (
-                    <div className="
+                  </select>
+                </div>
+
+                {showQris && (
+                  <div className="
     mt-4 w-full p-6 rounded-2xl 
     border border-gray-100 
     shadow-sm bg-white
   ">
-                      <div className="flex flex-col items-center">
+                    <div className="flex flex-col items-center">
 
-                        {/* TITLE */}
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-lg font-semibold text-gray-900">
-                            QRIS Payment
-                          </h3>
-                          <span className="px-2 py-0.5 text-[10px] rounded-md bg-gray-100 text-gray-500">
-                            Secure
-                          </span>
-                        </div>
-
-                        <span className="text-xs text-gray-500 mt-1">
-                          Scan untuk melanjutkan pembayaran
+                      {/* TITLE */}
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          QRIS Payment
+                        </h3>
+                        <span className="px-2 py-0.5 text-[10px] rounded-md bg-gray-100 text-gray-500">
+                          Secure
                         </span>
+                      </div>
 
-                        {/* QR WRAPPER */}
-                        <div className="
+                      <span className="text-xs text-gray-500 mt-1">
+                        Scan untuk melanjutkan pembayaran
+                      </span>
+
+                      {/* QR WRAPPER */}
+                      <div className="
         mt-5 p-4 rounded-2xl bg-gray-50 border
         w-48 h-48 flex items-center justify-center
         shadow-inner
       ">
-                          <img
-                            src="/image/qiris.jpg"
-                            alt="QRIS"
-                            className="w-full h-full object-contain rounded-xl"
-                          />
-                        </div>
+                        <img
+                          src="/image/qiris.jpg"
+                          alt="QRIS"
+                          className="w-full h-full object-contain rounded-xl"
+                        />
+                      </div>
 
 
 
-                        {/* DOWNLOAD BUTTON */}
-                        <a
-                          href="/image/qiris.jpg"
-                          download
-                          className="
+                      {/* DOWNLOAD BUTTON */}
+                      <a
+                        href="/image/qiris.jpg"
+                        download
+                        className="
           mt-6 w-full text-center py-2.5 text-[15px] font-medium
           rounded-xl bg-gray-900 text-white
           hover:bg-black transition-all active:scale-[0.98]
           shadow-md
         "
+                      >
+                        Download QR
+                      </a>
+
+                      {/* FOOTNOTE */}
+                      <p className="text-[11px] text-gray-400 mt-3">
+                        Pastikan QR terlihat jelas sebelum di-scan
+                      </p>
+
+                    </div>
+                  </div>
+                )}
+
+
+                {showGopay && (
+                  <div className="mt-4 w-full p-6 rounded-2xl border border-gray-100 shadow-sm bg-white">
+                    <div className="flex flex-col items-center">
+
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-semibold text-gray-900">GoPay Payment</h3>
+                        <span className="px-2 py-0.5 text-[10px] rounded-md bg-gray-100 text-gray-500">
+                          Secure
+                        </span>
+                      </div>
+
+                      <span className="text-xs text-gray-500 mt-1">
+                        Transfer ke nomor GoPay berikut
+                      </span>
+
+                      <div className="mt-5 w-full p-4 rounded-xl bg-gray-50 border flex justify-between items-center">
+                        <span className="font-semibold text-gray-900 text-base">
+                          087860592111
+                        </span>
+
+                        <button
+                          onClick={() => navigator.clipboard.writeText("087860592111")}
+                          className="text-sm px-3 py-1.5 rounded-lg bg-gray-900 text-white hover:bg-black transition active:scale-[0.97]"
                         >
-                          Download QR
-                        </a>
-
-                        {/* FOOTNOTE */}
-                        <p className="text-[11px] text-gray-400 mt-3">
-                          Pastikan QR terlihat jelas sebelum di-scan
-                        </p>
-
+                          Copy
+                        </button>
                       </div>
+
+                      <p className="text-[11px] text-gray-400 mt-3">
+                        Pastikan nomor benar sebelum transfer
+                      </p>
                     </div>
-                  )}
+                  </div>
+                )}
+                {showPaypal && (
+                  <div className="mt-6 w-full max-w-md mx-auto p-6 rounded-2xl border border-gray-100 shadow-sm bg-white">
+                    <div className="flex flex-col items-center space-y-2">
 
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          Paypal Payment
+                        </h3>
+                        <span className="px-2 py-0.5 text-[10px] rounded-md bg-gray-100 text-gray-500">
+                          Secure
+                        </span>
+                      </div>
 
-                  {showGopay && (
-                    <div className="mt-4 w-full p-6 rounded-2xl border border-gray-100 shadow-sm bg-white">
-                      <div className="flex flex-col items-center">
+                      <span className="text-xs text-gray-500">
+                        Kirim pembayaran ke email berikut
+                      </span>
 
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-lg font-semibold text-gray-900">GoPay Payment</h3>
-                          <span className="px-2 py-0.5 text-[10px] rounded-md bg-gray-100 text-gray-500">
-                            Secure
-                          </span>
-                        </div>
-
-                        <span className="text-xs text-gray-500 mt-1">
-                          Transfer ke nomor GoPay berikut
+                      <div className="mt-4 w-full p-4 rounded-xl bg-gray-50 border flex justify-between items-center gap-3">
+                        <span className="font-semibold text-gray-900 text-sm sm:text-base break-all">
+                          zizzzzdul@gmail.com
                         </span>
 
-                        <div className="mt-5 w-full p-4 rounded-xl bg-gray-50 border flex justify-between items-center">
-                          <span className="font-semibold text-gray-900 text-base">
-                            087860592111
-                          </span>
-
-                          <button
-                            onClick={() => navigator.clipboard.writeText("087860592111")}
-                            className="text-sm px-3 py-1.5 rounded-lg bg-gray-900 text-white hover:bg-black transition active:scale-[0.97]"
-                          >
-                            Copy
-                          </button>
-                        </div>
-
-                        <p className="text-[11px] text-gray-400 mt-3">
-                          Pastikan nomor benar sebelum transfer
-                        </p>
+                        <button
+                          onClick={() => navigator.clipboard.writeText("zizzzzdul@gmail.com")}
+                          className="text-sm px-3 py-2 rounded-lg bg-gray-900 text-white hover:bg-black transition active:scale-95 whitespace-nowrap"
+                        >
+                          Copy
+                        </button>
                       </div>
+
+                      <p className="text-[11px] text-gray-400 mt-2">
+                        Pastikan email benar sebelum kirim
+                      </p>
                     </div>
-                  )}
+                  </div>
+                )}
 
-                  {showPaypal && (
-                    <div className="mt-4 w-full p-6 rounded-2xl border border-gray-100 shadow-sm bg-white">
-                      <div className="flex flex-col items-center">
 
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-lg font-semibold text-gray-900">Paypal Payment</h3>
-                          <span className="px-2 py-0.5 text-[10px] rounded-md bg-gray-100 text-gray-500">
-                            Secure
-                          </span>
-                        </div>
 
-                        <span className="text-xs text-gray-500 mt-1">
-                          Kirim pembayaran ke email berikut
+                {showBCA && (
+                  <div className="mt-4 w-full p-6 rounded-2xl border border-gray-100 shadow-sm bg-white">
+                    <div className="flex flex-col items-center">
+
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-semibold text-gray-900">BCA Transfer</h3>
+                        <span className="px-2 py-0.5 text-[10px] rounded-md bg-gray-100 text-gray-500">
+                          Secure
                         </span>
-
-                        <div className="mt-5 w-full p-4 rounded-xl bg-gray-50 border flex justify-between items-center">
-                          <span className="font-semibold text-gray-900 text-base">
-                            yourpaypal@email.com
-                          </span>
-
-                          <button
-                            onClick={() => navigator.clipboard.writeText("yourpaypal@email.com")}
-                            className="text-sm px-3 py-1.5 rounded-lg bg-gray-900 text-white hover:bg-black transition active:scale-[0.97]"
-                          >
-                            Copy
-                          </button>
-                        </div>
-
-                        <p className="text-[11px] text-gray-400 mt-3">
-                          Pastikan email benar sebelum kirim
-                        </p>
                       </div>
-                    </div>
-                  )}
 
+                      <span className="text-xs text-gray-500 mt-1">
+                        Transfer melalui bank BCA ke nomor berikut
+                      </span>
 
-                  {showBCA && (
-                    <div className="mt-4 w-full p-6 rounded-2xl border border-gray-100 shadow-sm bg-white">
-                      <div className="flex flex-col items-center">
-
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-lg font-semibold text-gray-900">BCA Transfer</h3>
-                          <span className="px-2 py-0.5 text-[10px] rounded-md bg-gray-100 text-gray-500">
-                            Secure
-                          </span>
+                      <div className="mt-5 w-full p-4 rounded-xl bg-gray-50 border flex justify-between items-center">
+                        <div>
+                          <p className="font-semibold text-gray-900 text-base">Akan Segera Hadir</p>
+                          <p className="text-xs text-gray-500 -mt-0.5">a.n Abdul Aziz</p>
                         </div>
 
-                        <span className="text-xs text-gray-500 mt-1">
-                          Transfer melalui bank BCA ke nomor berikut
-                        </span>
-
-                        <div className="mt-5 w-full p-4 rounded-xl bg-gray-50 border flex justify-between items-center">
-                          <div>
-                            <p className="font-semibold text-gray-900 text-base">AKAN segera hadir</p>
-                            <p className="text-xs text-gray-500 -mt-0.5">a.n Abdul Aziz</p>
-                          </div>
-
-                          <button
-                            onClick={() => navigator.clipboard.writeText("1234567890")}
-                            className="text-sm px-3 py-1.5 rounded-lg bg-gray-900 text-white hover:bg-black transition active:scale-[0.97]"
-                          >
-                            Copy
-                          </button>
-                        </div>
-
-                        <p className="text-[11px] text-gray-400 mt-3">
-                          Gunakan transfer antar bank bila berbeda bank
-                        </p>
+                        <button
+                          onClick={() => navigator.clipboard.writeText("1234567890")}
+                          className="text-sm px-3 py-1.5 rounded-lg bg-gray-900 text-white hover:bg-black transition active:scale-[0.97]"
+                        >
+                          Copy
+                        </button>
                       </div>
+
+                      <p className="text-[11px] text-gray-400 mt-3">
+                        Gunakan transfer antar bank bila berbeda bank
+                      </p>
                     </div>
-                  )}
+                  </div>
+                )}
 
 
-                  
+
                 <div>
                   <Button
                     type="submit"
