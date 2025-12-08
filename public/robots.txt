@@ -1,4 +1,9 @@
+# *
 User-agent: *
 Allow: /
 
-Sitemap: https://layanannusantara.netlify.app/sitemap.xml
+# Host
+Host: https://layanannusantara.store
+
+# Sitemaps
+Sitemap: https://layanannusantara.store/sitemap.xml

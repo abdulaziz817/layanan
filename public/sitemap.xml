@@ -1,8 +1,6 @@
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://layanannusantara.store/</loc>
-  </url>
-  <url>
-    <loc>https://layanannusantara.store/order</loc>
-  </url>
-</urlset>
+<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<sitemap><loc>https://layanannusantara.store/sitemap-0.xml</loc></sitemap>
+<sitemap><loc>https://layanannusantara.store/sitemap-1.xml</loc></sitemap>
+<sitemap><loc>https://layanannusantara.store/sitemap-2.xml</loc></sitemap>
+</sitemapindex>
