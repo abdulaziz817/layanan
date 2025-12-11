@@ -49,7 +49,8 @@ const Layout = ({ children }) => {
                             "@type": "Organization",
                             name: "Layanan Nusantara",
                             url: "https://layanannusantara.store",
-                            logo: "https://layanannusantara.store/logo.png"
+                            logo: "https://layanannusantara.store/image/nusantaralogo.png"
+
                         })
                     }}
                 />
