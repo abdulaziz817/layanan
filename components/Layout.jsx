@@ -25,7 +25,10 @@ const Layout = ({ children }) => {
                 />
 
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
-                <link rel="icon" href="/favicon.ico" />
+           <link rel="icon" href="/favicon/favicon-32x32.png" />
+
+
+
 
                 {/* OG SITE NAME – Biar Google munculin nama website */}
                 <meta property="og:site_name" content="Layanan Nusantara" />
