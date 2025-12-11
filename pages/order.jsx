@@ -689,11 +689,12 @@ setDurationPrice(finalPrice);
                     value={paymentMethod}
                     onChange={(e) => handlePaymentChange(e.target.value)}
                   >
-                    <option value="">-- Pilih Metode Pembayaran --</option>
-                    <option value="QRIS">QRIS</option>
-                    <option value="BCA">BCA</option>
-                    <option value="GoPay">GoPay</option>
-                    <option value="PayPal">PayPal</option>
+                  <option value="">-- Pilih Metode Pembayaran --</option>
+<option value="QRIS">QRIS</option>
+<option value="BCA">Transfer Bank (BCA)</option>
+<option value="GoPay">GoPay</option>
+<option value="PayPal">PayPal</option>
+
 
                   </select>
                 </div>
@@ -847,11 +848,11 @@ setDurationPrice(finalPrice);
                         Transfer melalui bank BCA ke nomor berikut
                       </span>
 
-                      <div className="mt-5 w-full p-4 rounded-xl bg-gray-50 border flex justify-between items-center">
-                        <div>
-                          <p className="font-semibold text-gray-900 text-base">Akan Segera Hadir</p>
-                          <p className="text-xs text-gray-500 -mt-0.5">a.n Abdul Aziz</p>
-                        </div>
+                    <div className="mt-5 w-full p-4 rounded-xl bg-gray-50 border flex justify-between items-center">
+  <div>
+    <p className="font-semibold text-gray-900 text-base">3780905904</p>
+    <p className="text-xs text-gray-500 -mt-0.5">a.n A***l A**z</p>
+  </div>
 
                         <button
                           onClick={() => navigator.clipboard.writeText("1234567890")}
@@ -867,9 +868,6 @@ setDurationPrice(finalPrice);
                     </div>
                   </div>
                 )}
-
-
-
                 <div>
                   <Button
                     type="submit"
