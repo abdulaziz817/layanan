@@ -40,9 +40,10 @@ const CTA = () => {
                             className="md:col-span-7 space-y-6"
                         >
                             <div className="space-y-4 text-gray-700 text-base leading-loose" style={{ wordSpacing: '0.12em' }}>
-                                <p className="text-justify" style={{ textIndent: '2rem' }}>
-                                    <span className="font-semibold text-indigo-600">Layanan Nusantara</span> adalah penyedia jasa kreatif yang menawarkan layanan <strong>desain grafis</strong>, <strong>pembuatan website</strong>, <strong>preset fotografi</strong>, serta <strong>aplikasi premium dengan harga terbaik</strong>, yang dirancang khusus untuk memenuhi kebutuhan individu maupun pelaku bisnis. Sejak berdiri pada tahun <span className="underline decoration-indigo-500">2025</span>, kami terus berkomitmen untuk memberikan solusi visual yang tidak hanya menarik secara estetika tetapi juga mampu meningkatkan citra profesional para klien. Dikelola secara langsung oleh <span className="font-semibold text-indigo-600">Abdul Aziz</span>, seorang desainer berpengalaman dengan lebih dari <strong>8 tahun sebagai desainer grafis</strong>, Layanan Nusantara hadir sebagai mitra yang dapat diandalkan dalam membangun identitas visual yang kuat dan berkesan.
-                                </p>
+<p className="text-justify" style={{ textIndent: '2rem' }}>
+  <span className="font-semibold text-indigo-600">Layanan Nusantara</span> didirikan pada tahun <span className="underline decoration-indigo-500">2025</span> sebagai jasa kreatif yang menyediakan <strong>desain grafis</strong>, <strong>pembuatan website</strong>, <strong>preset fotografi</strong>, dan <strong>aplikasi premium dengan harga terbaik</strong>, dirancang untuk memenuhi kebutuhan individu maupun bisnis. Kami berkomitmen menghadirkan solusi visual yang tidak hanya menarik secara estetika, tetapi juga meningkatkan citra profesional klien. Dikelola langsung oleh <span className="font-semibold text-indigo-600">Abdul Aziz</span>, seorang desainer berpengalaman lebih dari <strong>8 tahun</strong>, Layanan Nusantara hadir sebagai mitra terpercaya dalam membangun identitas visual yang kuat dan berkesan.
+</p>
+
 
                             </div>
 
