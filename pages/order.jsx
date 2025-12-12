@@ -257,31 +257,40 @@ export default function OrderForm() {
     e.preventDefault();
 
     // VALIDASI UMUM
-   if (name.trim().length < 3) {
-  return setError("Nama harus berisi setidaknya 3 karakter.");
-}
-if (!phone.match(/^08\d{8,}$/)) {
-  return setError("Nomor HP tidak valid. Gunakan format 08xxxxxxxxxx.");
-}
-if (!selectedService) {
-  return setError("Silakan pilih layanan terlebih dahulu.");
-}
-if (selectedSubService === "Lainnya" && customSubService.trim().length < 3) {
-  return setError("Tulis detail layanan jika memilih 'Lainnya'.");
-}
-if (!budget.match(/^\d{1,3}(\.\d{3})*$/)) {
-  return setError("Budget harus berupa angka dengan format yang benar, contoh: 150.000.");
-}
-if (!deadline || new Date(deadline) <= new Date()) {
-  return setError("Deadline harus ditetapkan setidaknya H+1 dari hari ini.");
-}
-if (message.trim().length < 10) {
-  return setError("Pesan terlalu singkat. Tulis setidaknya 10 karakter.");
-}
-if (!paymentMethod) {
-  return setError("Pilih metode pembayaran terlebih dahulu.");
-}
+    if (name.trim().length < 3) {
+      return setError("Nama harus berisi setidaknya 3 karakter.");
+    }
+    if (!phone.match(/^08\d{8,}$/)) {
+      return setError("Nomor HP tidak valid (gunakan format 08xxxxxxxxxx).");
+    }
+    if (!selectedService) {
+      return setError("Silakan pilih layanan terlebih dahulu.");
+    }
+    if (selectedSubService === "Lainnya" && customSubService.trim().length < 3) {
+      return setError("Masukkan detail layanan jika memilih 'Lainnya'.");
+    }
 
+    // KHUSUS "APLIKASI PREMIUM"
+    if (selectedService === "Aplikasi Premium") {
+      if (!duration) {
+        return setError("Silakan pilih durasi langganan.");
+      }
+    } else {
+      // VALIDASI NORMAL (untuk layanan selain Aplikasi Premium)
+      if (!budget.match(/^\d{1,3}(\.\d{3})*$/)) {
+        return setError("Budget harus berupa angka dengan format yang benar, contoh: 150.000.");
+      }
+      if (!deadline || new Date(deadline) <= new Date()) {
+        return setError("Deadline harus minimal 1 hari setelah tanggal hari ini.");
+      }
+    }
+
+    if (message.trim().length < 10) {
+      return setError("Pesan terlalu singkat. Tulis setidaknya 10 karakter.");
+    }
+    if (!paymentMethod) {
+      return setError("Pilih metode pembayaran terlebih dahulu.");
+    }
 
     // Jika semua valid:
     setError("");
