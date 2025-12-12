@@ -330,21 +330,21 @@ export default function OrderForm() {
     setShowBCA(method === "BCA");
   };
 
-const today = new Date();
-const month = today.getMonth() + 1;
-const day = today.getDate();
+  const today = new Date();
+  const month = today.getMonth() + 1;
+  const day = today.getDate();
 
-// Promo 40% 25 Des – 2 Jan
-const isPromo =
-  (month === 12 && day >= 25) || (month === 1 && day <= 2);
+  // Promo 40% 25 Des – 2 Jan
+  const isPromo =
+    (month === 12 && day >= 25) || (month === 1 && day <= 2);
 
-// ❄ Efek salju akhir tahun
-const isSnowEvent =
-  (month === 12 && day >= 20) || (month === 1 && day <= 5);
+  // ❄ Efek salju akhir tahun
+  const isSnowEvent =
+    (month === 12 && day >= 24) || (month === 1 && day <= 5);
 
 
 
-  
+
   return (
     <>
       <Head>
@@ -379,7 +379,7 @@ const isSnowEvent =
   `}</style>
 
       </Head>
- {isSnowEvent && (
+      {isSnowEvent && (
         <div className="snow">
           {Array.from({ length: 50 }).map((_, i) => (
             <span
@@ -574,12 +574,12 @@ const isSnowEvent =
                         setDuration(dur);
 
                         const price = appPrices[selectedSubService][dur] || 0;
-                        
 
 
 
-const finalPrice = isPromo ? price - price * 0.4 : price;
-setDurationPrice(finalPrice);
+
+                        const finalPrice = isPromo ? price - price * 0.4 : price;
+                        setDurationPrice(finalPrice);
                       }}
 
                     >
@@ -593,58 +593,58 @@ setDurationPrice(finalPrice);
                         ))}
                     </select>
 
-                  {duration && (
-  <div className="relative w-full text-center space-y-2 py-3">
+                    {duration && (
+                      <div className="relative w-full text-center space-y-2 py-3">
 
-    {/* Label Diskon di pojok kanan atas — hanya tampil saat promo */}
-    {isPromo && (
-      <div className="absolute right-2 top-2">
-        <span className="text-red-500 text-[11px] font-semibold bg-red-50 px-2 py-0.5 rounded">
-          40% OFF
-        </span>
-      </div>
-    )}
+                        {/* Label Diskon di pojok kanan atas — hanya tampil saat promo */}
+                        {isPromo && (
+                          <div className="absolute right-2 top-2">
+                            <span className="text-red-500 text-[11px] font-semibold bg-red-50 px-2 py-0.5 rounded">
+                              40% OFF
+                            </span>
+                          </div>
+                        )}
 
-    {/* Santaklos kecil elegan */}
-    {isPromo && (
-      <div className="bg-red-100 border border-red-300 text-red-700 p-3 rounded-xl mb-3 flex items-center gap-2">
-        <span className="text-2xl">🎅</span>
-        <div>
-          <p className="font-bold text-red-700">Event Akhir Tahun</p>
-          <p className="text-sm text-red-600 font-medium">
-            Berlaku: 25 Desember – 2 Januari
-          </p>
-        </div>
-      </div>
-    )}
+                        {/* Santaklos kecil elegan */}
+                        {isPromo && (
+                          <div className="bg-red-100 border border-red-300 text-red-700 p-3 rounded-xl mb-3 flex items-center gap-2">
+                            <span className="text-2xl">🎅</span>
+                            <div>
+                              <p className="font-bold text-red-700">Event Akhir Tahun</p>
+                              <p className="text-sm text-red-600 font-medium">
+                                Berlaku: 25 Desember – 2 Januari
+                              </p>
+                            </div>
+                          </div>
+                        )}
 
 
                         {/* Harga Normal */}
-{/* Harga Normal */}
-<div className="mt-3 text-center">
+                        {/* Harga Normal */}
+                        <div className="mt-3 text-center">
 
-  {/* Jika promo aktif → tampil harga coret + harga diskon */}
-  {isPromo && (
-    <>
-      <p className="text-gray-400 text-sm line-through">
-        Rp {appPrices[selectedSubService][duration]?.toLocaleString() || "-"}
-      </p>
-      <p className="text-red-600 text-2xl font-bold">
-        Rp {durationPrice?.toLocaleString() || "-"}
-      </p>
-    </>
-  )}
+                          {/* Jika promo aktif → tampil harga coret + harga diskon */}
+                          {isPromo && (
+                            <>
+                              <p className="text-gray-400 text-sm line-through">
+                                Rp {appPrices[selectedSubService][duration]?.toLocaleString() || "-"}
+                              </p>
+                              <p className="text-red-600 text-2xl font-bold">
+                                Rp {durationPrice?.toLocaleString() || "-"}
+                              </p>
+                            </>
+                          )}
 
-  {/* Jika promo TIDAK aktif → tampil harga normal */}
-  {!isPromo && null}  {/* <— harga tidak ditampilkan di sini */}
-</div>
-
-
+                          {/* Jika promo TIDAK aktif → tampil harga normal */}
+                          {!isPromo && null}  {/* <— harga tidak ditampilkan di sini */}
+                        </div>
 
 
 
 
-                      
+
+
+
                       </div>
                     )}
 
@@ -689,11 +689,11 @@ setDurationPrice(finalPrice);
                     value={paymentMethod}
                     onChange={(e) => handlePaymentChange(e.target.value)}
                   >
-                  <option value="">-- Pilih Metode Pembayaran --</option>
-<option value="QRIS">QRIS</option>
-<option value="BCA">Transfer Bank (BCA)</option>
-<option value="GoPay">GoPay</option>
-<option value="PayPal">PayPal</option>
+                    <option value="">-- Pilih Metode Pembayaran --</option>
+                    <option value="QRIS">QRIS</option>
+                    <option value="BCA">Transfer Bank (BCA)</option>
+                    <option value="GoPay">GoPay</option>
+                    <option value="PayPal">PayPal</option>
 
 
                   </select>
@@ -848,11 +848,11 @@ setDurationPrice(finalPrice);
                         Transfer melalui bank BCA ke nomor berikut
                       </span>
 
-                    <div className="mt-5 w-full p-4 rounded-xl bg-gray-50 border flex justify-between items-center">
-  <div>
-    <p className="font-semibold text-gray-900 text-base">3780905904</p>
-    <p className="text-xs text-gray-500 -mt-0.5">a.n A***l A**z</p>
-  </div>
+                      <div className="mt-5 w-full p-4 rounded-xl bg-gray-50 border flex justify-between items-center">
+                        <div>
+                          <p className="font-semibold text-gray-900 text-base">3780905904</p>
+                          <p className="text-xs text-gray-500 -mt-0.5">a.n A***l A**z</p>
+                        </div>
 
                         <button
                           onClick={() => navigator.clipboard.writeText("1234567890")}
