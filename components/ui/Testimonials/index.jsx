@@ -17,61 +17,67 @@ import clsx from "clsx"
 
 const Testimonials = () => {
     const testimonials = [
-        {
-            id: 1,
-            name: "Sinta Rahmadani",
-            role: "Customer",
-            stars: 4.5,
-            service: "Desain logo usaha kopi",
-            comment:
-                "Desainnya kece dan sesuai selera, usaha aku jadi makin dikenal orang. Worth it banget!",
-            time: "2 minggu lalu",
-            budget: "Rp 400.000",
-        },
-        {
-            id: 2,
-            name: "Rizky Fadillah",
-            role: "Customer",
-            stars: 5,
-            service: "Pembuatan website portfolio",
-            comment:
-                "Webnya cepat, responsif, dan tampilannya keren abis! Bener-bener bikin karir aku naik kelas.",
-            time: "1 bulan lalu",
-            budget: "Rp 150.000",
-        },
-        {
-            id: 3,
-            name: "Nadira Putri",
-            role: "Customer",
-            stars: 4,
-            service: "Preset fotografi outdoor",
-            comment:
-                "Presetnya pas banget buat foto-foto aku, bikin feed IG jadi makin estetik dan menarik.",
-            time: "4 hari lalu",
-            budget: "Rp 80.000",
-        },
-        {
-            id: 4,
-            name: "Andi Maulana",
-            role: "Customer",
-            stars: 5,
-            service: "Desain banner promosi",
-            comment:
-                "Banner detailnya keren, bikin banyak orang langsung tertarik sama produk aku.",
-            time: "3 minggu lalu",
-            budget: "Rp 40.000",
-        },
-        {
-            id: 5,
-            name: "Dewi Lestari",
-            role: "Customer",
-            stars: 4.5,
-            service: "Desain kartu nama & branding",
-            comment:
-                "Kartu nama aku jadi profesional dan elegan banget, makin percaya diri waktu networking.",
-            time: "1 bulan lalu",
-            budget: "Rp 15.000",
-        },
+     {
+        id: 1,
+        name: "Keisha Anindya",
+        role: "Customer",
+        stars: 4.5,
+        service: "Desain Logo Usaha Kopi",
+        comment:
+            "Gila sih, logo yang dibikinin bener-bener ngehit 🥹✨ toko kopi gue langsung keliatan ‘berjiwa’ banget. Banyak yang bilang keren juga!",
+        time: "2 minggu lalu",
+    },
+    {
+        id: 2,
+        name: "Rafly Mahardika",
+        role: "Customer",
+        stars: 5,
+        service: "Pembuatan Website Portfolio",
+        comment:
+            "Web gue jadi super clean, responsif, dan keliatan profesional banget 😭🔥 sekarang kalo ngelamar kerja tuh auto diliat HR!",
+        time: "1 bulan lalu",
+    },
+    {
+        id: 3,
+        name: "Naya Febriola",
+        role: "Customer",
+        stars: 4,
+        service: "Preset Fotografi Outdoor",
+        comment:
+            "Presetnya cakep parah sih 🌿📸 feed IG gue auto glow up, jadi betah scroll sendiri wkwk.",
+        time: "4 hari lalu",
+    },
+    {
+        id: 4,
+        name: "Farel Aditya",
+        role: "Customer",
+        stars: 5,
+        service: "Desain Banner Promosi",
+        comment:
+            "Bannernya eye-catching banget 😆🔥 banyak yang nanya bikin di mana, jualan gue langsung rame cuy!",
+        time: "3 minggu lalu",
+    },
+    {
+        id: 5,
+        name: "Tasya Reviona",
+        role: "Customer",
+        stars: 4.5,
+        service: "Desain Kartu Nama & Branding",
+        comment:
+            "Kartu namanya elegan parah 😍 bikin makin pede tiap ketemu klien!",
+        time: "1 bulan lalu",
+    },
+    {
+        id: 6,
+        name: "Dimas Atmaja",
+        role: "Customer",
+        stars: 5,
+        service: "Canva Pro",
+        comment:
+            "Aktifnya cepet, aman, fitur pro semua kebuka 😎👍 edit konten jadi sat-set!",
+        time: "2 minggu lalu",
+    }
+
     ]
 
     // State untuk menyimpan liked testimonial dan animasi trigger
