@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-html-link-for-pages */
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 const Hero = () => {
   const services = [
@@ -25,7 +26,7 @@ const Hero = () => {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [services.length]); // ← tambahkan ini
+  }, [services.length]);
 
   const fadeClass =
     fadeStage === "fadeIn"
@@ -53,12 +54,14 @@ const Hero = () => {
         </p>
 
         <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-8 px-4 sm:px-0">
-          <a
+
+          {/* FIX di sini */}
+          <Link
             href="/order"
             className="px-6 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition text-center"
           >
             Pesan Layanan
-          </a>
+          </Link>
 
           <a
             href="https://wa.me/6287860592111"

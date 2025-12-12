@@ -10,7 +10,7 @@ import SplashScreen from "./SplashScreen"
 
 
 const Layout = ({ children }) => {
-    const [showSplash, setShowSplash] = useState(false)
+    const [showSplash, setShowSplash] = useState(true)
 
     useEffect(() => {
         AOS.init({ duration: 1000, once: true })

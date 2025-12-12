@@ -3,61 +3,65 @@ import { useEffect, useState } from "react";
 
 export default function SplashScreen({ onFinish }) {
   const [visible, setVisible] = useState(true);
-  const [show, setShow] = useState(false);
-  const [hide, setHide] = useState(false);
+  const [state, setState] = useState("enter");
 
   useEffect(() => {
-    // Mulai animasi masuk
-    const enter = setTimeout(() => setShow(true), 50);
+    const t1 = setTimeout(() => setState("show"), 80);
 
-    // Mulai animasi keluar total 2 detik
-    const exit = setTimeout(() => {
-      setHide(true);
-      setShow(false);
+    const t2 = setTimeout(() => {
+      setState("exit");
+
+      setTimeout(() => {
+        setState("fadeout");
+      }, 600); // efek mengecil smooth
 
       setTimeout(() => {
         setVisible(false);
         onFinish();
-      }, 700); // durasi animasi keluar
-    }, 2000); // total durasi splash
+      }, 1100); // fade out selesai
+    }, 2000); // durasi muncul lebih lama sedikit
 
     return () => {
-      clearTimeout(enter);
-      clearTimeout(exit);
+      clearTimeout(t1);
+      clearTimeout(t2);
     };
   }, [onFinish]);
 
   if (!visible) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-white flex items-center justify-center">
+    <div className={`
+      fixed inset-0 z-[9999] bg-white flex items-center justify-center
+      transition-opacity duration-[600ms]
+      ${state === "fadeout" ? "opacity-0" : "opacity-100"}
+    `}>
       <div
         className={`
-          flex flex-col items-center text-center
-          transition-all duration-[750ms] ease-[cubic-bezier(.25,.8,.25,1)]
-          ${show ? "opacity-100 scale-100" : "opacity-0 scale-75"}
-          ${hide ? "opacity-0 scale-75" : ""}
+          relative flex flex-col items-center text-center
+          transition-all duration-[700ms] ease-[cubic-bezier(.25,.8,.25,1)]
+          ${state === "enter" ? "opacity-0 scale-75 translate-y-6" : ""}
+          ${state === "show" ? "opacity-100 scale-100 translate-y-0" : ""}
+          ${state === "exit" ? "opacity-0 scale-90 -translate-y-3" : ""}
         `}
       >
-
-        {/* Glow super ringan */}
+        {/* Floating glow */}
         <div
           className={`
-            absolute w-24 h-24 rounded-full bg-indigo-500 blur-xl 
-            transition-all duration-[900ms]
-            ${show ? "opacity-15 scale-110" : "opacity-0 scale-75"}
-            ${hide ? "opacity-0 scale-90" : ""}
+            absolute w-32 h-32 rounded-full bg-indigo-400 blur-2xl opacity-0
+            transition-all duration-[1200ms]
+            ${state === "show" ? "opacity-20 scale-125 animate-[float_4s_ease-in-out_infinite]" : ""}
           `}
         ></div>
 
-        {/* Logo */}
+        {/* Logo with pulse */}
         <div
           className={`
-            relative w-24 h-24 sm:w-28 sm:h-28 bg-white rounded-full shadow-md
+            relative w-24 h-24 sm:w-28 sm:h-28 bg-white rounded-full shadow-lg
             flex items-center justify-center
-            transition-all duration-[750ms]
-            ${show ? "opacity-100 scale-100" : "opacity-0 scale-75"}
-            ${hide ? "opacity-0 scale-75" : ""}
+            transition-all duration-[800ms]
+            ${state === "enter" ? "opacity-0 scale-75" : ""}
+            ${state === "show" ? "opacity-100 scale-100 animate-[pulse_2.8s_ease-in-out_infinite]" : ""}
+            ${state === "exit" ? "opacity-0 scale-95" : ""}
           `}
         >
           <img
@@ -70,28 +74,42 @@ export default function SplashScreen({ onFinish }) {
         {/* Title */}
         <h1
           className={`
-            mt-6 text-lg sm:text-2xl font-semibold text-gray-800 tracking-wide
-            transition-all duration-[800ms]
-            ${show ? "opacity-100 scale-100" : "opacity-0 scale-90"}
-            ${hide ? "opacity-0 scale-90" : ""}
+            mt-4 text-xl sm:text-3xl font-extrabold text-gray-900 tracking-wide
+            transition-all duration-[900ms]
+            ${state === "enter" ? "opacity-0 translate-y-1" : ""}
+            ${state === "show" ? "opacity-100 translate-y-0" : ""}
+            ${state === "exit" ? "opacity-0 -translate-y-1 scale-95" : ""}
           `}
         >
           Layanan Nusantara
         </h1>
 
-        {/* Description */}
+        {/* Deskripsi sedikit di bawah dan animasi muncul */}
         <p
           className={`
-            mt-1 text-sm sm:text-base text-gray-500
-            transition-all duration-[850ms]
-            ${show ? "opacity-100 scale-100" : "opacity-0 scale-90"}
-            ${hide ? "opacity-0 scale-90" : ""}
+            mt-1 text-sm sm:text-lg text-gray-500
+            transition-all duration-[1000ms] delay-150
+            ${state === "enter" ? "opacity-0 translate-y-3" : ""}
+            ${state === "show" ? "opacity-100 translate-y-0" : ""}
+            ${state === "exit" ? "opacity-0 -translate-y-1 scale-95" : ""}
           `}
         >
           Solusi Jasa Layanan Terpercaya
         </p>
+
       </div>
+
+      {/* Keyframes */}
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.04); opacity: 0.9; }
+        }
+        @keyframes float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-8px); }
+        }
+      `}</style>
     </div>
   );
 }
-    
