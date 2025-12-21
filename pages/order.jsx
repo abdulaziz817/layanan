@@ -30,76 +30,186 @@ export default function OrderForm() {
 
 
   const appPrices = {
-    "ChatGPT": {
-      "1 Bulan (No Garansi)": "17000",
-      "1 Bulan (Head No Garansi)": "20000",
-      "1 Bulan (Full Garansi)": "30000",
-      "3 Bulan (Full Garansi)": "54000"
-    },
-    "YouTube Premium": {
-      "1 Bulan (IndPlan)": "35000",
-      "1 Bulan (Family Plan)": "30000",
-      "1 Bulan (Student)": "26000",
-      "1 Bulan (Student No Garansi)": "13000"
-    },
-    "Netflix Premium": {
-      "1 Bulan (Standard)": "25000",
-      "1 Bulan (Ultimate)": "31000"
-    },
-    "Disney Hotstar": {
-      "1 Bulan": "20000",
-      "1 Tahun": "120000"
-    },
-    "Vidio": {
-      "1 Bulan (Premier)": "25000",
-      "1 Bulan (Champions)": "30000",
-      "1 Tahun (Premier)": "150000"
-    },
-    "WeTV": {
-      "1 Bulan (VIP)": "15000",
-      "3 Bulan (VIP)": "40000"
-    },
-    "iQIYI": {
-      "1 Bulan (Standard)": "15000",
-      "1 Bulan (Premium)": "20000"
-    },
-    "Bstation Premium": {
-      "1 Bulan (Garansi)": "12000",
-      "1 Bulan (Full Garansi)": "18000"
-    },
-    "Viu Premium": {
-      "1 Bulan": "12000",
-      "1 Tahun": "120000"
-    },
-    "Spotify": {
-      "1 Bulan (Premium)": "6000",
-      "1 Bulan (Family Plan)": "10000",
-      "1 Bulan (Student)": "5000"
-    },
-    "Canva Pro": {
-      "1 Bulan (No Garansi)": "15000",
-      "1 Bulan (Full Garansi)": "25000",
-      "1 Tahun (Full Garansi)": "75000"
-    },
-    "CapCut Pro": {
-      "1 Bulan (Full Garansi)": "18000"
-    },
-    "Google Gemini": {
-      "1 Bulan (Full Garansi)": "25000"
-    },
-    "TikTok Premium": {
-      "1 Bulan (No Garansi)": "15000",
-      "1 Bulan (Full Garansi)": "20000"
-    },
+   "ChatGPT": {
+  "1 Bulan – Dipakai Bareng (Tanpa Garansi)": "20000",
+  "1 Bulan – Dipakai Bareng Lebih Stabil (Tanpa Garansi)": "22000",
+  "1 Bulan – Dipakai Bareng (Full Garansi)": "32000",
+  "3 Bulan – Dipakai Bareng (Full Garansi)": "56000"
+},
+
+"YouTube Premium": {
+  "1 Bulan – Akun Pribadi (1 Orang, Full Garansi)": "35000",
+  "1 Bulan – Akun Keluarga (Dipakai Bareng)": "30000",
+  "1 Bulan – Akun Pelajar (Lebih Murah, Full Garansi)": "26000",
+  "1 Bulan – Akun Pelajar (Lebih Murah, Tanpa Garansi)": "13000"
+},
+
+"Netflix Premium": {
+  "7 Hari – Dipakai Sendiri (1 Profil, 1 Perangkat)": "26000",
+  "1 Bulan – Dipakai Sendiri (1 Profil, 1 Perangkat)": "49000",
+  "7 Hari – Dipakai Berdua (1 Profil, 2 Perangkat)": "24000",
+  "1 Bulan – Dipakai Berdua (1 Profil, 2 Perangkat)": "40000",
+  "1 Bulan – Semi Private (1 Profil, 2 Perangkat)": "61000"
+},
+
+"Disney Hotstar": {
+  "1 Bulan – Bisa Semua Perangkat": "20000",
+  "1 Tahun – Bisa Semua Perangkat": "120000"
+},
+
+"Vidio": {
+  "1 Bulan – HP Saja (Dipakai Bareng, Garansi 20–25 Hari)": "32000",
+  "1 Bulan – Semua Perangkat (Dipakai Bareng, Garansi 20–25 Hari)": "44000",
+  "1 Bulan – HP Saja (Akun Sendiri, Garansi 20–25 Hari)": "51000",
+  "1 Bulan – Semua Perangkat (Akun Sendiri, Garansi 20–25 Hari)": "71000",
+  "1 Tahun – TV Saja (Akun Sendiri, Garansi 20–25 Hari)": "10000"
+},
+
+"WeTV": {
+  "1 Bulan – Dipakai Bareng 6 Orang": "18000",
+  "1 Bulan – Dipakai Bareng 3 Orang": "24000",
+  "1 Bulan – Akun Sendiri (Garansi Backfree)": "59000"
+},
+
+"iQIYI": {
+  "1 Bulan – Paket Biasa (Dipakai Bareng)": "15000",
+  "1 Bulan – Paket Lengkap (Dipakai Bareng)": "20000"
+},
+
+"Bstation Premium": {
+  "1 Bulan – Dipakai Bareng (Paket Biasa)": "15000",
+  "1 Bulan – Dipakai Bareng (Paket Lebih Lengkap)": "27000"
+},
+
+"Youku": {
+  "1 Bulan – Dipakai Bareng": "16000",
+  "1 Tahun – Dipakai Bareng": "32000"
+},
+
+"Viu Anlim": {
+  "1 Bulan – Akun Sendiri": "4000",
+  "1 Tahun – Akun Sendiri": "6000"
+},
+
+"HBO": {
+  "1 Bulan – Dipakai Bareng": "27000",
+  "1 Tahun – Dipakai Bareng": "33000"
+},
+
+"Loklok": {
+  "1 Bulan – Paket Basic (Dipakai Bareng)": "40000",
+  "1 Bulan – Paket Standar (Dipakai Bareng)": "44000"
+},
+
+"Fizzo": {
+  "1 Tahun – Dipakai Bareng": "28000"
+},
+
+"Wibuku": {
+  "1 Bulan – Dipakai Bareng": "25000"
+},
+
+"Drakor Id": {
+  "1 Bulan – Dipakai Bareng": "15000"
+},
+
+"Dramabox": {
+  "1 Bulan – Dipakai Bareng": "25000"
+},
+
+"Iqiyl": {
+  "1 Bulan – Dipakai Bareng": "17000",
+  "1 Tahun – Dipakai Bareng": "34000"
+},
+
+"Prime Video": {
+  "1 Bulan – Dipakai Bareng (Semua Perangkat)": "12000",
+  "1 Bulan – Akun Sendiri (Semua Perangkat)": "26000"
+},
+
+"Melolo": {
+  "1 Bulan – Dipakai Bareng": "16000"
+},
+
+"Duolingo": {
+  "1 Bulan – Akun Belajar Premium": "14000"
+},
+
+"Perplexity Ai": {
+  "1 Bulan – Dipakai Bareng": "11000"
+},
+
+"Express VPN": {
+  "1 Bulan – Akun Sendiri": "15000"
+},
+
+"Viu Premium": {
+  "1 Bulan – Premium": "12000",
+  "1 Tahun – Premium": "120000"
+},
+
+"Spotify": {
+  "1 Bulan – Akun Pribadi (1 Orang, Full Garansi)": "37000",
+  "1 Bulan – Akun Keluarga (Dipakai Bareng, Full Garansi)": "32000",
+  "1 Bulan – Akun Pelajar (Full Garansi)": "28000",
+  "1 Bulan – Akun Pelajar (Tanpa Garansi)": "15000"
+},
+
+"Canva Pro": {
+  "1 Bulan – Member (Tanpa Garansi)": "15000",
+  "1 Bulan – Member (Full Garansi)": "25000",
+  "1 Tahun – Member (Full Garansi)": "50000"
+},
+
+"CapCut Pro": {
+  "7 Hari – Akun Sendiri": "10000",
+  "21 Hari – Akun Sendiri": "18000",
+  "35 Hari – Akun Sendiri": "23000",
+  "21 Hari – Dipakai Bareng": "12000",
+  "35 Hari – Dipakai Bareng": "16000"
+},
+
+"Google Gemini": {
+  "1 Tahun – Dipakai Bareng": "25000"
+},
+
+"Zoom": {
+  "14 Hari – Akun Sendiri": "14000"
+},
+
+"TikTok Premium": {
+  "1 Bulan – Tanpa Garansi": "15000",
+  "1 Bulan – Full Garansi": "20000"
+},
 
     "HBO GO": {
-      "1 Bulan (Full Garansi)": "25000"
-    },
-    "Apple Music": {
-      "1 Bulan (Student)": "6000",
-      "1 Bulan (Individual)": "9000",
-      "1 Bulan (Family)": "15000"
-    }
+  "1 Bulan – Full Garansi": "25000"
+},
+
+"Apple Music": {
+  "1 Bulan – Via Invite Member": "10000"
+},
+
+"Alight Motion": {
+  "1 Tahun – Generator (Tanpa Email)": "4000",
+  "1 Tahun – Email Pembeli (Email Baru, Garansi 6 Bulan)": "8000",
+  "1 Tahun – Email Seller (Garansi 6 Bulan)": "12000"
+},
+
+"Wink": {
+  "7 Hari – Android (Akun Pembeli, Email Baru)": "8000"
+},
+
+"Meitu": {
+  "7 Hari – Android (Akun Pembeli, Email Baru)": "8000",
+  "1 Bulan – Sharing (Akun Pembeli, Email Baru)": "17000"
+},
+
+"PicsArt": {
+  "1 Bulan – Sharing (Akun Seller)": "6000",
+  "1 Bulan – Private (Akun Seller)": "15000"
+}
+
 
 
   };
@@ -211,32 +321,52 @@ export default function OrderForm() {
     ],
     "Aplikasi Premium": [
       "🎬 Streaming Film",
-
       "Bstation Premium",
       "Disney Hotstar",
       "HBO GO",
+      "HBO",
       "iQIYI",
       "Netflix Premium",
+      "Prime Video",
       "Vidio",
       "Viu Premium",
+      "Viu Anlim",
       "WeTV",
+      "Youku",
+      "Wibuku",
+      "Dramabox",
+      "Loklok",
+      "Drakor ID",
 
-      "🎵 Musik",
+      "🎵 Musik & Audio",
       "Apple Music",
       "Spotify",
+      "Melolo",
 
       "🤖 AI",
       "ChatGPT",
       "Google Gemini",
+      "Perplexity AI",
 
       "🎨 Desain & Editing",
       "Canva Pro",
       "CapCut Pro",
+      "Alight Motion",
+      "Wink",
+      "Meitu",
+      "PicsArt",
 
       "▶️ Video Premium",
       "TikTok Premium",
-      "YouTube Premium"
+      "YouTube Premium",
+      "Zoom",
+
+      "📚 Aplikasi Lainnya",
+      "Fizzo",
+      "Duolingo",
+      "Express VPN"
     ]
+
 
 
 
@@ -491,7 +621,8 @@ export default function OrderForm() {
                           "🎵 Musik",
                           "🤖 AI",
                           "🎨 Desain & Editing",
-                          "▶️ Video Premium"
+                          "▶️ Video Premium",
+                          "📚 Aplikasi Lainnya"
                         ].includes(subItem);
 
                         return (
@@ -639,18 +770,8 @@ export default function OrderForm() {
                           {!isPromo && null}  {/* <— harga tidak ditampilkan di sini */}
                         </div>
 
-
-
-
-
-
-
                       </div>
                     )}
-
-
-
-
 
                     {/* 🔥 HARGA PREMIUM RINGAN */}
                     <div
@@ -850,12 +971,16 @@ export default function OrderForm() {
 
                       <div className="mt-5 w-full p-4 rounded-xl bg-gray-50 border flex justify-between items-center">
                         <div>
-                          <p className="font-semibold text-gray-900 text-base">3780905904</p>
-                          <p className="text-xs text-gray-500 -mt-0.5">a.n A***l A**z</p>
+                          <p className="font-semibold text-gray-900 text-base">
+                            3780905904
+                          </p>
+                          <p className="text-xs text-gray-500 -mt-0.5">
+                            a.n A***l A**z
+                          </p>
                         </div>
 
                         <button
-                          onClick={() => navigator.clipboard.writeText("1234567890")}
+                          onClick={() => navigator.clipboard.writeText("3780905904")}
                           className="text-sm px-3 py-1.5 rounded-lg bg-gray-900 text-white hover:bg-black transition active:scale-[0.97]"
                         >
                           Copy
@@ -868,6 +993,7 @@ export default function OrderForm() {
                     </div>
                   </div>
                 )}
+
                 <div>
                   <Button
                     type="submit"
