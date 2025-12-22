@@ -1,13 +1,13 @@
-export default async function handler(event) {
-  if (event.httpMethod !== "POST") {
-    return {
-      statusCode: 405,
-      body: JSON.stringify({ error: "Method not allowed" }),
-    };
+export default async (request) => {
+  if (request.method !== "POST") {
+    return new Response(
+      JSON.stringify({ error: "Method not allowed" }),
+      { status: 405 }
+    );
   }
 
   try {
-    const { messages } = JSON.parse(event.body);
+    const { messages } = await request.json();
 
     const response = await fetch(
       "https://openrouter.ai/api/v1/chat/completions",
@@ -20,27 +20,27 @@ export default async function handler(event) {
           "X-Title": "AI Nusantara",
         },
         body: JSON.stringify({
-          model: "google/gemini-flash", // GRATIS
+          model: "google/gemini-flash",
           messages: [
             {
               role: "system",
               content: `
 Kamu adalah AI resmi bernama AI Nusantara.
 
-Jawab semua pertanyaan dengan bebas seperti ChatGPT.
-Jika pengguna bertanya soal layanan atau pemesanan:
+Jawab seperti ChatGPT.
+Jika ditanya layanan:
 
 Layanan Nusantara:
-- Desain Grafis Profesional
-- Pembuatan Website Modern
-- Preset Fotografi Eksklusif
-- Aplikasi Premium Harga Terbaik
+- Desain Grafis
+- Website
+- Preset Foto
+- Aplikasi Premium
 
-Cara Pemesanan:
+Cara pesan:
 1. Pilih layanan
-2. Kunjungi halaman /order atau chat WhatsApp
+2. Chat /order / WhatsApp
 3. Konsultasi
-4. Pembayaran
+4. Bayar
 5. Pengerjaan
               `,
             },
@@ -52,20 +52,20 @@ Cara Pemesanan:
 
     const data = await response.json();
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
+    return new Response(
+      JSON.stringify({
         reply:
           data.choices?.[0]?.message?.content ||
           "Maaf, AI belum bisa menjawab 🙏",
       }),
-    };
-  } catch (error) {
-    console.error("AI ERROR:", error);
+      { status: 200 }
+    );
+  } catch (err) {
+    console.error("AI ERROR:", err);
 
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "AI error" }),
-    };
+    return new Response(
+      JSON.stringify({ error: "AI error" }),
+      { status: 500 }
+    );
   }
-}
+};
