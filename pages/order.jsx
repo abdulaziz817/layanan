@@ -31,187 +31,187 @@ export default function OrderForm() {
 
   const appPrices = {
 
-  "ChatGPT": {
-    "1 Bulan · Sharing · Non Garansi": "20000",
-    "1 Bulan · Sharing · Stabil · Non Garansi": "22000",
-    "1 Bulan · Sharing · Garansi": "32000",
-    "3 Bulan · Sharing · Garansi": "56000"
-  },
+    "ChatGPT": {
+      "1 Bulan · Sharing · Non Garansi": "20000",
+      "1 Bulan · Sharing · Stabil · Non Garansi": "22000",
+      "1 Bulan · Sharing · Garansi": "32000",
+      "3 Bulan · Sharing · Garansi": "56000"
+    },
 
-  "YouTube Premium": {
-    "1 Bulan · Pribadi · Garansi": "35000",
-    "1 Bulan · Keluarga · Sharing": "30000",
-    "1 Bulan · Pelajar · Garansi": "26000",
-    "1 Bulan · Pelajar · Non Garansi": "13000"
-  },
+    "YouTube Premium": {
+      "1 Bulan · Pribadi · Garansi": "35000",
+      "1 Bulan · Keluarga · Sharing": "30000",
+      "1 Bulan · Pelajar · Garansi": "26000",
+      "1 Bulan · Pelajar · Non Garansi": "13000"
+    },
 
-  "Netflix Premium": {
-    "7 Hari · Pribadi · 1 Perangkat": "26000",
-    "1 Bulan · Pribadi · 1 Perangkat": "49000",
-    "7 Hari · Sharing · 2 Perangkat": "24000",
-    "1 Bulan · Sharing · 2 Perangkat": "40000",
-    "1 Bulan · Semi Private · 2 Perangkat": "61000"
-  },
+    "Netflix Premium": {
+      "7 Hari · Pribadi · 1 Perangkat": "26000",
+      "1 Bulan · Pribadi · 1 Perangkat": "49000",
+      "7 Hari · Sharing · 2 Perangkat": "24000",
+      "1 Bulan · Sharing · 2 Perangkat": "40000",
+      "1 Bulan · Semi Private · 2 Perangkat": "61000"
+    },
 
-  "Disney Hotstar": {
-    "1 Bulan · Semua Perangkat": "20000",
-    "1 Tahun · Semua Perangkat": "120000"
-  },
+    "Disney Hotstar": {
+      "1 Bulan · Semua Perangkat": "20000",
+      "1 Tahun · Semua Perangkat": "120000"
+    },
 
-  "Vidio": {
-    "1 Bulan · Sharing · HP Only · Garansi": "32000",
-    "1 Bulan · Sharing · Semua Perangkat · Garansi": "44000",
-    "1 Bulan · Pribadi · HP Only · Garansi": "51000",
-    "1 Bulan · Pribadi · Semua Perangkat · Garansi": "71000",
-    "1 Tahun · Pribadi · TV Only · Garansi": "10000"
-  },
+    "Vidio": {
+      "1 Bulan · Sharing · HP Only · Garansi": "32000",
+      "1 Bulan · Sharing · Semua Perangkat · Garansi": "44000",
+      "1 Bulan · Pribadi · HP Only · Garansi": "51000",
+      "1 Bulan · Pribadi · Semua Perangkat · Garansi": "71000",
+      "1 Tahun · Pribadi · TV Only · Garansi": "10000"
+    },
 
-  "WeTV": {
-    "1 Bulan · Sharing · 6 Orang": "18000",
-    "1 Bulan · Sharing · 3 Orang": "24000",
-    "1 Bulan · Pribadi · Garansi": "59000"
-  },
+    "WeTV": {
+      "1 Bulan · Sharing · 6 Orang": "18000",
+      "1 Bulan · Sharing · 3 Orang": "24000",
+      "1 Bulan · Pribadi · Garansi": "59000"
+    },
 
-  "iQIYI": {
-    "1 Bulan · Sharing · Paket Basic": "15000",
-    "1 Bulan · Sharing · Paket Lengkap": "20000"
-  },
+    "iQIYI": {
+      "1 Bulan · Sharing · Paket Basic": "15000",
+      "1 Bulan · Sharing · Paket Lengkap": "20000"
+    },
 
-  "Bstation Premium": {
-    "1 Bulan · Sharing · Paket Basic": "15000",
-    "1 Bulan · Sharing · Paket Lengkap": "27000"
-  },
+    "Bstation Premium": {
+      "1 Bulan · Sharing · Paket Basic": "15000",
+      "1 Bulan · Sharing · Paket Lengkap": "27000"
+    },
 
-  "Youku": {
-    "1 Bulan · Sharing": "16000",
-    "1 Tahun · Sharing": "32000"
-  },
+    "Youku": {
+      "1 Bulan · Sharing": "16000",
+      "1 Tahun · Sharing": "32000"
+    },
 
-  "Viu Anlim": {
-    "1 Bulan · Pribadi": "4000",
-    "1 Tahun · Pribadi": "6000"
-  },
+    "Viu Anlim": {
+      "1 Bulan · Pribadi": "4000",
+      "1 Tahun · Pribadi": "6000"
+    },
 
-  "HBO": {
-    "1 Bulan · Sharing": "27000",
-    "1 Tahun · Sharing": "33000"
-  },
+    "HBO": {
+      "1 Bulan · Sharing": "27000",
+      "1 Tahun · Sharing": "33000"
+    },
 
-  "Loklok": {
-    "1 Bulan · Sharing · Paket Basic": "40000",
-    "1 Bulan · Sharing · Paket Standar": "44000"
-  },
+    "Loklok": {
+      "1 Bulan · Sharing · Paket Basic": "40000",
+      "1 Bulan · Sharing · Paket Standar": "44000"
+    },
 
-  "Fizzo": {
-    "1 Tahun · Sharing": "28000"
-  },
+    "Fizzo": {
+      "1 Tahun · Sharing": "28000"
+    },
 
-  "Wibuku": {
-    "1 Bulan · Sharing": "25000"
-  },
+    "Wibuku": {
+      "1 Bulan · Sharing": "25000"
+    },
 
-  "Drakor ID": {
-    "1 Bulan · Sharing": "15000"
-  },
+    "Drakor ID": {
+      "1 Bulan · Sharing": "15000"
+    },
 
-  "Dramabox": {
-    "1 Bulan · Sharing": "25000"
-  },
+    "Dramabox": {
+      "1 Bulan · Sharing": "25000"
+    },
 
-  "Iqiyl": {
-    "1 Bulan · Sharing": "17000",
-    "1 Tahun · Sharing": "34000"
-  },
+    "Iqiyl": {
+      "1 Bulan · Sharing": "17000",
+      "1 Tahun · Sharing": "34000"
+    },
 
-  "Prime Video": {
-    "1 Bulan · Sharing · Semua Perangkat": "12000",
-    "1 Bulan · Pribadi · Semua Perangkat": "26000"
-  },
+    "Prime Video": {
+      "1 Bulan · Sharing · Semua Perangkat": "12000",
+      "1 Bulan · Pribadi · Semua Perangkat": "26000"
+    },
 
-  "Melolo": {
-    "1 Bulan · Sharing": "16000"
-  },
+    "Melolo": {
+      "1 Bulan · Sharing": "16000"
+    },
 
-  "Duolingo": {
-    "1 Bulan · Premium": "14000"
-  },
+    "Duolingo": {
+      "1 Bulan · Premium": "14000"
+    },
 
-  "Perplexity AI": {
-    "1 Bulan · Sharing": "11000"
-  },
+    "Perplexity AI": {
+      "1 Bulan · Sharing": "11000"
+    },
 
-  "Express VPN": {
-    "1 Bulan · Pribadi": "15000"
-  },
+    "Express VPN": {
+      "1 Bulan · Pribadi": "15000"
+    },
 
-  "Viu Premium": {
-    "1 Bulan · Premium": "12000",
-    "1 Tahun · Premium": "120000"
-  },
+    "Viu Premium": {
+      "1 Bulan · Premium": "12000",
+      "1 Tahun · Premium": "120000"
+    },
 
-  "Spotify": {
-    "1 Bulan · Pribadi · Garansi": "37000",
-    "1 Bulan · Keluarga · Garansi": "32000",
-    "1 Bulan · Pelajar · Garansi": "28000",
-    "1 Bulan · Pelajar · Non Garansi": "15000"
-  },
+    "Spotify": {
+      "1 Bulan · Pribadi · Garansi": "37000",
+      "1 Bulan · Keluarga · Garansi": "32000",
+      "1 Bulan · Pelajar · Garansi": "28000",
+      "1 Bulan · Pelajar · Non Garansi": "15000"
+    },
 
-  "Canva Pro": {
-    "1 Bulan · Member · Non Garansi": "15000",
-    "1 Bulan · Member · Garansi": "25000",
-    "1 Tahun · Member · Garansi": "50000"
-  },
+    "Canva Pro": {
+      "1 Bulan · Member · Non Garansi": "15000",
+      "1 Bulan · Member · Garansi": "25000",
+      "1 Tahun · Member · Garansi": "50000"
+    },
 
-  "CapCut Pro": {
-    "7 Hari · Pribadi": "10000",
-    "21 Hari · Pribadi": "18000",
-    "35 Hari · Pribadi": "23000",
-    "21 Hari · Sharing": "12000",
-    "35 Hari · Sharing": "16000"
-  },
+    "CapCut Pro": {
+      "7 Hari · Pribadi": "10000",
+      "21 Hari · Pribadi": "18000",
+      "35 Hari · Pribadi": "23000",
+      "21 Hari · Sharing": "12000",
+      "35 Hari · Sharing": "16000"
+    },
 
-  "Google Gemini": {
-    "1 Tahun · Sharing": "25000"
-  },
+    "Google Gemini": {
+      "1 Tahun · Sharing": "25000"
+    },
 
-  "Zoom": {
-    "14 Hari · Pribadi": "14000"
-  },
+    "Zoom": {
+      "14 Hari · Pribadi": "14000"
+    },
 
-  "TikTok Premium": {
-    "1 Bulan · Non Garansi": "15000",
-    "1 Bulan · Garansi": "20000"
-  },
+    "TikTok Premium": {
+      "1 Bulan · Non Garansi": "15000",
+      "1 Bulan · Garansi": "20000"
+    },
 
-  "HBO GO": {
-    "1 Bulan · Garansi": "25000"
-  },
+    "HBO GO": {
+      "1 Bulan · Garansi": "25000"
+    },
 
-  "Apple Music": {
-    "1 Bulan · Invite Member": "10000"
-  },
+    "Apple Music": {
+      "1 Bulan · Invite Member": "10000"
+    },
 
-  "Alight Motion": {
-    "1 Tahun · Generator · No Email": "4000",
-    "1 Tahun · Email Pembeli · Garansi 6 Bulan": "8000",
-    "1 Tahun · Email Seller · Garansi 6 Bulan": "12000"
-  },
+    "Alight Motion": {
+      "1 Tahun · Generator · No Email": "4000",
+      "1 Tahun · Email Pembeli · Garansi 6 Bulan": "8000",
+      "1 Tahun · Email Seller · Garansi 6 Bulan": "12000"
+    },
 
-  "Wink": {
-    "7 Hari · Android · Akun Pembeli": "8000"
-  },
+    "Wink": {
+      "7 Hari · Android · Akun Pembeli": "8000"
+    },
 
-  "Meitu": {
-    "7 Hari · Android · Akun Pembeli": "8000",
-    "1 Bulan · Sharing · Akun Pembeli": "17000"
-  },
+    "Meitu": {
+      "7 Hari · Android · Akun Pembeli": "8000",
+      "1 Bulan · Sharing · Akun Pembeli": "17000"
+    },
 
-  "PicsArt": {
-    "1 Bulan · Sharing": "6000",
-    "1 Bulan · Private": "15000"
-  }
+    "PicsArt": {
+      "1 Bulan · Sharing": "6000",
+      "1 Bulan · Private": "15000"
+    }
 
-};
+  };
 
 
 

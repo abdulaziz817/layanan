@@ -7,6 +7,9 @@ import Hero from "../components/ui/Hero";
 import LogoGrid from "../components/ui/LogoGrid";
 import Testimonials from "../components/ui/Testimonials";
 import ToolKit from "../components/ui/ToolKit";
+import FloatingAI from "../components/FloatingAI";
+
+
 
 export default function Home() {
   return (
@@ -25,6 +28,7 @@ export default function Home() {
         <Testimonials />
       </GradientWrapper>
       <FooterCTA />
+       <FloatingAI />
     </>
   );
 }
