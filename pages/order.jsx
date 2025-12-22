@@ -617,7 +617,7 @@ export default function OrderForm() {
                       {serviceSubOptions[selectedService].map((subItem, idx) => {
                         const isCategory = [
                           "🎬 Streaming Film",
-                          "🎵 Musik",
+                          "🎵 Musik & Audio",
                           "🤖 AI",
                           "🎨 Desain & Editing",
                           "▶️ Video Premium",
