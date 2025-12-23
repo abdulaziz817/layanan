@@ -19,7 +19,7 @@ const Testimonials = () => {
     const testimonials = [
      {
         id: 1,
-        name: "Keisha Anindya",
+        name: "Muhammad Rizky Pratama",
         role: "Customer",
         stars: 4.5,
         service: "Desain Logo Usaha Kopi",
@@ -29,7 +29,7 @@ const Testimonials = () => {
     },
     {
         id: 2,
-        name: "Rafly Mahardika",
+        name: "Dimas",
         role: "Customer",
         stars: 5,
         service: "Pembuatan Website Portfolio",
@@ -39,7 +39,7 @@ const Testimonials = () => {
     },
     {
         id: 3,
-        name: "Naya Febriola",
+        name: "Aditya Nugroho",
         role: "Customer",
         stars: 4,
         service: "Preset Fotografi Outdoor",
@@ -49,7 +49,7 @@ const Testimonials = () => {
     },
     {
         id: 4,
-        name: "Farel Aditya",
+        name: "Muhammad Iqbal",
         role: "Customer",
         stars: 5,
         service: "Desain Banner Promosi",
@@ -59,7 +59,7 @@ const Testimonials = () => {
     },
     {
         id: 5,
-        name: "Tasya Reviona",
+        name: "Salsabila Putri",
         role: "Customer",
         stars: 4.5,
         service: "Desain Kartu Nama & Branding",
@@ -69,7 +69,7 @@ const Testimonials = () => {
     },
     {
         id: 6,
-        name: "Dimas Atmaja",
+        name: "Putri Lestari",
         role: "Customer",
         stars: 5,
         service: "Canva Pro",
