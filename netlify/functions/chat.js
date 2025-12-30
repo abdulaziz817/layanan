@@ -14,9 +14,7 @@ exports.handler = async (event) => {
     if (!process.env.GROQ_API_KEY) {
       return {
         statusCode: 500,
-        body: JSON.stringify({
-          content: "⚠️ API KEY GROQ tidak terdeteksi.",
-        }),
+        body: JSON.stringify({ content: "⚠️ API KEY GROQ tidak terdeteksi." }),
       };
     }
 
@@ -25,116 +23,72 @@ exports.handler = async (event) => {
     if (!message) {
       return {
         statusCode: 200,
-        body: JSON.stringify({
-          content: "Silakan ketik pertanyaan Anda 🙂",
-        }),
+        body: JSON.stringify({ content: "Silakan ketik pertanyaan Anda 🙂" }),
       };
     }
 
-    // ================= SYSTEM PROMPT GLOBAL =================
+    // ================= SYSTEM PROMPT =================
     const systemPrompt = `
 Kamu adalah Nusantara AI 🤖
-
 Aturan WAJIB:
+- Jawaban jelas, relevan, dan sesuai pertanyaan
+- Ambil jawaban langsung dari info website
 - Tanpa tanda ** atau markdown
-- Jawaban sedang, tidak bertele-tele
-- Emoji secukupnya
-- Gunakan jarak antar paragraf
-- Judul pakai HURUF KAPITAL
-- Bahasa santai, sopan, profesional
+- Bahasa santai tapi profesional
+- Gunakan paragraf untuk pemisahan jawaban
+- Judul pakai HURUF KAPITAL jika perlu
+- Emoji boleh digunakan secukupnya
 `;
 
-    // ================= KHUSUS LAYANAN NUSANTARA =================
-    if (message.toLowerCase().includes("layanan nusantara")) {
-      const res = await fetch("https://layanannusantara.store/");
-      const html = await res.text();
+    // ================= AMBIL KONTEN WEBSITE =================
+    const res = await fetch("https://layanannusantara.store/");
+    const html = await res.text();
 
-      const cleanText = html
-        .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
-        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
-        .replace(/<[^>]+>/g, " ")
-        .replace(/\s+/g, " ")
-        .slice(0, 900);
+    // Bersihkan HTML
+    const cleanText = html
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/\s+/g, " ");
 
-      const groqRes = await fetch(
-        "https://api.groq.com/openai/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-          },
-          body: JSON.stringify({
-            model: "llama-3.1-8b-instant",
-            temperature: 0.6,
-            max_tokens: 260,
-            messages: [
-              { role: "system", content: systemPrompt },
-              {
-                role: "user",
-                content: `Jelaskan secara ringkas dan rapi tentang Layanan Nusantara:\n\n${cleanText}`,
-              },
-            ],
-          }),
-        }
-      );
-
-      const data = await groqRes.json();
-
-      // ⏳ DELAY BIAR KELIHATAN MIKIR
-      await delay(1000);
-
-
-      return {
-        statusCode: 200,
-        body: JSON.stringify({
-          content:
-            data?.choices?.[0]?.message?.content || "Tidak ada jawaban.",
-        }),
-      };
-    }
-
-    // ================= AI BEBAS =================
-    const groqRes = await fetch(
-      "https://api.groq.com/openai/v1/chat/completions",
+    // ================= SIAPKAN MESSAGE UNTUK AI =================
+    const groqMessages = [
+      { role: "system", content: systemPrompt },
       {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: "llama-3.1-8b-instant",
-          temperature: 0.6,
-          max_tokens: 240,
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: message },
-          ],
-        }),
-      }
-    );
+        role: "user",
+        content: `Berikut adalah konten website Layanan Nusantara:\n${cleanText}\nJawab pertanyaan berikut hanya berdasarkan info tersebut: ${message}`,
+      },
+    ];
+
+    // ================= PANGGIL AI =================
+    const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "llama-3.1-8b-instant",
+        temperature: 0.6,
+        max_tokens: 400,
+        messages: groqMessages,
+      }),
+    });
 
     const data = await groqRes.json();
-
-    // ⏳ DELAY BIAR HUMAN-LIKE
-await delay(1000);
-
+    await delay(500); // optional, bisa dihapus
 
     return {
       statusCode: 200,
       body: JSON.stringify({
-        content:
-          data?.choices?.[0]?.message?.content || "Tidak ada jawaban.",
+        content: data?.choices?.[0]?.message?.content || "Tidak ada jawaban.",
       }),
     };
   } catch (err) {
     console.error("CHAT FUNCTION ERROR:", err);
     return {
       statusCode: 500,
-      body: JSON.stringify({
-        content: "⚠️ Terjadi kesalahan pada server.",
-      }),
+      body: JSON.stringify({ content: "⚠️ Terjadi kesalahan pada server." }),
     };
   }
 };

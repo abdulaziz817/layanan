@@ -63,8 +63,7 @@ export default function FloatingAI() {
     {
       question: "Jam operasional layanan",
       answer:
-       "⏰ Layanan beroperasi setiap hari.\n🕘 08.00 – 20.00 WIB.\nPesan di luar jam kerja akan dibalas pada jam operasional."
-
+        "⏰ Layanan beroperasi setiap hari.\n🕘 08.00 – 20.00 WIB.\nPesan di luar jam kerja akan dibalas pada jam operasional.",
     },
     {
       question: "Metode pembayaran?",
@@ -84,60 +83,59 @@ export default function FloatingAI() {
     ]);
   };
 
-    /* ===================== SEND MESSAGE ===================== */
+  /* ===================== SEND MESSAGE ===================== */
   const sendMessage = async (text) => {
-  if (!text.trim() || isTyping) return;
+    if (!text.trim() || isTyping) return;
 
-  setMessages((prev) => [...prev, { role: "user", content: text }]);
-  setInput("");
-  setIsTyping(true);
+    // tampilkan pesan user
+    setMessages((prev) => [...prev, { role: "user", content: text }]);
+    setInput("");
+    setIsTyping(true);
 
-  // quick reply
-  const matched = quickReplies.find((q) =>
-    text.toLowerCase().includes(q.question.toLowerCase())
-  );
+    // quick reply
+    const matched = quickReplies.find((q) =>
+      text.toLowerCase().includes(q.question.toLowerCase())
+    );
 
-  if (matched) {
-    setMessages((prev) => [
-      ...prev,
-      { role: "assistant", content: matched.answer },
-    ]);
-    setIsTyping(false);
-    return;
-  }
+    if (matched) {
+      setTimeout(() => {
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: matched.answer },
+        ]);
+        setIsTyping(false);
+      }, 1000); // delay 1 detik
+      return;
+    }
 
-  try {
-    const res = await fetch("/.netlify/functions/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        message: text, // ⬅️ PENTING
-      }),
-    });
+    // panggil AI generic via Netlify Function
+    try {
+      const res = await fetch("/.netlify/functions/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: text,
+        }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    setMessages((prev) => [
-      ...prev,
-      {
-        role: "assistant",
-        content: data.content || "Tidak ada jawaban.",
-      },
-    ]);
-  } catch (err) {
-    setMessages((prev) => [
-      ...prev,
-      {
-        role: "assistant",
-        content: "⚠️ Terjadi kesalahan. Silakan coba lagi.",
-      },
-    ]);
-  } finally {
-    setIsTyping(false);
-  }
-};
-
-
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: data.content || "Tidak ada jawaban." },
+      ]);
+    } catch (err) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "⚠️ Terjadi kesalahan. Silakan coba lagi.",
+        },
+      ]);
+    } finally {
+      setIsTyping(false);
+    }
+  };
 
   return (
     <>
@@ -215,7 +213,7 @@ export default function FloatingAI() {
                       : "bg-white text-gray-700 mr-auto border rounded-bl-md"
                   }`}
                 >
-                 {(msg.content || "").split("\n").map((line, idx) => (
+                  {(msg.content || "").split("\n").map((line, idx) => (
                     <p key={idx} className="leading-relaxed">
                       {line || <span className="block h-2" />}
                     </p>
@@ -250,13 +248,11 @@ export default function FloatingAI() {
                       : "Tanya AI tentang layanan, harga, atau pemesanan..."
                   }
                   className="flex-1 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-600 disabled:opacity-60"
-
                 />
                 <button
                   disabled={isTyping}
                   onClick={() => sendMessage(input)}
-                 className="bg-indigo-600 text-white px-4 rounded-lg disabled:opacity-60"
-
+                  className="bg-indigo-600 text-white px-4 rounded-lg disabled:opacity-60"
                 >
                   Kirim
                 </button>
@@ -281,8 +277,7 @@ export default function FloatingAI() {
                     key={idx}
                     disabled={isTyping}
                     onClick={() => sendMessage(q.question)}
-                  className="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded-full text-xs whitespace-nowrap disabled:opacity-50"
-
+                    className="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded-full text-xs whitespace-nowrap disabled:opacity-50"
                   >
                     {q.question}
                   </button>
