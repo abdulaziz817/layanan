@@ -90,6 +90,15 @@ exports.handler = async (event) => {
         }),
       }
     );
+    
+if (!process.env.GROQ_API_KEY) {
+  return {
+    statusCode: 500,
+    body: JSON.stringify({
+      content: "API KEY GROQ TIDAK TERDETEKSI",
+    }),
+  };
+}
 
     const data = await groqRes.json();
 
