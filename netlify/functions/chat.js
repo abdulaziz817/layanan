@@ -1,21 +1,79 @@
-export default async (request) => {
-  console.log("Function hit!"); // memastikan function terpanggil
+const Groq = require("groq-sdk");
 
-  if (request.method !== "POST") {
-    return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405 });
-  }
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
+});
 
+exports.handler = async (event) => {
   try {
-    const { messages } = await request.json();
-    console.log("Messages:", messages);
+    if (event.httpMethod !== "POST") {
+      return {
+        statusCode: 405,
+        body: JSON.stringify({ content: "Method not allowed" }),
+      };
+    }
 
-    // Dummy response untuk test
-    return new Response(JSON.stringify({
-      reply: `Test OK. Kamu mengirim: ${messages[messages.length - 1]?.content || ""}`
-    }), { status: 200 });
+    const { message } = JSON.parse(event.body || "{}");
+    if (!message) {
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ content: "Silakan ketik pertanyaan Anda." }),
+      };
+    }
 
-  } catch (err) {
-    console.error("Function ERROR:", err);
-    return new Response(JSON.stringify({ error: "AI error" }), { status: 500 });
+    /* ===================== AMBIL DATA WEBSITE JIKA PERLU ===================== */
+    let websiteContext = "";
+
+    if (message.toLowerCase().includes("layanan nusantara")) {
+      const response = await fetch("https://layanannusantara.store/");
+      const html = await response.text();
+
+      websiteContext = html
+        .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+        .replace(/<[^>]+>/g, " ")
+        .replace(/\s+/g, " ")
+        .slice(0, 1500);
+    }
+
+    /* ===================== AI BEBAS + KONTEXT WEBSITE ===================== */
+    const completion = await groq.chat.completions.create({
+      model: "llama-3.1-8b-instant",
+      messages: [
+        {
+          role: "system",
+          content:
+            "Kamu adalah Nusantara AI. Jawab dengan bahasa Indonesia yang rapi, profesional, dan mudah dipahami. Jika ada informasi website, gunakan itu sebagai sumber utama dan rangkum dengan baik. Jangan tampilkan teks mentah website.",
+        },
+        ...(websiteContext
+          ? [
+              {
+                role: "system",
+                content:
+                  "Informasi resmi dari website Layanan Nusantara:\n" +
+                  websiteContext,
+              },
+            ]
+          : []),
+        {
+          role: "user",
+          content: message,
+        },
+      ],
+    });
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        content: completion.choices[0].message.content,
+      }),
+    };
+  } catch (error) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        content: "Terjadi kesalahan pada server.",
+      }),
+    };
   }
 };

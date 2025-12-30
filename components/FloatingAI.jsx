@@ -84,29 +84,60 @@ export default function FloatingAI() {
     ]);
   };
 
-  /* ===================== SEND MESSAGE ===================== */
-  const sendMessage = (text) => {
-    if (!text.trim()) return;
-    if (isTyping) return; // ⛔ BLOKIR INPUT SAAT AI MENJAWAB
+    /* ===================== SEND MESSAGE ===================== */
+  const sendMessage = async (text) => {
+  if (!text.trim() || isTyping) return;
 
-    setMessages((prev) => [...prev, { role: "user", content: text }]);
-    setInput("");
-    setIsTyping(true);
+  setMessages((prev) => [...prev, { role: "user", content: text }]);
+  setInput("");
+  setIsTyping(true);
 
-    const matched = quickReplies.find((q) =>
-      text.toLowerCase().includes(q.question.toLowerCase())
-    );
+  // quick reply
+  const matched = quickReplies.find((q) =>
+    text.toLowerCase().includes(q.question.toLowerCase())
+  );
 
-    const reply = matched
-  ? matched.answer
-  : "😊 Maaf ya, fitur chatbot belum bisa digunakan saat ini.\n\n👇 Silakan pilih pertanyaan cepat di bawah.";
+  if (matched) {
+    setMessages((prev) => [
+      ...prev,
+      { role: "assistant", content: matched.answer },
+    ]);
+    setIsTyping(false);
+    return;
+  }
+
+  try {
+    const res = await fetch("/.netlify/functions/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: text, // ⬅️ PENTING
+      }),
+    });
+
+    const data = await res.json();
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "assistant",
+        content: data.content || "Tidak ada jawaban.",
+      },
+    ]);
+  } catch (err) {
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "assistant",
+        content: "⚠️ Terjadi kesalahan. Silakan coba lagi.",
+      },
+    ]);
+  } finally {
+    setIsTyping(false);
+  }
+};
 
 
-    setTimeout(() => {
-      setIsTyping(false);
-      setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
-    }, 1600);
-  };
 
   return (
     <>
@@ -184,7 +215,7 @@ export default function FloatingAI() {
                       : "bg-white text-gray-700 mr-auto border rounded-bl-md"
                   }`}
                 >
-                  {msg.content.split("\n").map((line, idx) => (
+                 {(msg.content || "").split("\n").map((line, idx) => (
                     <p key={idx} className="leading-relaxed">
                       {line || <span className="block h-2" />}
                     </p>
