@@ -32,7 +32,7 @@ exports.handler = async (event) => {
 Kamu adalah Nusantara AI 🤖
 Aturan WAJIB:
 - Jawaban jelas, relevan, dan sesuai pertanyaan
-- Ambil jawaban langsung dari info website
+- Ambil jawaban langsung dari info website jika terkait "Layanan Nusantara"
 - Tanpa tanda ** atau markdown
 - Bahasa santai tapi profesional
 - Gunakan paragraf untuk pemisahan jawaban
@@ -40,24 +40,27 @@ Aturan WAJIB:
 - Emoji boleh digunakan secukupnya
 `;
 
-    // ================= AMBIL KONTEN WEBSITE =================
-    const res = await fetch("https://layanannusantara.store/");
-    const html = await res.text();
+    let userContent = message;
 
-    // Bersihkan HTML
-    const cleanText = html
-      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
-      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
-      .replace(/<[^>]+>/g, " ")
-      .replace(/\s+/g, " ");
+    // ================= CEK KATA "LAYANAN NUSANTARA" =================
+    if (message.toLowerCase().includes("layanan nusantara")) {
+      const res = await fetch("https://layanannusantara.store/");
+      const html = await res.text();
+
+      // Bersihkan HTML
+      const cleanText = html
+        .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+        .replace(/<[^>]+>/g, " ")
+        .replace(/\s+/g, " ");
+
+      userContent = `Berikut adalah konten website Layanan Nusantara:\n${cleanText}\nJawab pertanyaan berikut hanya berdasarkan info tersebut: ${message}`;
+    }
 
     // ================= SIAPKAN MESSAGE UNTUK AI =================
     const groqMessages = [
       { role: "system", content: systemPrompt },
-      {
-        role: "user",
-        content: `Berikut adalah konten website Layanan Nusantara:\n${cleanText}\nJawab pertanyaan berikut hanya berdasarkan info tersebut: ${message}`,
-      },
+      { role: "user", content: userContent },
     ];
 
     // ================= PANGGIL AI =================
