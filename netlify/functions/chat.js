@@ -1,9 +1,3 @@
-const Groq = require("groq-sdk");
-
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
-
 exports.handler = async (event) => {
   try {
     if (event.httpMethod !== "POST") {
@@ -24,69 +18,89 @@ exports.handler = async (event) => {
       };
     }
 
-    /* ===================== KHUSUS LAYANAN NUSANTARA ===================== */
+    // ===== KHUSUS LAYANAN NUSANTARA =====
     if (message.toLowerCase().includes("layanan nusantara")) {
-      const response = await fetch("https://layanannusantara.store/");
-      const html = await response.text();
+      const res = await fetch("https://layanannusantara.store/");
+      const html = await res.text();
 
       const cleanText = html
         .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
         .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
         .replace(/<[^>]+>/g, " ")
         .replace(/\s+/g, " ")
-        .slice(0, 1200);
+        .slice(0, 1000);
 
-      // 🔥 biar rapi → lempar ke Groq
-      const summary = await groq.chat.completions.create({
-        model: "llama-3.1-8b-instant",
-        messages: [
-          {
-            role: "system",
-            content:
-              "Kamu adalah Nusantara AI. Ringkas dan jelaskan informasi website secara rapi, profesional, dan mudah dipahami dalam bahasa Indonesia.",
+      const groqRes = await fetch(
+        "https://api.groq.com/openai/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
           },
-          {
-            role: "user",
-            content:
-              "Berikut isi website Layanan Nusantara:\n\n" +
-              cleanText +
-              "\n\nJawab pertanyaan user dengan rapi.",
-          },
-        ],
-      });
+          body: JSON.stringify({
+            model: "llama-3.1-8b-instant",
+            messages: [
+              {
+                role: "system",
+                content:
+                  "Kamu adalah Nusantara AI. Jelaskan dengan rapi, profesional, dan mudah dipahami.",
+              },
+              {
+                role: "user",
+                content: cleanText,
+              },
+            ],
+          }),
+        }
+      );
+
+      const data = await groqRes.json();
 
       return {
         statusCode: 200,
         body: JSON.stringify({
-          content: summary.choices[0].message.content,
+          content: data.choices?.[0]?.message?.content || "Tidak ada jawaban.",
         }),
       };
     }
 
-    /* ===================== AI BEBAS ===================== */
-    const completion = await groq.chat.completions.create({
-      model: "llama-3.1-8b-instant",
-      messages: [
-        {
-          role: "system",
-          content:
-            "Kamu adalah Nusantara AI, asisten ramah berbahasa Indonesia. Jawab dengan jelas, sopan, dan natural seperti chatbot profesional.",
+    // ===== AI BEBAS =====
+    const groqRes = await fetch(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
         },
-        {
-          role: "user",
-          content: message,
-        },
-      ],
-    });
+        body: JSON.stringify({
+          model: "llama-3.1-8b-instant",
+          messages: [
+            {
+              role: "system",
+              content:
+                "Kamu adalah Nusantara AI, chatbot ramah berbahasa Indonesia.",
+            },
+            {
+              role: "user",
+              content: message,
+            },
+          ],
+        }),
+      }
+    );
+
+    const data = await groqRes.json();
 
     return {
       statusCode: 200,
       body: JSON.stringify({
-        content: completion.choices[0].message.content,
+        content: data.choices?.[0]?.message?.content || "Tidak ada jawaban.",
       }),
     };
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
     return {
       statusCode: 500,
       body: JSON.stringify({
