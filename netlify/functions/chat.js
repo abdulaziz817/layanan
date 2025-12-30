@@ -1,6 +1,3 @@
-const fetch = (...args) =>
-  import("node-fetch").then(({ default: fetch }) => fetch(...args));
-
 const Groq = require("groq-sdk");
 
 const groq = new Groq({
@@ -21,11 +18,13 @@ exports.handler = async (event) => {
     if (!message) {
       return {
         statusCode: 200,
-        body: JSON.stringify({ content: "Silakan ketik pertanyaan Anda." }),
+        body: JSON.stringify({
+          content: "Silakan ketik pertanyaan Anda 🙂",
+        }),
       };
     }
 
-    // ===== KHUSUS LAYANAN NUSANTARA =====
+    /* ===================== KHUSUS LAYANAN NUSANTARA ===================== */
     if (message.toLowerCase().includes("layanan nusantara")) {
       const response = await fetch("https://layanannusantara.store/");
       const html = await response.text();
@@ -35,26 +34,43 @@ exports.handler = async (event) => {
         .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
         .replace(/<[^>]+>/g, " ")
         .replace(/\s+/g, " ")
-        .slice(0, 1000);
+        .slice(0, 1200);
+
+      // 🔥 biar rapi → lempar ke Groq
+      const summary = await groq.chat.completions.create({
+        model: "llama-3.1-8b-instant",
+        messages: [
+          {
+            role: "system",
+            content:
+              "Kamu adalah Nusantara AI. Ringkas dan jelaskan informasi website secara rapi, profesional, dan mudah dipahami dalam bahasa Indonesia.",
+          },
+          {
+            role: "user",
+            content:
+              "Berikut isi website Layanan Nusantara:\n\n" +
+              cleanText +
+              "\n\nJawab pertanyaan user dengan rapi.",
+          },
+        ],
+      });
 
       return {
         statusCode: 200,
         body: JSON.stringify({
-          content:
-            "Berikut informasi resmi dari website Layanan Nusantara:\n\n" +
-            cleanText,
+          content: summary.choices[0].message.content,
         }),
       };
     }
 
-    // ===== AI BEBAS =====
+    /* ===================== AI BEBAS ===================== */
     const completion = await groq.chat.completions.create({
       model: "llama-3.1-8b-instant",
       messages: [
         {
           role: "system",
           content:
-            "Kamu adalah Nusantara AI. Jawab dengan rapi, natural, dan mudah dipahami.",
+            "Kamu adalah Nusantara AI, asisten ramah berbahasa Indonesia. Jawab dengan jelas, sopan, dan natural seperti chatbot profesional.",
         },
         {
           role: "user",
@@ -69,7 +85,8 @@ exports.handler = async (event) => {
         content: completion.choices[0].message.content,
       }),
     };
-  } catch (err) {
+  } catch (error) {
+    console.error(error);
     return {
       statusCode: 500,
       body: JSON.stringify({
