@@ -1,97 +1,184 @@
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const products = require("./products.json");
+
+const delay = (ms) => new Promise((r) => setTimeout(r, ms));
+
+const normalize = (t = "") =>
+  t.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
+
+// ====== INTENT LANJUTAN / BELI ======
+const followUpIntents = [
+  "iya",
+  "ya",
+  "mau",
+  "beli",
+  "pesan",
+  "lanjut",
+  "oke",
+  "ok",
+  "siap",
+];
+
+// ====== CARI PRODUK (TYPO FRIENDLY) ======
+function detectProduct(text) {
+  const msg = normalize(text);
+
+  for (const key in products) {
+    const product = products[key];
+    for (const kw of product.keywords) {
+      if (msg.includes(normalize(kw))) {
+        return product;
+      }
+    }
+  }
+  return null;
+}
 
 exports.handler = async (event) => {
   try {
-    // ================= METHOD CHECK =================
     if (event.httpMethod !== "POST") {
-      return {
-        statusCode: 405,
-        body: JSON.stringify({ content: "Method not allowed" }),
-      };
+      return { statusCode: 405, body: "Method not allowed" };
     }
 
-    // ================= API KEY CHECK =================
     if (!process.env.GROQ_API_KEY) {
       return {
         statusCode: 500,
-        body: JSON.stringify({ content: "⚠️ API KEY GROQ tidak terdeteksi." }),
+        body: JSON.stringify({ content: "API KEY GROQ tidak ada" }),
       };
     }
 
-    const { message } = JSON.parse(event.body || "{}");
+    const { message, history = [] } = JSON.parse(event.body || "{}");
 
     if (!message) {
       return {
         statusCode: 200,
-        body: JSON.stringify({ content: "Silakan ketik pertanyaan Anda 🙂" }),
+        body: JSON.stringify({ content: "Silakan ketik pertanyaan 🙂" }),
       };
     }
 
-    // ================= SYSTEM PROMPT =================
+    // ====== AMBIL PESAN USER TERAKHIR ======
+    const lastUser = [...history]
+      .reverse()
+      .find((h) => h.role === "user")?.content;
+
+    const isFollowUp = followUpIntents.some((w) =>
+      normalize(message).includes(w)
+    );
+
+    // ====== GABUNG KONTEKS ======
+    const combinedMessage =
+      (isFollowUp ||
+        ["berapa", "itu", "emangnya"].some((w) =>
+          normalize(message).includes(w)
+        )) && lastUser
+        ? lastUser
+        : message;
+
+    // ====== CEK PRODUK ======
+    const product = detectProduct(combinedMessage);
+
     const systemPrompt = `
 Kamu adalah Nusantara AI 🤖
-Aturan WAJIB:
-- Jawaban jelas, relevan, dan sesuai pertanyaan
-- Ambil jawaban langsung dari info website jika terkait "Layanan Nusantara"
-- Tanpa tanda ** atau markdown
-- Bahasa santai tapi profesional
-- Gunakan paragraf untuk pemisahan jawaban
-- Judul pakai HURUF KAPITAL jika perlu
-- Emoji boleh digunakan secukupnya
+
+ATURAN WAJIB:
+- Jika produk sudah terdeteksi, ANGGAP produk AKTIF
+- Jika user bilang "iya", "mau beli", "pesan", "lanjut"
+  → JANGAN tanya ulang produk
+  → LANGSUNG kirim cara pemesanan
+- Jika data produk ada, WAJIB digunakan
+- DILARANG bilang "tidak menemukan informasi"
+- Jawab profesional, jelas, tidak bertele-tele
 `;
 
-    let userContent = message;
+    let userPrompt = message;
 
-    // ================= CEK KATA "LAYANAN NUSANTARA" =================
-    if (message.toLowerCase().includes("layanan nusantara")) {
+    // ====== JIKA PRODUK TERDETEKSI ======
+    if (product) {
+      userPrompt = `
+Produk AKTIF di Layanan Nusantara (JANGAN DIABAIKAN):
+
+Nama Produk:
+${product.name}
+
+Daftar Paket & Harga:
+${product.packages.join("\n")}
+
+Jika user menyatakan ingin membeli,
+WAJIB kirim langkah pemesanan berikut:
+
+🛒 Cara Melakukan Pemesanan
+🔘 Klik tombol Pesan Layanan di halaman utama
+🖥️ Isi form pemesanan dengan data yang sesuai
+📦 Pilih jenis layanan:
+• Aplikasi Premium → harga & durasi otomatis
+• Desain Grafis / Preset Foto / Web Development → isi budget & deadline
+💳 Pilih metode pembayaran dan lakukan transfer
+💬 Klik Kirim Pesanan via WhatsApp
+📱 Admin akan memverifikasi dan pesanan diproses
+
+Pertanyaan user:
+${message}
+`;
+    }
+
+    // ====== JIKA NANYA UMUM TENTANG LAYANAN ======
+    if (
+      message.toLowerCase().includes("layanan nusantara") &&
+      !product
+    ) {
       const res = await fetch("https://layanannusantara.store/");
       const html = await res.text();
 
-      // Bersihkan HTML
-      const cleanText = html
+      const clean = html
         .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
         .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
         .replace(/<[^>]+>/g, " ")
         .replace(/\s+/g, " ");
 
-      userContent = `Berikut adalah konten website Layanan Nusantara:\n${cleanText}\nJawab pertanyaan berikut hanya berdasarkan info tersebut: ${message}`;
+      userPrompt = `
+Gunakan informasi berikut untuk menjawab:
+${clean}
+
+Pertanyaan:
+${message}
+`;
     }
 
-    // ================= SIAPKAN MESSAGE UNTUK AI =================
-    const groqMessages = [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: userContent },
-    ];
-
-    // ================= PANGGIL AI =================
-    const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "llama-3.1-8b-instant",
-        temperature: 0.6,
-        max_tokens: 400,
-        messages: groqMessages,
-      }),
-    });
+    const groqRes = await fetch(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "llama-3.1-8b-instant",
+          temperature: 0.4,
+          max_tokens: 500,
+          messages: [
+            { role: "system", content: systemPrompt },
+            ...history,
+            { role: "user", content: userPrompt },
+          ],
+        }),
+      }
+    );
 
     const data = await groqRes.json();
-    await delay(500); // optional, bisa dihapus
+    const reply =
+      data?.choices?.[0]?.message?.content || "Tidak ada jawaban";
+
+    await delay(200);
 
     return {
       statusCode: 200,
-      body: JSON.stringify({
-        content: data?.choices?.[0]?.message?.content || "Tidak ada jawaban.",
-      }),
+      body: JSON.stringify({ content: reply }),
     };
   } catch (err) {
-    console.error("CHAT FUNCTION ERROR:", err);
+    console.error("ERROR DETAIL:", err);
     return {
       statusCode: 500,
-      body: JSON.stringify({ content: "⚠️ Terjadi kesalahan pada server." }),
+      body: JSON.stringify({ content: "Server error" }),
     };
   }
 };

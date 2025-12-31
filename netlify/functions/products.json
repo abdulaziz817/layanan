@@ -1,0 +1,340 @@
+{
+  "netflix": {
+    "name": "Netflix Premium",
+    "keywords": ["netflix", "net flix", "nfx", "netflix premium"],
+    "packages": [
+      "7 Hari · Pribadi · 1 Perangkat — Rp26.000",
+      "1 Bulan · Pribadi · 1 Perangkat — Rp49.000",
+      "7 Hari · Sharing · 2 Perangkat — Rp24.000",
+      "1 Bulan · Sharing · 2 Perangkat — Rp40.000",
+      "1 Bulan · Semi Private · 2 Perangkat — Rp61.000"
+    ]
+  },
+
+  "disney": {
+    "name": "Disney Hotstar",
+    "keywords": ["disney", "hotstar", "disney plus", "disney+"],
+    "packages": [
+      "1 Bulan · Semua Perangkat — Rp20.000",
+      "1 Tahun · Semua Perangkat — Rp120.000"
+    ]
+  },
+
+  "primevideo": {
+    "name": "Prime Video",
+    "keywords": ["prime video", "amazon prime"],
+    "packages": [
+      "1 Bulan · Sharing · Semua Perangkat — Rp12.000",
+      "1 Bulan · Pribadi · Semua Perangkat — Rp26.000"
+    ]
+  },
+
+  "vidio": {
+    "name": "Vidio Premium",
+    "keywords": ["vidio", "vidio premium"],
+    "packages": [
+      "1 Bulan · Sharing · HP Only · Garansi — Rp32.000",
+      "1 Bulan · Sharing · Semua Perangkat · Garansi — Rp44.000",
+      "1 Bulan · Pribadi · HP Only · Garansi — Rp51.000",
+      "1 Bulan · Pribadi · Semua Perangkat · Garansi — Rp71.000",
+      "1 Tahun · Pribadi · TV Only · Garansi — Rp100.000"
+    ]
+  },
+
+  "wetv": {
+    "name": "WeTV",
+    "keywords": ["wetv", "we tv"],
+    "packages": [
+      "1 Bulan · Sharing · 6 Orang — Rp18.000",
+      "1 Bulan · Sharing · 3 Orang — Rp24.000",
+      "1 Bulan · Pribadi · Garansi — Rp59.000"
+    ]
+  },
+
+  "iqiyi": {
+    "name": "iQIYI",
+    "keywords": ["iqiyi", "i qiyi"],
+    "packages": [
+      "1 Bulan · Sharing · Paket Basic — Rp15.000",
+      "1 Bulan · Sharing · Paket Lengkap — Rp20.000"
+    ]
+  },
+
+  "bstation": {
+    "name": "Bstation Premium",
+    "keywords": ["bstation", "b station"],
+    "packages": [
+      "1 Bulan · Sharing · Paket Basic — Rp15.000",
+      "1 Bulan · Sharing · Paket Lengkap — Rp27.000"
+    ]
+  },
+
+  "youku": {
+    "name": "Youku",
+    "keywords": ["youku"],
+    "packages": [
+      "1 Bulan · Sharing — Rp16.000",
+      "1 Tahun · Sharing — Rp32.000"
+    ]
+  },
+
+  "viu": {
+    "name": "Viu Premium",
+    "keywords": ["viu", "viu premium"],
+    "packages": [
+      "1 Bulan · Premium — Rp12.000",
+      "1 Tahun · Premium — Rp120.000"
+    ]
+  },
+
+  "viu_anlim": {
+    "name": "Viu Anlim",
+    "keywords": ["viu anlim", "viu unlimited"],
+    "packages": [
+      "1 Bulan · Pribadi — Rp4.000",
+      "1 Tahun · Pribadi — Rp6.000"
+    ]
+  },
+
+  "hbo": {
+    "name": "HBO",
+    "keywords": ["hbo"],
+    "packages": [
+      "1 Bulan · Sharing — Rp27.000",
+      "1 Tahun · Sharing — Rp33.000"
+    ]
+  },
+
+  "hbogo": {
+    "name": "HBO GO",
+    "keywords": ["hbo go"],
+    "packages": [
+      "1 Bulan · Garansi — Rp25.000"
+    ]
+  },
+
+  "loklok": {
+    "name": "Loklok",
+    "keywords": ["loklok"],
+    "packages": [
+      "1 Bulan · Sharing · Paket Basic — Rp40.000",
+      "1 Bulan · Sharing · Paket Standar — Rp44.000"
+    ]
+  },
+
+  "drakorid": {
+    "name": "Drakor ID",
+    "keywords": ["drakor id", "drakorid"],
+    "packages": [
+      "1 Bulan · Sharing — Rp15.000"
+    ]
+  },
+
+  "dramabox": {
+    "name": "Dramabox",
+    "keywords": ["dramabox"],
+    "packages": [
+      "1 Bulan · Sharing — Rp25.000"
+    ]
+  },
+
+  "wibuku": {
+    "name": "Wibuku",
+    "keywords": ["wibuku"],
+    "packages": [
+      "1 Bulan · Sharing — Rp25.000"
+    ]
+  },
+
+  "spotify": {
+    "name": "Spotify Premium",
+    "keywords": ["spotify", "spotify premium"],
+    "packages": [
+      "1 Bulan · Pribadi · Garansi — Rp37.000",
+      "1 Bulan · Keluarga · Garansi — Rp32.000",
+      "1 Bulan · Pelajar · Garansi — Rp28.000",
+      "1 Bulan · Pelajar · Non Garansi — Rp15.000"
+    ]
+  },
+
+  "applemusic": {
+    "name": "Apple Music",
+    "keywords": ["apple music"],
+    "packages": [
+      "1 Bulan · Invite Member — Rp10.000"
+    ]
+  },
+
+  "chatgpt": {
+    "name": "ChatGPT Premium",
+    "keywords": ["chatgpt", "chat gpt", "openai"],
+    "packages": [
+      "1 Bulan · Sharing · Non Garansi — Rp20.000",
+      "1 Bulan · Sharing · Stabil · Non Garansi — Rp22.000",
+      "1 Bulan · Sharing · Garansi — Rp32.000",
+      "3 Bulan · Sharing · Garansi — Rp56.000"
+    ]
+  },
+
+  "gemini": {
+    "name": "Google Gemini",
+    "keywords": ["gemini", "google gemini"],
+    "packages": [
+      "1 Tahun · Sharing — Rp25.000"
+    ]
+  },
+
+  "perplexity": {
+    "name": "Perplexity AI",
+    "keywords": ["perplexity", "perplexity ai"],
+    "packages": [
+      "1 Bulan · Sharing — Rp11.000"
+    ]
+  },
+
+  "canva": {
+    "name": "Canva Pro",
+    "keywords": ["canva", "canva pro"],
+    "packages": [
+      "1 Bulan · Member · Non Garansi — Rp15.000",
+      "1 Bulan · Member · Garansi — Rp25.000",
+      "1 Tahun · Member · Garansi — Rp50.000"
+    ]
+  },
+
+  "capcut": {
+    "name": "CapCut Pro",
+    "keywords": ["capcut", "capcut pro"],
+    "packages": [
+      "7 Hari · Pribadi — Rp10.000",
+      "21 Hari · Pribadi — Rp18.000",
+      "35 Hari · Pribadi — Rp23.000",
+      "21 Hari · Sharing — Rp12.000",
+      "35 Hari · Sharing — Rp16.000"
+    ]
+  },
+
+  "wink": {
+    "name": "Wink",
+    "keywords": ["wink"],
+    "packages": [
+      "7 Hari · Android · Akun Pembeli — Rp8.000"
+    ]
+  },
+
+  "meitu": {
+    "name": "Meitu",
+    "keywords": ["meitu"],
+    "packages": [
+      "7 Hari · Android · Akun Pembeli — Rp8.000",
+      "1 Bulan · Sharing · Akun Pembeli — Rp17.000"
+    ]
+  },
+
+  "youtube": {
+    "name": "YouTube Premium",
+    "keywords": ["youtube", "youtube premium"],
+    "packages": [
+      "1 Bulan · Pribadi · Garansi — Rp35.000",
+      "1 Bulan · Keluarga · Sharing — Rp30.000",
+      "1 Bulan · Pelajar · Garansi — Rp26.000",
+      "1 Bulan · Pelajar · Non Garansi — Rp13.000"
+    ]
+  },
+
+  "tiktok": {
+    "name": "TikTok Premium",
+    "keywords": ["tiktok", "tiktok premium"],
+    "packages": [
+      "1 Bulan · Non Garansi — Rp15.000",
+      "1 Bulan · Garansi — Rp20.000"
+    ]
+  },
+
+  "zoom": {
+    "name": "Zoom",
+    "keywords": ["zoom"],
+    "packages": [
+      "14 Hari · Pribadi — Rp14.000"
+    ]
+  },
+
+  "fizzo": {
+    "name": "Fizzo",
+    "keywords": ["fizzo"],
+    "packages": [
+      "1 Tahun · Sharing — Rp28.000"
+    ]
+  },
+
+  "duolingo": {
+    "name": "Duolingo Premium",
+    "keywords": ["duolingo"],
+    "packages": [
+      "1 Bulan · Premium — Rp14.000"
+    ]
+  },
+
+  "expressvpn": {
+    "name": "Express VPN",
+    "keywords": ["express vpn", "vpn"],
+    "packages": [
+      "1 Bulan · Pribadi — Rp15.000"
+    ]
+  },
+
+"jasa_digital": {
+  "name": "Jasa Digital (Custom Sesuai Budget)",
+  "keywords": [
+    "jasa desain",
+    "desain grafis",
+    "desain logo",
+    "desain banner",
+    "desain poster",
+    "desain instagram",
+    "feed instagram",
+    "story instagram",
+    "logo animasi",
+    "cv kreatif",
+    "brosur",
+    "pamflet",
+    "flyer",
+    "thumbnail youtube",
+    "desain kaos",
+    "desain hoodie",
+    "template powerpoint",
+    "desain menu",
+    "x banner",
+    "roll up banner",
+    "infografis",
+    "mockup produk",
+    "web development",
+    "buat website",
+    "jasa website",
+    "landing page",
+    "company profile",
+    "toko online",
+    "website umkm",
+    "dashboard admin",
+    "web app",
+    "website sekolah",
+    "website booking",
+    "sistem absensi",
+    "undangan digital",
+    "preset fotografi",
+    "lightroom preset",
+    "mobile preset",
+    "preset wedding",
+    "preset cinematic",
+    "editing foto"
+  ],
+  
+  "packages": [
+    "🎨 Layanan Desain Grafis: logo, banner, poster, feed & story Instagram, CV kreatif, brosur, flyer, thumbnail YouTube, desain kaos, kemasan produk, dan lainnya.",
+    "💻 Layanan Web Development: landing page, company profile, toko online, website UMKM, dashboard admin, web app interaktif, sistem absensi, undangan digital, dan lainnya.",
+    "📸 Preset & Editing Fotografi: editing foto, Lightroom preset, mobile preset, preset wedding, cinematic, moody, outdoor, indoor, dan lainnya.",
+    "💬 Semua layanan bersifat CUSTOM dan menyesuaikan kebutuhan serta budget masing-masing klien."
+  ]
+}
+
+}
