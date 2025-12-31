@@ -183,24 +183,52 @@ export default function FloatingAI() {
             exit="exit"
             className="fixed bottom-6 right-6 z-50 w-80 md:w-96 h-[480px] bg-white rounded-2xl shadow-xl flex flex-col overflow-hidden"
           >
-            {/* HEADER */}
-            <div className="bg-indigo-600 text-white px-4 py-3 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
-                  🤖
-                </div>
-                <div>
-                  <p className="font-semibold text-sm">Nusantara AI</p>
-                  <p className="text-[11px] opacity-90 flex items-center gap-1">
-                    <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                    Online • AI Assistant
-                  </p>
-                </div>
-              </div>
-              <button onClick={() => setOpen(false)}>
-                <FiX size={20} />
-              </button>
-            </div>
+{/* HEADER */}
+<div className="bg-indigo-600 text-white px-4 py-3 flex items-center justify-between">
+  <div className="flex items-center gap-3">
+    {/* Avatar */}
+    <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-lg">
+      🤖
+    </div>
+
+    {/* Info */}
+    <div className="leading-tight">
+      <div className="flex items-center gap-1">
+        <p className="font-semibold text-sm">Nusantara AI</p>
+
+        {/* Blue Check ala IG */}
+        <svg
+          className="w-4 h-4 text-blue-400"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+        >
+          <path d="M22.5 12l-2.1 2.4.3 3.2-3.1.7-1.6 2.8-3-1.2-3 1.2-1.6-2.8-3.1-.7.3-3.2L1.5 12l2.1-2.4-.3-3.2 3.1-.7L8 2.9l3 1.2 3-1.2 1.6 2.8 3.1.7-.3 3.2L22.5 12z" />
+          <path
+            d="M10.2 13.9l-1.8-1.8-.9.9 2.7 2.7 5.4-5.4-.9-.9-4.5 4.5z"
+            fill="#fff"
+          />
+        </svg>
+      </div>
+
+      <p className="text-[11px] opacity-90 flex items-center gap-2">
+        <span className="flex items-center gap-1">
+          <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+          Online
+        </span>
+        •
+        <span>v1.8</span>
+      </p>
+    </div>
+  </div>
+
+  {/* Close */}
+  <button
+    onClick={() => setOpen(false)}
+    className="hover:bg-white/20 p-1 rounded-md transition"
+  >
+    <FiX size={18} />
+  </button>
+</div>
 
             {/* CHAT AREA */}
             <div className="flex-1 p-3 overflow-y-auto bg-gray-50 space-y-2">
@@ -245,7 +273,7 @@ export default function FloatingAI() {
                   placeholder={
                     isTyping
                       ? "AI sedang menjawab..."
-                      : "Tanya AI tentang layanan, harga, atau pemesanan..."
+                      : "Mau tanya apa?"
                   }
                   className="flex-1 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-600 disabled:opacity-60"
                 />
