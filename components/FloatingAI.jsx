@@ -210,14 +210,15 @@ export default function FloatingAI() {
         </svg>
       </div>
 
-      <p className="text-[11px] opacity-90 flex items-center gap-2">
-        <span className="flex items-center gap-1">
-          <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-          Online
-        </span>
-        •
-        <span>v1.8</span>
-      </p>
+   <p className="text-[11px] opacity-90 flex items-center gap-2 leading-none">
+  <span className="inline-flex items-center gap-1">
+    <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse align-middle" />
+    <span className="leading-none">Online</span>
+  </span>
+  <span className="opacity-60">•</span>
+  <span className="leading-none">v1.8</span>
+</p>
+
     </div>
   </div>
 
@@ -299,18 +300,25 @@ export default function FloatingAI() {
                 </button>
               </div>
 
-              <div className="flex gap-2 overflow-x-auto mt-2">
-                {quickReplies.map((q, idx) => (
-                  <button
-                    key={idx}
-                    disabled={isTyping}
-                    onClick={() => sendMessage(q.question)}
-                    className="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded-full text-xs whitespace-nowrap disabled:opacity-50"
-                  >
-                    {q.question}
-                  </button>
-                ))}
-              </div>
+         {/* QUICK REPLIES */}
+<div className="relative mt-2">
+  <div className="flex gap-2 overflow-x-auto pb-1 pr-6 scrollbar-hide">
+    {quickReplies.map((q, idx) => (
+      <button
+        key={idx}
+        disabled={isTyping}
+        onClick={() => sendMessage(q.question)}
+        className="bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded-full text-xs whitespace-nowrap disabled:opacity-50"
+      >
+        {q.question}
+      </button>
+    ))}
+  </div>
+
+  {/* FADE INDICATOR KANAN */}
+  <div className="pointer-events-none absolute right-0 top-0 h-full w-6 bg-gradient-to-l from-white to-transparent" />
+</div>
+
             </div>
           </motion.div>
         )}
