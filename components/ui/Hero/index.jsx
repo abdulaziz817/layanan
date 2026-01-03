@@ -106,7 +106,7 @@ export default function Hero() {
           {/* 💬 APP */}
           {isPWA && (
             <a
-              href="https://wa.me/087860592111"
+              href="https://wa.me/6287860592111"
               target="_blank"
               rel="noopener noreferrer"
               className="px-6 py-3 border-2 border-indigo-600 text-indigo-600 rounded-md hover:bg-indigo-50 transition text-center"
