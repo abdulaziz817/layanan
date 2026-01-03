@@ -13,6 +13,9 @@ const Hero = () => {
   const [index, setIndex] = useState(0);
   const [fadeStage, setFadeStage] = useState("fadeIn");
 
+  // 👉 STATE UNTUK PWA INSTALL
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+
   useEffect(() => {
     const interval = setInterval(() => {
       setFadeStage("fadeOut");
@@ -27,6 +30,24 @@ const Hero = () => {
 
     return () => clearInterval(interval);
   }, [services.length]);
+
+  // 👉 LISTEN EVENT INSTALL PWA
+  useEffect(() => {
+    const handler = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  const installApp = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    setDeferredPrompt(null);
+  };
 
   const fadeClass =
     fadeStage === "fadeIn"
@@ -43,19 +64,18 @@ const Hero = () => {
         <div className="relative h-16 sm:h-20 overflow-hidden mb-6">
           <h2
             className={`absolute inset-0 flex items-center justify-center text-center text-2xl sm:text-4xl font-semibold text-indigo-600 transition-all duration-700 ease-in-out transform ${fadeClass}`}
-            style={{ wordBreak: "break-word", paddingLeft: "1rem", paddingRight: "1rem" }}
           >
             {services[index]}
           </h2>
         </div>
 
-        <p className="text-base sm:text-lg text-gray-600 max-w-xl mx-auto mb-10 px-4 sm:px-0">
+        <p className="text-base sm:text-lg text-gray-600 max-w-xl mx-auto mb-10">
           Kami menyediakan layanan berkualitas tinggi untuk kebutuhan teknologi dan kreativitas Anda.
         </p>
 
-        <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-8 px-4 sm:px-0">
+        <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-8">
 
-          {/* FIX di sini */}
+          {/* Pesan Layanan */}
           <Link
             href="/order"
             className="px-6 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition text-center"
@@ -63,14 +83,15 @@ const Hero = () => {
             Pesan Layanan
           </Link>
 
-          <a
-            href="https://wa.me/6287860592111"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-6 py-3 border-2 border-indigo-600 text-indigo-600 rounded-md hover:bg-indigo-50 transition text-center"
-          >
-            Chat Sekarang
-          </a>
+          {/* 🔥 UNDUNH APLIKASI */}
+          {deferredPrompt && (
+            <button
+              onClick={installApp}
+              className="px-6 py-3 border-2 border-indigo-600 text-indigo-600 rounded-md hover:bg-indigo-50 transition text-center"
+            >
+              Unduh Aplikasi
+            </button>
+          )}
         </div>
       </div>
     </section>
