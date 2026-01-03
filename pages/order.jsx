@@ -469,7 +469,7 @@ export default function OrderForm() {
 
   // ❄ Efek salju akhir tahun
   const isSnowEvent =
-    (month === 12 && day >= 24) || (month === 1 && day <= 5);
+    (month === 12 && day >= 24) || (month === 1 && day <= 2);
 
 
 
