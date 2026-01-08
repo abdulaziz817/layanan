@@ -37,7 +37,7 @@ export function claimDailyCoin() {
   return coin;
 }
 
-// ------------------- REDEEM REWARD -------------------
+// ------------------- HELPER -------------------
 function simpleHash(str) {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -47,6 +47,7 @@ function simpleHash(str) {
   return Math.abs(hash).toString(16).toUpperCase();
 }
 
+// ------------------- REDEEM REWARD -------------------
 export function redeemReward(cost, rewardName) {
   if (!isBrowser) return null;
 
@@ -66,7 +67,7 @@ export function redeemReward(cost, rewardName) {
     date,
     code,
     deviceId,
-    signature
+    signature,
   };
 
   // Simpan semua redeem ke localStorage
@@ -82,12 +83,20 @@ export async function generateRedeemPDF(redeemData) {
   if (!isBrowser || !redeemData) return;
 
   const { rewardName, cost, date, code, deviceId, signature } = redeemData;
-  const verifyURL = `https://layanannusantara.store/reward/verify?code=${code}&sig=${signature}&data=${btoa(JSON.stringify(redeemData))}`;
-  const qr = await QRCode.toDataURL(verifyURL);
+
+  // Gunakan URL pendek untuk QR
+  const verifyURL = `https://layanannusantara.store/reward/verify?code=${code}`;
+
+  // QR besar & tebal
+  const qr = await QRCode.toDataURL(verifyURL, {
+    errorCorrectionLevel: "H",
+    margin: 2,
+    scale: 8,
+  });
 
   const doc = new jsPDF();
 
-  // Watermark tipis supaya sulit dicopy
+  // Watermark tipis
   doc.setTextColor(230);
   doc.setFontSize(40);
   doc.text("LAYANAN NUSANTARA", 35, 140, { angle: 45 });
@@ -106,10 +115,11 @@ export async function generateRedeemPDF(redeemData) {
   doc.setFontSize(10);
   doc.text(`Signature: ${signature}`, 20, 90);
 
-  // QR Code
-  doc.addImage(qr, "PNG", 140, 55, 40, 40);
-  doc.setFontSize(9);
-  doc.text("Scan untuk verifikasi voucher", 140, 100);
+  // QR Code lebih besar
+  doc.addImage(qr, "PNG", 120, 50, 100, 100);
+  doc.setFontSize(10);
+  doc.text("Scan untuk verifikasi voucher", 120, 160);
 
+  // Simpan PDF
   doc.save(`${rewardName}_voucher.pdf`);
 }
