@@ -4,7 +4,7 @@ import QRCode from "qrcode";
 
 const isBrowser = typeof window !== "undefined";
 
-// Coin
+// ====== Coin ======
 export function getCoin() {
   if (!isBrowser) return 0;
   return Number(localStorage.getItem("reward_coin") || 0);
@@ -15,7 +15,7 @@ export function setCoin(value) {
   localStorage.setItem("reward_coin", value);
 }
 
-// Reward harian
+// ====== Reward harian ======
 export function canClaimToday() {
   if (!isBrowser) return false;
   const last = localStorage.getItem("reward_last_claim");
@@ -37,7 +37,7 @@ export function claimDailyCoin() {
   return coin;
 }
 
-// Redeem reward
+// ====== Redeem reward ======
 export function redeemReward(cost, rewardName) {
   if (!isBrowser) return false;
   const current = getCoin();
@@ -47,7 +47,7 @@ export function redeemReward(cost, rewardName) {
   return true;
 }
 
-// PDF voucher
+// ====== PDF Voucher ======
 function generateCode() {
   return `LN-REWARD-${Math.random().toString(36).slice(2, 8).toUpperCase()}-${Date.now()}`;
 }
@@ -68,15 +68,20 @@ export async function generateRedeemPDF(rewardName, cost) {
   const code = generateCode();
   const date = new Date().toLocaleString("id-ID");
 
-  // Signature unik untuk mencegah palsu
-  const signature = simpleHash(`${rewardName}${cost}${deviceId}${code}`);
+  // ===== Encode data redeem =====
+  const rewardData = { rewardName, cost, date };
+  const dataStr = btoa(JSON.stringify(rewardData));
 
-  // Gunakan domain store dan sertakan signature di URL verify
-  const verifyURL = `https://layanannusantara.store/reward/verify?code=${code}&sig=${signature}`;
+  // Signature unik untuk mencegah palsu
+  const signature = simpleHash(`${rewardName}|${cost}|${date}|${deviceId}|${code}`);
+
+  // URL QR Code untuk verifikasi
+  const verifyURL = `https://layanannusantara.store/reward/verify?code=${code}&sig=${signature}&data=${dataStr}`;
 
   // Generate QR Code
   const qr = await QRCode.toDataURL(verifyURL);
 
+  // ===== Buat PDF =====
   const doc = new jsPDF();
 
   // Watermark tipis supaya sulit dicopy
