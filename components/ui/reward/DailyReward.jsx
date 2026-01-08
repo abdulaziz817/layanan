@@ -12,24 +12,24 @@ export default function DailyReward({ onClaim }) {
 
   const handleClaim = () => {
     if (claimed) {
-      alert("Kamu sudah klaim hari ini 👀");
+      alert("Kamu sudah Ambil Coin hari ini 👀");
       return;
     }
     const c = claimDailyCoin();
     if (c) {
       setCoinState(getCoin());
       setClaimed(true);
-      alert(`🔥 Kamu dapat ${c} coin hari ini!`);
+      alert(`🔥 Kamu dapat ${c} Coin hari ini!`);
       onClaim && onClaim(getCoin());
     }
   };
 
   return (
-    <div className="bg-white shadow-md rounded-xl p-6 text-center">
-      <h2 className="text-xl font-bold mb-2">🎁 Daily Reward</h2>
-      <p className="text-gray-500 mb-4">
-        Coinmu: <span className="font-bold">{coin}</span>
-      </p>
+   <div className="bg-white shadow-md rounded-xl p-6 text-center">
+  <h2 className="text-xl font-bold mb-2">Ambil Hadiah Harianmu!</h2>
+  <p className="text-gray-500 mb-4">
+    Kamu punya <span className="font-bold">{coin}</span> Coin
+  </p>
       <button
         onClick={handleClaim}
         className={`px-6 py-3 rounded-xl text-white font-semibold transition ${
