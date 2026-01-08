@@ -37,7 +37,7 @@ export function claimDailyCoin() {
   return coin;
 }
 
-// ------------------- HELPER -------------------
+// ------------------- REDEEM REWARD -------------------
 function simpleHash(str) {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -47,7 +47,6 @@ function simpleHash(str) {
   return Math.abs(hash).toString(16).toUpperCase();
 }
 
-// ------------------- REDEEM REWARD -------------------
 export function redeemReward(cost, rewardName) {
   if (!isBrowser) return null;
 
@@ -67,7 +66,7 @@ export function redeemReward(cost, rewardName) {
     date,
     code,
     deviceId,
-    signature,
+    signature
   };
 
   // Simpan semua redeem ke localStorage
@@ -83,14 +82,8 @@ export async function generateRedeemPDF(redeemData) {
   if (!isBrowser || !redeemData) return;
 
   const { rewardName, cost, date, code, deviceId, signature } = redeemData;
-
-  // QR encode hanya "code + signature" → pendek, mudah scan
-  const qrData = `${code}|${signature}`;
-  const qr = await QRCode.toDataURL(qrData, {
-    errorCorrectionLevel: "H",
-    margin: 2,
-    scale: 6, // QR cukup besar tapi QR data kecil
-  });
+  const verifyURL = `https://layanannusantara.store/reward/verify?code=${code}&sig=${signature}&data=${btoa(JSON.stringify(redeemData))}`;
+  const qr = await QRCode.toDataURL(verifyURL);
 
   const doc = new jsPDF();
 
@@ -99,7 +92,7 @@ export async function generateRedeemPDF(redeemData) {
   doc.setFontSize(40);
   doc.text("LAYANAN NUSANTARA", 35, 140, { angle: 45 });
 
-  // Konten utama PDF
+  // Konten utama
   doc.setTextColor(0);
   doc.setFontSize(18);
   doc.text("🎁 VOUCHER REWARD RESMI", 20, 20);
@@ -113,10 +106,10 @@ export async function generateRedeemPDF(redeemData) {
   doc.setFontSize(10);
   doc.text(`Signature: ${signature}`, 20, 90);
 
-  // QR Code di pojok kanan bawah
-  doc.addImage(qr, "PNG", 140, 50, 50, 50); // ukuran QR cukup besar, tidak menutupi halaman
-  doc.setFontSize(10);
-  doc.text("Scan untuk verifikasi voucher", 140, 105);
+  // QR Code yang lebih kecil dan tidak mepet tepi
+  doc.addImage(qr, "PNG", 150, 55, 40, 40); // <-- 40x40 mm, posisi agak ke tengah halaman
+  doc.setFontSize(9);
+  doc.text("Scan untuk verifikasi voucher", 150, 100);
 
   doc.save(`${rewardName}_voucher.pdf`);
 }
