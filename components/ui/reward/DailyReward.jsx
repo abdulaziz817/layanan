@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { claimDailyCoin, canClaimToday, getCoin } from "../../../utils/reward";
 
+
 export default function DailyReward({ onClaim }) {
   const [coin, setCoinState] = useState(0);
   const [claimed, setClaimed] = useState(false);

@@ -1,4 +1,4 @@
-import PwaOnly from '@/components/guards/PwaOnly'
+import PwaOnly from '../components/guards/PwaOnly'
 import DailyReward from '../components/ui/reward/DailyReward'
 import RedeemList from '../components/ui/reward/RedeemList'
 
