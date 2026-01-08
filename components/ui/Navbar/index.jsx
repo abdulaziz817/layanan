@@ -13,6 +13,7 @@ export default function Navbar() {
     { title: "Tentang", path: "/#cta" },
     { title: "Software", path: "/#toolkit" },
     { title: "Testimoni", path: "/#testimonials" },
+     { title: "Blog", path: "/blog" }
   ]
 
   const scrollToAnchor = (id) => {

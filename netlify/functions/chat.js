@@ -55,7 +55,7 @@ exports.handler = async (event) => {
       };
     }
 
-    // ====== AMBIL PESAN USER TERAKHIR ======
+    // ====== AMBIL PESAN USER TERAKHIR DARI HISTORY ======
     const lastUser = [...history]
       .reverse()
       .find((h) => h.role === "user")?.content;
@@ -64,7 +64,7 @@ exports.handler = async (event) => {
       normalize(message).includes(w)
     );
 
-    // ====== GABUNG KONTEKS ======
+    // ====== GABUNG KONTEKS CHAT ======
     const combinedMessage =
       (isFollowUp ||
         ["berapa", "itu", "emangnya"].some((w) =>
@@ -75,6 +75,13 @@ exports.handler = async (event) => {
 
     // ====== CEK PRODUK ======
     const product = detectProduct(combinedMessage);
+
+    // ====== CEK APAKAH SEBELUMNYA SUDAH MEMBAHAS PROFIL AZIZ ======
+    const talkedAboutAzizBefore = [...history].some(
+      (h) =>
+        h.role === "assistant" &&
+        normalize(h.content).includes("abdul aziz")
+    );
 
     const systemPrompt = `
 Kamu adalah Nusantara AI 🤖
@@ -90,6 +97,59 @@ ATURAN WAJIB:
 `;
 
     let userPrompt = message;
+
+    // ====== LOGIKA PROFIL SESUAI ALUR YANG LU MINTA ======
+    if (
+      normalize(message).includes("aziz") ||
+      normalize(message).includes("abdul") ||
+      normalize(message).includes("pembuat") ||
+      normalize(message).includes("owner")
+    ) {
+
+      // Jika user SUDAH nanya lagi tentang Aziz → pakai SUMBER LEBIH LENGKAP
+      if (talkedAboutAzizBefore) {
+        const res = await fetch("https://abdulaziznusantara.netlify.app/");
+        const html = await res.text();
+
+        const clean = html
+          .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+          .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+          .replace(/<[^>]+>/g, " ")
+          .replace(/\s+/g, " ");
+
+        userPrompt = `
+User ingin mengetahui informasi LEBIH LENGKAP tentang Abdul Aziz.
+
+Data sumber:
+
+${clean}
+
+Pertanyaan user:
+${message}
+`;
+      }
+
+      // Jika baru pertanyaan awal SEKILAS tentang Aziz → pakai sumber ringkas
+      else {
+        const res = await fetch("https://layanannusantara.store/");
+        const html = await res.text();
+
+        const clean = html
+          .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
+          .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+          .replace(/<[^>]+>/g, " ")
+          .replace(/\s+/g, " ");
+
+        userPrompt = `
+Gunakan informasi RINGKAS berikut untuk menjawab tentang Abdul Aziz:
+
+${clean}
+
+Pertanyaan user:
+${message}
+`;
+      }
+    }
 
     // ====== JIKA PRODUK TERDETEKSI ======
     if (product) {
@@ -120,7 +180,7 @@ ${message}
 `;
     }
 
-    // ====== JIKA NANYA UMUM TENTANG LAYANAN ======
+    // ====== JIKA NANYA UMUM TENTANG LAYANAN NUSANTARA ======
     if (
       message.toLowerCase().includes("layanan nusantara") &&
       !product
@@ -143,6 +203,7 @@ ${message}
 `;
     }
 
+    // ====== KIRIM KE GROQ API ======
     const groqRes = await fetch(
       "https://api.groq.com/openai/v1/chat/completions",
       {
