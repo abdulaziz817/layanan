@@ -3,43 +3,43 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { isPWA } from '@/utils/isPWA'
 
 export default function Navbar() {
   const router = useRouter()
   const [menuOpen, setMenuOpen] = useState(false)
   const [pendingAnchor, setPendingAnchor] = useState(null)
-  const [isApp, setIsApp] = useState(false)
+  const [pwa, setPwa] = useState(false)
 
-  // 🔒 DETEKSI APLIKASI (PWA / Standalone)
   useEffect(() => {
-    const standalone =
-      window.matchMedia('(display-mode: standalone)').matches ||
-      window.navigator.standalone === true
-
-    setIsApp(standalone)
+    setPwa(isPWA())
   }, [])
 
   const navigation = [
-    { title: "Tentang", path: "/#cta" },
-    { title: "Software", path: "/#toolkit" },
-    { title: "Testimoni", path: "/#testimonials" },
+    { title: 'Tentang', path: '/#cta' },
+    { title: 'Software', path: '/#toolkit' },
+    { title: 'Testimoni', path: '/#testimonials' },
 
-    // 🔥 BLOG & REWARD HANYA DI APLIKASI
-    ...(isApp
+    // ⛔ Blog & Reward hanya muncul kalau PWA
+    ...(pwa
       ? [
-          { title: "Blog", path: "/blog" },
-          { title: "Reward", path: "/reward" },
+          { title: 'Blog', path: '/blog' },
+          { title: 'Reward', path: '/reward' },
         ]
       : []),
   ]
 
   const scrollToAnchor = (id) => {
     const element = document.getElementById(id)
-    if (element) {
-      const yOffset = -80
-      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset
-      window.scrollTo({ top: y, behavior: 'smooth' })
-    }
+    if (!element) return
+
+    const yOffset = -80
+    const y =
+      element.getBoundingClientRect().top +
+      window.pageYOffset +
+      yOffset
+
+    window.scrollTo({ top: y, behavior: 'smooth' })
   }
 
   const handleNavClick = (path) => {
@@ -47,6 +47,7 @@ export default function Navbar() {
 
     if (path.startsWith('/#')) {
       const id = path.replace('/#', '')
+
       if (window.location.pathname === '/') {
         scrollToAnchor(id)
       } else {
@@ -56,8 +57,9 @@ export default function Navbar() {
       return
     }
 
-    if (window.location.pathname === path) return
-    router.push(path)
+    if (window.location.pathname !== path) {
+      router.push(path)
+    }
   }
 
   useEffect(() => {
@@ -74,13 +76,13 @@ export default function Navbar() {
           Layanan Nusantara
         </h1>
 
-        {/* DESKTOP NAV */}
-        <nav className="hidden md:flex space-x-4 items-center">
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center space-x-4">
           {navigation.map((item, idx) => (
             <button
               key={idx}
               onClick={() => handleNavClick(item.path)}
-              className="text-gray-700 hover:text-blue-600 transition-colors duration-300 px-3 py-2 rounded-md cursor-pointer select-none"
+              className="px-3 py-2 rounded-md text-gray-700 hover:text-blue-600 transition-colors duration-300 select-none"
             >
               {item.title}
             </button>
@@ -94,41 +96,75 @@ export default function Navbar() {
           </Link>
         </nav>
 
-        {/* MOBILE BUTTON */}
+        {/* Mobile Toggle */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className={`md:hidden p-3 rounded-md text-gray-700 transition-transform duration-300 ${
-            menuOpen ? 'rotate-90' : ''
+          aria-label="Toggle menu"
+          className={`md:hidden p-3 rounded-md text-gray-700 hover:text-black transition-transform duration-300 ${
+            menuOpen ? 'rotate-90' : 'rotate-0'
           }`}
         >
-          ☰
+          <svg
+            className="w-7 h-7"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            strokeWidth="2"
+          >
+            <path
+              d="M4 6h16M4 12h16M4 18h16"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </button>
       </div>
 
-      {/* MOBILE MENU */}
+      {/* Mobile Overlay */}
       <div
-        className={`fixed inset-0 z-40 md:hidden ${
+        className={`fixed inset-0 z-40 md:hidden flex justify-end transition ${
           menuOpen ? 'pointer-events-auto' : 'pointer-events-none'
         }`}
       >
         <div
-          className={`absolute inset-0 bg-black/40 transition-opacity ${
+          className={`absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${
             menuOpen ? 'opacity-100' : 'opacity-0'
           }`}
           onClick={() => setMenuOpen(false)}
         />
 
+        {/* Mobile Sidebar */}
         <aside
-          className={`absolute right-0 top-0 h-full w-72 bg-white px-6 py-8 space-y-6 shadow-2xl transform transition-transform duration-500 ${
+          className={`relative min-w-[260px] bg-white rounded-l-xl shadow-2xl px-6 py-8 space-y-6 transform transition-transform duration-500 ${
             menuOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
         >
-          <nav className="flex flex-col space-y-5 text-gray-700 font-medium mt-6">
+          <button
+            onClick={() => setMenuOpen(false)}
+            aria-label="Close menu"
+            className="absolute top-4 right-4 text-gray-500 hover:text-black transition"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              strokeWidth="2"
+            >
+              <path
+                d="M6 18L18 6M6 6l12 12"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+
+          <nav className="flex flex-col space-y-5 mt-6 font-medium text-gray-700">
             {navigation.map((item, idx) => (
               <button
                 key={idx}
                 onClick={() => handleNavClick(item.path)}
-                className="text-left hover:text-blue-600 transition"
+                className="text-left hover:text-blue-600 transition select-none"
               >
                 {item.title}
               </button>
@@ -138,12 +174,19 @@ export default function Navbar() {
           <Link
             href="/order"
             onClick={() => setMenuOpen(false)}
-            className="block text-center bg-gray-800 text-white px-5 py-3 rounded-lg hover:bg-gray-700 transition"
+            className="block text-center bg-gray-800 text-white px-5 py-3 rounded-lg shadow hover:bg-gray-700 hover:scale-105 transition-transform"
           >
             Pesan Sekarang
           </Link>
         </aside>
       </div>
+
+      {/* Offset anchor */}
+      <style jsx global>{`
+        [id] {
+          scroll-margin-top: 80px;
+        }
+      `}</style>
     </header>
   )
 }
