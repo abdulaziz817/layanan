@@ -1,6 +1,10 @@
 'use client'
-import { motion } from "framer-motion"
+
+import { motion, AnimatePresence } from 'framer-motion'
 import { useState } from 'react'
+
+
+
 
 /* =========================
    DATA
@@ -985,15 +989,16 @@ export default function BlogUI() {
   return (
     <main className="min-h-screen bg-gray-50">
       {/* ================= HERO ================= */}
-      <section className="px-6 pt-20 pb-16 text-center">
-        <h1 className="text-4xl md:text-5xl font-semibold mb-4">
-          Blog & Insight
-        </h1>
-        <p className="max-w-2xl mx-auto text-gray-600 text-lg">
-          Catatan pemikiran, pengalaman, dan insight seputar desain, teknologi,
-          AI, dan bisnis digital.
-        </p>
-      </section>
+<section className="px-6 pt-28 pb-16 text-center">
+  <div className="text-center mb-14">
+    <h1 className="text-4xl font-bold text-gray-800">
+      Blog & Tips
+    </h1>
+    <p className="text-lg text-gray-600 mt-4 max-w-xl mx-auto">
+    Informasi dan pengalaman seru seputar desain grafis, web development, teknologi AI, dan manajemen bisnis.
+    </p>
+  </div>
+</section>
 
       {/* ================= CATEGORY ================= */}
       <section className="px-6 pb-10">
@@ -1024,9 +1029,7 @@ export default function BlogUI() {
         <h2 className="text-3xl font-bold tracking-tight">
           Artikel Terbaru
         </h2>
-        <p className="text-gray-500 text-sm mt-1">
-          Insight seputar desain, web, AI, dan bisnis
-        </p>
+       
       </div>
 
       {/* Search */}
@@ -1102,70 +1105,85 @@ export default function BlogUI() {
             {post.excerpt}
           </p>
 
-          {/* Footer */}
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-400">{post.date}</span>
-            <button
-              onClick={() => setSelectedArticle(post)}
-              className="font-medium text-black
-              flex items-center gap-1
-              group-hover:gap-2 transition-all"
-            >
-              Baca
-              <span className="transition">→</span>
-            </button>
-          </div>
+       {/* Footer */}
+<div className="flex items-center justify-between text-sm">
+  <span className="text-indigo-600">{post.date}</span>
+
+  <button
+    onClick={() => setSelectedArticle(post)}
+    className="font-medium text-black flex items-center gap-1
+               group-hover:gap-2 transition-all duration-200"
+  >
+    Baca
+    <motion.span
+      className="ml-1"
+      whileHover={{ x: 5 }}
+      transition={{ type: "tween", duration: 0.2 }}
+    >
+      →
+    </motion.span>
+  </button>
+</div>
         </article>
       ))}
     </div>
   </div>
 </section>
 
-      {/* ================= MODAL ================= */}
-      {selectedArticle && (
-        <div
-          onClick={() => setSelectedArticle(null)}
-          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-4"
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white max-w-2xl w-full rounded-3xl p-8 relative
-            max-h-[85vh] overflow-y-auto shadow-2xl"
-          >
-            {/* Close */}
-            <button
-              onClick={() => setSelectedArticle(null)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-black text-lg"
-            >
-              ✕
-            </button>
+     {/* ================= MODAL ================= */}
+      <AnimatePresence>
+        {selectedArticle && (
+        <motion.div
+  onClick={() => setSelectedArticle(null)}
+  className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-4"
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  exit={{ opacity: 0 }}
+  transition={{ duration: 0.25, ease: 'easeOut' }}
+>
+  <motion.div
+    onClick={(e) => e.stopPropagation()}
+    className="bg-white max-w-2xl w-full rounded-3xl p-8 relative max-h-[85vh] overflow-y-auto shadow-2xl"
+    initial={{ opacity: 0, scale: 0.96, y: 20 }}
+    animate={{ opacity: 1, scale: 1, y: 0 }}
+    exit={{ opacity: 0, scale: 0.94, y: 20 }} // scale + fade out smooth
+    transition={{ type: 'spring', stiffness: 500, damping: 35 }} // spring smooth ala MacBook
+  >
+    {/* Close */}
+    <motion.button
+      onClick={(e) => {
+        e.stopPropagation()
+        setSelectedArticle(null) // langsung trigger exit, animasi spring akan jalan
+      }}
+      className="absolute top-4 right-4 rounded-full p-2 text-gray-400 hover:text-black"
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.92 }}
+      aria-label="Close"
+    >
+      ✕
+    </motion.button>
 
-            {/* Category */}
-            <span
-              className="inline-block mb-4 text-xs font-medium
-              px-3 py-1 rounded-full bg-black/5 text-black"
-            >
-              {selectedArticle.category}
-            </span>
 
-            {/* Title */}
-            <h2 className="text-2xl font-semibold mb-2 leading-snug">
-              {selectedArticle.title}
-            </h2>
+              {/* Category */}
+              <span className="inline-block mb-4 text-xs font-medium px-3 py-1 rounded-full bg-black/5 text-black">
+                {selectedArticle.category}
+              </span>
 
-            {/* Date */}
-            <p className="text-sm text-gray-400 mb-6">
-              {selectedArticle.date}
-            </p>
+              {/* Title */}
+              <h2 className="text-2xl font-semibold mb-2 leading-snug">
+                {selectedArticle.title}
+              </h2>
 
-            {/* Content */}
-            <div className="text-gray-700 leading-relaxed whitespace-pre-line mb-10">
-              {selectedArticle.content}
-            </div>
+              {/* Date */}
+              <p className="text-sm text-gray-400 mb-6">{selectedArticle.date}</p>
 
-            {/* Reference */}
-            {selectedArticle.reference &&
-              selectedArticle.reference.length > 0 && (
+              {/* Content */}
+              <div className="text-gray-700 leading-relaxed whitespace-pre-line mb-10">
+                {selectedArticle.content}
+              </div>
+
+              {/* Reference */}
+              {selectedArticle.reference && selectedArticle.reference.length > 0 && (
                 <div className="border-t pt-6">
                   <h4 className="text-sm font-semibold mb-3 text-gray-800">
                     Referensi
@@ -1178,22 +1196,20 @@ export default function BlogUI() {
                           href={ref}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-sm text-gray-600 hover:text-black
-                          flex items-center gap-2 transition"
+                          className="text-sm text-gray-600 hover:text-black flex items-center gap-2 transition"
                         >
                           <span className="text-gray-400">↗</span>
-                          <span className="truncate">
-                            {new URL(ref).hostname.replace('www.', '')}
-                          </span>
+                          <span className="truncate">{new URL(ref).hostname.replace('www.', '')}</span>
                         </a>
                       </li>
                     ))}
                   </ul>
                 </div>
               )}
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   )
 }
