@@ -1,28 +1,26 @@
-// pages/reward/verify.jsx
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
 export default function RewardVerify() {
   const router = useRouter();
-  const { code, sig, data } = router.query; // ambil query params dari QR Code
+  const { code, sig, data } = router.query;
   const [valid, setValid] = useState(false);
   const [rewardData, setRewardData] = useState(null);
 
   useEffect(() => {
     if (!code || !sig || !data) return;
 
-    // ===== Validasi signature =====
-    const expectedSigPattern = /^[0-9A-F]+$/;
-    if (!expectedSigPattern.test(sig)) {
-      setValid(false);
-      return;
-    }
-
-    // ===== Decode data redeem =====
     try {
       const decoded = JSON.parse(atob(data));
       setRewardData(decoded);
-      setValid(true);
+
+      // Cek signature asli
+      const expectedSig = decoded.signature;
+      if (sig === expectedSig) {
+        setValid(true);
+      } else {
+        setValid(false);
+      }
     } catch (err) {
       setRewardData(null);
       setValid(false);
@@ -53,6 +51,9 @@ export default function RewardVerify() {
             </p>
             <p>
               <span className="font-semibold">Tanggal Redeem:</span> {rewardData.date}
+            </p>
+            <p>
+              <span className="font-semibold">Device ID:</span> {rewardData.deviceId}
             </p>
             <p className="text-green-600 font-bold mt-4 text-center text-lg">
               ✔ Voucher valid!

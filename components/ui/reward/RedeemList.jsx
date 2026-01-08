@@ -16,13 +16,16 @@ export default function RedeemList() {
   }, []);
 
   const handleRedeem = async (reward) => {
-    if (!redeemReward(reward.cost, reward.name)) {
+    // Lakukan redeem dan dapatkan redeemData asli
+    const redeemData = redeemReward(reward.cost, reward.name);
+
+    if (!redeemData) {
       alert("Coinmu tidak cukup 😢");
       return;
     }
 
-    // Generate PDF (async karena QR Code)
-    await generateRedeemPDF(reward.name, reward.cost);
+    // Generate PDF berdasarkan redeemData (bukan cuma reward & cost)
+    await generateRedeemPDF(redeemData);
 
     alert(`🎉 Redeem berhasil! PDF ter-download, silahkan kirim ke admin via WA`);
 
@@ -46,7 +49,7 @@ export default function RedeemList() {
         {REWARDS.map((r) => (
           <div
             key={r.name}
-            className="border p-4 rounded-lg flex justify-between items-center"
+            className="border p-4 rounded-lg flex justify-between items-center hover:shadow-lg transition"
           >
             <div>
               <h3 className="font-semibold">{r.name}</h3>
