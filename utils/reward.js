@@ -84,14 +84,12 @@ export async function generateRedeemPDF(redeemData) {
 
   const { rewardName, cost, date, code, deviceId, signature } = redeemData;
 
-  // Gunakan URL pendek untuk QR
-  const verifyURL = `https://layanannusantara.store/reward/verify?code=${code}`;
-
-  // QR besar & tebal
-  const qr = await QRCode.toDataURL(verifyURL, {
+  // QR encode hanya "code + signature" → pendek, mudah scan
+  const qrData = `${code}|${signature}`;
+  const qr = await QRCode.toDataURL(qrData, {
     errorCorrectionLevel: "H",
     margin: 2,
-    scale: 8,
+    scale: 6, // QR cukup besar tapi QR data kecil
   });
 
   const doc = new jsPDF();
@@ -115,11 +113,10 @@ export async function generateRedeemPDF(redeemData) {
   doc.setFontSize(10);
   doc.text(`Signature: ${signature}`, 20, 90);
 
-  // QR Code lebih besar
-  doc.addImage(qr, "PNG", 120, 50, 100, 100);
+  // QR Code di pojok kanan bawah
+  doc.addImage(qr, "PNG", 140, 50, 50, 50); // ukuran QR cukup besar, tidak menutupi halaman
   doc.setFontSize(10);
-  doc.text("Scan untuk verifikasi voucher", 120, 160);
+  doc.text("Scan untuk verifikasi voucher", 140, 105);
 
-  // Simpan PDF
   doc.save(`${rewardName}_voucher.pdf`);
 }
