@@ -1,5 +1,5 @@
 'use client'
-
+import { motion } from "framer-motion"
 import { useState } from 'react'
 
 /* =========================
@@ -1047,16 +1047,33 @@ export default function BlogUI() {
     </div>
 
     {/* Empty State */}
-    {filteredArticles.length === 0 && (
-      <div className="text-center py-20">
-        <p className="text-gray-500 text-sm">
-          😕 Artikel tidak ditemukan.
-        </p>
-        <p className="text-xs text-gray-400 mt-1">
-          Coba kata kunci lain ya
-        </p>
-      </div>
-    )}
+{filteredArticles.length === 0 && (
+  <div className="flex flex-col items-center justify-center py-28 text-center">
+    <motion.div
+      className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gray-100"
+      animate={{ y: [0, -10, 0] }}
+      transition={{
+        duration: 1.5,
+        repeat: Infinity,
+        ease: "easeInOut",
+      }}
+    >
+      <span className="text-3xl">🔍</span>
+    </motion.div>
+
+    <h2 className="text-2xl font-bold text-gray-800">
+      Artikel Tidak Ditemukan
+    </h2>
+
+    <p className="mt-3 max-w-md text-base text-gray-500">
+      Hasil pencarian tidak menampilkan artikel apa pun.
+    </p>
+
+    <p className="mt-1 text-sm text-gray-400">
+      Coba ganti keyword atau eksplor topik lainnya.
+    </p>
+  </div>
+)}
 
     {/* Articles */}
     <div className="grid gap-8 sm:grid-cols-2">
