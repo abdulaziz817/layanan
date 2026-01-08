@@ -1106,24 +1106,25 @@ export default function BlogUI() {
           </p>
 
        {/* Footer */}
-<div className="flex items-center justify-between text-sm">
-  <span className="text-indigo-600">{post.date}</span>
+  {/* Footer */}
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-indigo-600">{post.date}</span>
 
-  <button
-    onClick={() => setSelectedArticle(post)}
-    className="font-medium text-black flex items-center gap-1
-               group-hover:gap-2 transition-all duration-200"
-  >
-    Baca
-    <motion.span
-      className="ml-1"
-      whileHover={{ x: 5 }}
-      transition={{ type: "tween", duration: 0.2 }}
-    >
-      →
-    </motion.span>
-  </button>
-</div>
+            <button
+              onClick={() => setSelectedArticle(post)}
+              className="font-medium text-black flex items-center gap-1
+                         group-hover:gap-2 transition-all duration-200"
+            >
+              Baca
+              <motion.span
+                className="ml-1"
+                whileHover={{ x: 5 }}
+                transition={{ type: "tween", duration: 0.2 }}
+              >
+                →
+              </motion.span>
+            </button>
+          </div>
         </article>
       ))}
     </div>

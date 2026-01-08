@@ -13,7 +13,8 @@ export default function Navbar() {
     { title: "Tentang", path: "/#cta" },
     { title: "Software", path: "/#toolkit" },
     { title: "Testimoni", path: "/#testimonials" },
-     { title: "Blog", path: "/blog" }
+    { title: "Blog", path: "/blog" },
+    { title: "Reward", path: "/reward" } // <-- Tambahan link ke reward
   ]
 
   const scrollToAnchor = (id) => {
