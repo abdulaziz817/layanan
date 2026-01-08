@@ -10,22 +10,21 @@ export default function Navbar() {
   const [pendingAnchor, setPendingAnchor] = useState(null)
   const [isApp, setIsApp] = useState(false)
 
-  // 🔥 Detect APP (PWA / Standalone)
+  // 🔒 DETEKSI APLIKASI (PWA / Standalone)
   useEffect(() => {
-    const isStandalone =
+    const standalone =
       window.matchMedia('(display-mode: standalone)').matches ||
       window.navigator.standalone === true
 
-    setIsApp(isStandalone)
+    setIsApp(standalone)
   }, [])
 
-  // 🔥 Navigation
   const navigation = [
     { title: "Tentang", path: "/#cta" },
     { title: "Software", path: "/#toolkit" },
     { title: "Testimoni", path: "/#testimonials" },
 
-    // 👉 HANYA MUNCUL DI APLIKASI
+    // 🔥 BLOG & REWARD HANYA DI APLIKASI
     ...(isApp
       ? [
           { title: "Blog", path: "/blog" },
@@ -38,10 +37,7 @@ export default function Navbar() {
     const element = document.getElementById(id)
     if (element) {
       const yOffset = -80
-      const y =
-        element.getBoundingClientRect().top +
-        window.pageYOffset +
-        yOffset
+      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset
       window.scrollTo({ top: y, behavior: 'smooth' })
     }
   }
@@ -78,13 +74,13 @@ export default function Navbar() {
           Layanan Nusantara
         </h1>
 
-        {/* Desktop Nav */}
+        {/* DESKTOP NAV */}
         <nav className="hidden md:flex space-x-4 items-center">
           {navigation.map((item, idx) => (
             <button
               key={idx}
               onClick={() => handleNavClick(item.path)}
-              className="text-gray-700 hover:text-blue-600 transition px-3 py-2 rounded-md"
+              className="text-gray-700 hover:text-blue-600 transition-colors duration-300 px-3 py-2 rounded-md cursor-pointer select-none"
             >
               {item.title}
             </button>
@@ -92,39 +88,47 @@ export default function Navbar() {
 
           <Link
             href="/order"
-            className="bg-gray-800 text-white px-5 py-2 rounded-md hover:bg-gray-700 transition"
+            className="bg-gray-800 text-white px-5 py-2 rounded-md hover:bg-gray-700 transition duration-300"
           >
             Pesan Sekarang
           </Link>
         </nav>
 
-        {/* Mobile menu button */}
+        {/* MOBILE BUTTON */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="md:hidden p-3 rounded-md text-gray-700"
+          className={`md:hidden p-3 rounded-md text-gray-700 transition-transform duration-300 ${
+            menuOpen ? 'rotate-90' : ''
+          }`}
         >
           ☰
         </button>
       </div>
 
-      {/* Mobile Menu */}
+      {/* MOBILE MENU */}
       <div
-        className={`fixed inset-0 md:hidden ${
-          menuOpen ? 'block' : 'hidden'
+        className={`fixed inset-0 z-40 md:hidden ${
+          menuOpen ? 'pointer-events-auto' : 'pointer-events-none'
         }`}
       >
         <div
-          className="absolute inset-0 bg-black/40"
+          className={`absolute inset-0 bg-black/40 transition-opacity ${
+            menuOpen ? 'opacity-100' : 'opacity-0'
+          }`}
           onClick={() => setMenuOpen(false)}
         />
 
-        <aside className="absolute right-0 top-0 h-full w-72 bg-white p-6 space-y-6">
-          <nav className="flex flex-col space-y-4">
+        <aside
+          className={`absolute right-0 top-0 h-full w-72 bg-white px-6 py-8 space-y-6 shadow-2xl transform transition-transform duration-500 ${
+            menuOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
+        >
+          <nav className="flex flex-col space-y-5 text-gray-700 font-medium mt-6">
             {navigation.map((item, idx) => (
               <button
                 key={idx}
                 onClick={() => handleNavClick(item.path)}
-                className="text-left hover:text-blue-600"
+                className="text-left hover:text-blue-600 transition"
               >
                 {item.title}
               </button>
@@ -134,7 +138,7 @@ export default function Navbar() {
           <Link
             href="/order"
             onClick={() => setMenuOpen(false)}
-            className="block text-center bg-gray-800 text-white py-3 rounded-lg"
+            className="block text-center bg-gray-800 text-white px-5 py-3 rounded-lg hover:bg-gray-700 transition"
           >
             Pesan Sekarang
           </Link>
