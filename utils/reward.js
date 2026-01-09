@@ -15,17 +15,6 @@ export function setCoin(value) {
   localStorage.setItem("reward_coin", value);
 }
 
-// ------------------- UPDATE COIN DI PROFILE -------------------
-export const updateProfileCoin = (amount) => {
-  if (!isBrowser) return;
-  const stored = localStorage.getItem('userProfile');
-  if (!stored) return;
-  const profile = JSON.parse(stored);
-  profile.coin = (profile.coin || 0) + amount;
-  localStorage.setItem('userProfile', JSON.stringify(profile));
-  window.dispatchEvent(new Event('profileUpdated'));
-}
-
 // ------------------- REWARD HARIAN -------------------
 export function canClaimToday() {
   if (!isBrowser) return false;
@@ -44,10 +33,6 @@ export function claimDailyCoin() {
   const coin = Math.floor(Math.random() * 41) + 10;
   const current = getCoin();
   setCoin(current + coin);
-
-  // update profile coin juga
-  updateProfileCoin(coin);
-
   localStorage.setItem("reward_last_claim", new Date().toString());
   return coin;
 }
@@ -69,7 +54,6 @@ export function redeemReward(cost, rewardName) {
   if (current < cost) return null;
 
   setCoin(current - cost);
-  updateProfileCoin(-cost);
 
   const date = new Date().toLocaleString("id-ID");
   const deviceId = localStorage.getItem("device_id") || "UNKNOWN";
@@ -98,14 +82,8 @@ export async function generateRedeemPDF(redeemData) {
   if (!isBrowser || !redeemData) return;
 
   const { rewardName, cost, date, code, deviceId, signature } = redeemData;
-
-  // QR sederhana hanya encode code + signature (lebih mudah di scan)
-  const verifyURL = `https://layanannusantara.store/reward/verify?code=${code}&sig=${signature}`;
-  const qr = await QRCode.toDataURL(verifyURL, {
-    errorCorrectionLevel: "H",
-    margin: 2,
-    scale: 8
-  });
+  const verifyURL = `https://layanannusantara.store/reward/verify?code=${code}&sig=${signature}&data=${btoa(JSON.stringify(redeemData))}`;
+  const qr = await QRCode.toDataURL(verifyURL);
 
   const doc = new jsPDF();
 
@@ -128,10 +106,10 @@ export async function generateRedeemPDF(redeemData) {
   doc.setFontSize(10);
   doc.text(`Signature: ${signature}`, 20, 90);
 
-  // QR Code besar & jelas
-  doc.addImage(qr, "PNG", 60, 55, 80, 80);
+  // QR Code yang lebih kecil dan tidak mepet tepi
+  doc.addImage(qr, "PNG", 150, 55, 40, 40); // <-- 40x40 mm, posisi agak ke tengah halaman
   doc.setFontSize(9);
-  doc.text("Scan untuk verifikasi voucher", 60, 140);
+  doc.text("Scan untuk verifikasi voucher", 150, 100);
 
   doc.save(`${rewardName}_voucher.pdf`);
 }
