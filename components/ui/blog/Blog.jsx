@@ -10,6 +10,7 @@ import PwaOnly from "../../guards/PwaOnly.jsx"
 
 
 
+
 /* =========================
    DATA
 ========================= */
@@ -966,6 +967,260 @@ bukan sekadar transaksi sesaat.
     'https://www.investopedia.com/terms/c/customer_retention.asp'
   ],
 },
+{
+  category: 'Bisnis Management',
+  title: 'Manajemen Lebih Penting dari Ide Bisnis',
+  excerpt:
+    'Ide bisnis yang bagus tidak akan bertahan lama tanpa manajemen yang rapi dan terarah.',
+  content: `
+Banyak orang menghabiskan waktu berbulan-bulan
+untuk mencari ide bisnis yang dianggap sempurna.
+Padahal, dalam praktiknya, ide biasa dengan
+manajemen yang baik justru lebih sering bertahan.
+
+Manajemen berperan penting dalam:
+• Mengatur keuangan agar tidak bocor
+• Mengelola waktu dan tenaga
+• Membagi peran dalam tim
+• Mengambil keputusan berbasis data
+
+Tanpa manajemen, bisnis berjalan tanpa arah.
+Pemilik usaha sibuk setiap hari, tapi tidak tahu
+apakah bisnisnya benar-benar berkembang.
+
+Manajemen membuat bisnis:
+• Lebih terkontrol
+• Lebih terukur
+• Lebih siap menghadapi risiko
+
+Ide bisa ditiru,
+tapi manajemen yang rapi adalah keunggulan jangka panjang.
+  `,
+  date: '31 Des 2025',
+  reference: [
+    'https://www.jurnal.id/id/blog/manajemen-bisnis-adalah/',
+    'https://www.ukmindonesia.id/baca-artikel/62'
+  ],
+},
+{
+  category: 'Bisnis Management',
+  title: 'Bisnis Tanpa Target Akan Jalan di Tempat',
+  excerpt:
+    'Target bukan tekanan, melainkan alat agar bisnis terus berkembang.',
+  content: `
+Target sering dianggap sebagai beban.
+Padahal target adalah kompas dalam bisnis.
+
+Tanpa target, bisnis hanya sibuk:
+• Melayani pesanan
+• Mengejar omzet
+• Mengulang rutinitas
+
+Namun tidak pernah tahu:
+apakah bisnis ini maju atau stagnan.
+
+Target membantu bisnis untuk:
+• Menentukan arah pertumbuhan
+• Mengukur keberhasilan
+• Menentukan strategi berikutnya
+
+Target tidak harus besar.
+Yang penting realistis dan konsisten dievaluasi.
+
+Bisnis yang punya target jelas
+lebih cepat berkembang dibanding bisnis
+yang berjalan tanpa perencanaan.
+  `,
+  date: '30 Des 2025',
+  reference: [
+    'https://www.kompas.com/skola/read/2021/08/05/target-bisnis',
+    'https://www.ukmindonesia.id/baca-artikel/306'
+  ],
+},
+{
+  category: 'Bisnis Management',
+  title: 'Cash Flow Sehat Lebih Penting dari Omzet',
+  excerpt:
+    'Banyak bisnis terlihat sukses, tapi runtuh karena arus kas yang buruk.',
+  content: `
+Cash flow adalah aliran darah bisnis.
+Tanpa arus kas yang sehat, bisnis bisa berhenti mendadak.
+
+Banyak bisnis bangkrut bukan karena sepi pelanggan,
+tetapi karena:
+• Pembayaran pelanggan macet
+• Biaya operasional terlalu besar
+• Tidak ada pencatatan keuangan
+
+Omzet besar tidak menjamin bisnis aman.
+Jika pengeluaran lebih cepat dari pemasukan,
+masalah hanya menunggu waktu.
+
+Bisnis yang sehat adalah bisnis yang:
+• Memahami arus kas masuk dan keluar
+• Menyediakan dana cadangan
+• Disiplin dalam pencatatan keuangan
+
+Cash flow yang baik
+memberi napas panjang bagi bisnis untuk bertahan.
+  `,
+  date: '29 Des 2025',
+  reference: [
+    'https://www.jurnal.id/id/blog/cash-flow-adalah/',
+    'https://www.niagahoster.co.id/blog/cash-flow/'
+  ],
+},
+{
+  category: 'Bisnis Management',
+  title: 'Bisnis Kecil Tetap Perlu SOP',
+  excerpt:
+    'SOP bukan hanya milik perusahaan besar, tapi fondasi agar bisnis kecil lebih rapi.',
+  content: `
+Banyak pelaku UMKM menganggap SOP itu ribet.
+Padahal SOP justru mempermudah pekerjaan.
+
+SOP membantu bisnis:
+• Menjaga kualitas layanan
+• Mengurangi kesalahan kerja
+• Memudahkan pembagian tugas
+• Menghemat waktu dan tenaga
+
+Tanpa SOP, semua bergantung pada ingatan.
+Jika pemilik tidak hadir, bisnis sering ikut berhenti.
+
+SOP tidak harus rumit.
+Cukup tuliskan alur kerja sederhana
+yang bisa dipahami semua orang.
+
+Bisnis kecil yang rapi dari awal
+akan lebih siap tumbuh menjadi besar.
+  `,
+  date: '28 Des 2025',
+  reference: [
+    'https://www.jurnal.id/id/blog/sop-adalah/',
+    'https://www.ukmindonesia.id/baca-artikel/117'
+  ],
+},
+{
+  category: 'Bisnis Management',
+  title: 'Kenapa Banyak UMKM Sulit Naik Kelas?',
+  excerpt:
+    'Masalah utama UMKM sering kali bukan di produk, tapi di sistem pengelolaan.',
+  content: `
+Banyak UMKM bertahan bertahun-tahun,
+namun sulit berkembang lebih besar.
+
+Masalah yang sering terjadi:
+• Keuangan tercampur pribadi
+• Tidak ada pencatatan rapi
+• Tidak berani menaikkan harga
+• Takut merekrut tim
+
+UMKM yang ingin naik kelas
+harus mulai berpikir sebagai pengelola,
+bukan hanya sebagai pekerja.
+
+Perubahan kecil seperti:
+• Mencatat keuangan
+• Membuat SOP
+• Mengatur waktu kerja
+
+bisa memberi dampak besar dalam jangka panjang.
+  `,
+  date: '27 Des 2025',
+  reference: [
+    'https://www.ukmindonesia.id/baca-artikel/175',
+    'https://www.kemenkopukm.go.id/'
+  ],
+},
+{
+  category: 'Bisnis Management',
+  title: 'Kerja Keras Saja Tidak Cukup dalam Bisnis',
+  excerpt:
+    'Kerja keras tanpa strategi justru bisa membuat bisnis cepat lelah.',
+  content: `
+Banyak pelaku usaha bangga bekerja dari pagi sampai malam.
+Namun hasilnya tidak selalu sebanding.
+
+Masalahnya bukan kurang kerja keras,
+melainkan kurang strategi.
+
+Bisnis butuh:
+• Perencanaan
+• Evaluasi rutin
+• Pengambilan keputusan yang tepat
+
+Kerja keras penting,
+tapi tanpa arah yang jelas
+justru membuat pemilik cepat burnout.
+
+Bisnis yang sehat adalah
+bisnis yang bekerja cerdas,
+bukan hanya bekerja lama.
+  `,
+  date: '26 Des 2025',
+  reference: [
+    'https://www.kompasiana.com/bisnis-strategi',
+    'https://www.ukmindonesia.id/'
+  ],
+},
+{
+  category: 'Bisnis Management',
+  title: 'Pisahkan Uang Pribadi dan Uang Bisnis',
+  excerpt:
+    'Kesalahan klasik UMKM yang berdampak besar pada keberlangsungan usaha.',
+  content: `
+Mencampur uang pribadi dan bisnis
+adalah kesalahan yang sering dianggap sepele.
+
+Akibatnya:
+• Tidak tahu untung atau rugi
+• Sulit mengembangkan usaha
+• Keuangan tidak terkontrol
+
+Memisahkan keuangan membantu:
+• Mengukur performa bisnis
+• Mengambil keputusan lebih tepat
+• Menjaga kesehatan keuangan
+
+Langkah sederhana ini
+adalah pondasi penting
+agar bisnis bisa tumbuh berkelanjutan.
+  `,
+  date: '25 Des 2025',
+  reference: [
+    'https://www.jurnal.id/id/blog/pisahkan-keuangan-pribadi-dan-bisnis/',
+    'https://www.ukmindonesia.id/baca-artikel/97'
+  ],
+},
+{
+  category: 'Bisnis Management',
+  title: 'Evaluasi Rutin Membuat Bisnis Lebih Tahan',
+  excerpt:
+    'Bisnis yang bertahan lama adalah bisnis yang mau belajar dari kesalahan.',
+  content: `
+Evaluasi sering dianggap tidak penting
+karena tidak menghasilkan uang langsung.
+
+Padahal evaluasi membantu bisnis untuk:
+• Menemukan kesalahan lebih cepat
+• Memperbaiki strategi
+• Menghindari pengulangan masalah
+
+Bisnis yang jarang evaluasi
+biasanya mengulang kesalahan yang sama.
+
+Evaluasi sederhana setiap bulan
+sudah cukup untuk menjaga bisnis
+tetap berada di jalur yang benar.
+  `,
+  date: '24 Des 2025',
+  reference: [
+    'https://www.jurnal.id/id/blog/evaluasi-bisnis/',
+    'https://www.ukmindonesia.id/'
+  ],
+},
+
 
 
 ]
@@ -1024,7 +1279,7 @@ export default function BlogUI() {
         </div>
       </section>
 
-      {/* ================= SEARCH + ARTICLE ================= */}
+  {/* ================= SEARCH + ARTICLE ================= */}
 <section className="px-6 pb-28">
   <div className="max-w-6xl mx-auto">
     {/* Header */}
@@ -1033,7 +1288,6 @@ export default function BlogUI() {
         <h2 className="text-3xl font-bold tracking-tight">
           Artikel Terbaru
         </h2>
-       
       </div>
 
       {/* Search */}
@@ -1043,44 +1297,50 @@ export default function BlogUI() {
           placeholder="Cari artikel..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault()
+              e.target.blur() // ⬅️ ENTER = TUTUP KEYBOARD HP
+            }
+          }}
           className="w-full rounded-2xl border px-5 py-3 pr-12 text-sm
           focus:ring-2 focus:ring-black focus:border-black
           transition"
         />
-        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
+        <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
           🔍
         </span>
       </div>
     </div>
 
     {/* Empty State */}
-{filteredArticles.length === 0 && (
-  <div className="flex flex-col items-center justify-center py-28 text-center">
-    <motion.div
-      className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gray-100"
-      animate={{ y: [0, -10, 0] }}
-      transition={{
-        duration: 1.5,
-        repeat: Infinity,
-        ease: "easeInOut",
-      }}
-    >
-      <span className="text-3xl">🔍</span>
-    </motion.div>
+    {filteredArticles.length === 0 && (
+      <div className="flex flex-col items-center justify-center py-28 text-center">
+        <motion.div
+          className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gray-100"
+          animate={{ y: [0, -10, 0] }}
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        >
+          <span className="text-3xl">🔍</span>
+        </motion.div>
 
-    <h2 className="text-2xl font-bold text-gray-800">
-      Artikel Tidak Ditemukan
-    </h2>
+        <h2 className="text-2xl font-bold text-gray-800">
+          Artikel Tidak Ditemukan
+        </h2>
 
-    <p className="mt-3 max-w-md text-base text-gray-500">
-      Hasil pencarian tidak menampilkan artikel apa pun.
-    </p>
+        <p className="mt-3 max-w-md text-base text-gray-500">
+          Hasil pencarian tidak menampilkan artikel apa pun.
+        </p>
 
-    <p className="mt-1 text-sm text-gray-400">
-      Coba ganti keyword atau eksplor topik lainnya.
-    </p>
-  </div>
-)}
+        <p className="mt-1 text-sm text-gray-400">
+          Coba ganti keyword atau eksplor topik lainnya.
+        </p>
+      </div>
+    )}
 
     {/* Articles */}
     <div className="grid gap-8 sm:grid-cols-2">
@@ -1109,15 +1369,14 @@ export default function BlogUI() {
             {post.excerpt}
           </p>
 
-       {/* Footer */}
-  {/* Footer */}
+          {/* Footer */}
           <div className="flex items-center justify-between text-sm">
             <span className="text-indigo-600">{post.date}</span>
 
             <button
               onClick={() => setSelectedArticle(post)}
               className="font-medium text-black flex items-center gap-1
-                         group-hover:gap-2 transition-all duration-200"
+              group-hover:gap-2 transition-all duration-200"
             >
               Baca
               <motion.span
