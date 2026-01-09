@@ -9,7 +9,7 @@ const REWARDS = [
   { name: "Alight Motion Pro 1 Tahun", cost: 2550 },
 
   // 💎 PREMIUM TINGGI
-  { name: "YouTube Premium 1 Bulan", cost: 90 },
+  { name: "YouTube Premium 1 Bulan", cost: 0 },
   { name: "Spotify Premium 1 Bulan", cost: 2510 },
   { name: "Apple Music 1 Bulan", cost: 1850 },
 
