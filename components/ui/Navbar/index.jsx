@@ -125,15 +125,16 @@ export default function Navbar() {
         />
 
         {/* Mobile Sidebar */}
+{/* Mobile Sidebar */}
 <aside
-  className={`relative min-w-[260px] bg-white rounded-l-xl shadow-2xl px-6 py-8 flex flex-col items-center space-y-6 transform transition-transform duration-500 ${
+  className={`relative min-w-[260px] bg-white rounded-l-xl shadow-2xl px-2.5 py-4 flex flex-col items-center space-y-2 transform transition-transform duration-500 ${
     menuOpen ? 'translate-x-0' : 'translate-x-full'
   }`}
 >
   <button
     onClick={() => setMenuOpen(false)}
     aria-label="Close menu"
-    className="absolute top-4 right-4 text-gray-500 hover:text-black transition"
+    className="absolute top-2.5 right-2.5 text-gray-500 hover:text-black transition"
   >
     <svg
       className="w-6 h-6"
@@ -150,12 +151,12 @@ export default function Navbar() {
     </svg>
   </button>
 
-  <nav className="flex flex-col space-y-5 mt-6 font-medium text-gray-700 w-full items-center">
+  <nav className="flex flex-col space-y-2 mt-2 font-medium text-gray-700 w-full items-center">
     {navigation.map((item, idx) => (
       <button
         key={idx}
         onClick={() => handleNavClick(item.path)}
-        className="w-full text-center hover:text-blue-600 transition select-none px-2 py-2 rounded-md"
+        className="w-full text-center hover:text-blue-600 transition select-none px-2 py-1.5 rounded-md"
       >
         {item.title}
       </button>
@@ -165,11 +166,12 @@ export default function Navbar() {
   <Link
     href="/order"
     onClick={() => setMenuOpen(false)}
-    className="block w-full text-center bg-gray-800 text-white px-5 py-3 rounded-lg shadow hover:bg-gray-700 hover:scale-105 transition-transform"
+    className="block w-full text-center bg-gray-800 text-white px-5 py-2 rounded-lg shadow hover:bg-gray-700 hover:scale-105 transition-transform"
   >
     Pesan Sekarang
   </Link>
 </aside>
+
       </div>
 
       {/* Offset anchor */}
