@@ -2,7 +2,9 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState } from 'react'
-import PwaOnly from '../components/guards/PwaOnly'
+import PwaOnly from "../../guards/PwaOnly.jsx"
+
+
 
 
 
