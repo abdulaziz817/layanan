@@ -37,7 +37,7 @@ export default function DailyReward({ onClaim }) {
           claimed ? "bg-gray-400 cursor-not-allowed" : "bg-black hover:bg-gray-900"
         }`}
       >
-        {claimed ? "Sudah Klaim Hari Ini" : "Klaim Reward"}
+        {claimed ? "Coinmu Sudah Diambil" : "Ambil Coinmu!"}
       </button>
     </div>
   );
