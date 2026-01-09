@@ -13,10 +13,10 @@ export default function Reward() {
           </h1>
 
           {/* Deskripsi */}
-          <p className="text-lg text-gray-600 mt-4 max-w-xl mx-auto">
-            Kumpulkan coin setiap hari dan tukarkan dengan hadiah menarik.
-            Ikuti aktivitas harian untuk meningkatkan reward-mu!
-          </p>
+         <p className="text-lg text-gray-600 mt-4 max-w-xl mx-auto text-center">
+  Kumpulkan coin tiap hari dan tukar dengan hadiah dari kami!
+</p>
+
 
           {/* Komponen reward */}
           <DailyReward />
