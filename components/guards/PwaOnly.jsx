@@ -1,9 +1,8 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useRouter } from 'next/router'
-import { isPWA } from '../../utils/isPWA'
-
+import { useRouter } from 'next/navigation' // <- next/navigation buat app dir
+import { isPWA } from '../../utils/isPWA' // pastikan path ini benar
 
 export default function PwaOnly({ children }) {
   const router = useRouter()
@@ -12,7 +11,7 @@ export default function PwaOnly({ children }) {
     if (!isPWA()) {
       router.replace('/') // ⛔ browser → home
     }
-  }, [])
+  }, [router])
 
   return children
 }
