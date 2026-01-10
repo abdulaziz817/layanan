@@ -114,6 +114,43 @@ const ToolKit = () => {
     desc: "Platform desain online yang mudah digunakan.",
     colored: true,
   },
+    {
+    icon: "https://raw.githubusercontent.com/devicons/devicon/v2.16.0/icons/github/github-original.svg",
+    title: "GitHub",
+    desc: "Repositori kode dan kolaborasi tim pengembang.",
+    colored: true,
+  },
+  {
+    icon: "https://raw.githubusercontent.com/devicons/devicon/v2.16.0/icons/aftereffects/aftereffects-original.svg",
+    title: "Adobe After Effects",
+    desc: "Motion graphic dan visual effect profesional.",
+    colored: true,
+  },
+  {
+    icon: "https://upload.wikimedia.org/wikipedia/commons/0/0c/Capcut-icon.png",
+    title: "CapCut",
+    desc: "Edit video cepat dan modern untuk konten sosial media.",
+    colored: true,
+  },
+  {
+    icon: "https://www.vectorlogo.zone/logos/google_analytics/google_analytics-icon.svg",
+    title: "Google Analytics",
+    desc: "Analisis data pengunjung website secara real-time.",
+    colored: true,
+  },
+  {
+    icon: "https://global.discourse-cdn.com/sketchup/original/3X/6/8/6867be723cd855181b4a0ea3015fff6401c9cddb.png",
+    title: "SketchUp",
+    desc: "Desain dan visualisasi 3D untuk arsitektur dan interior.",
+    colored: true,
+  },
+  {
+    icon: "https://upload.wikimedia.org/wikipedia/commons/4/4d/DaVinci_Resolve_Studio.png",
+    title: "DaVinci Resolve",
+    desc: "Editing video dan color grading profesional.",
+    colored: true,
+  },
+
 ];
 
   return (
