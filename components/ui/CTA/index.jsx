@@ -16,18 +16,22 @@ const CTA = () => {
                     className="max-w-6xl mx-auto"
                 >
                     {/* Header */}
-                    <div className="text-center mb-14">
-                        <h2 className="text-3xl font-bold text-gray-800">
-                            Tentang <span className="text-indigo-600 underline underline-offset-4">Layanan Kami</span>
-                        </h2>
-                        <motion.div
-                            initial={{ scaleX: 0 }}
-                            whileInView={{ scaleX: 1 }}
-                            transition={{ duration: 0.8 }}
-                            viewport={{ once: true }}
-                            className="w-24 h-1 bg-indigo-600 mx-auto mt-4 origin-left rounded-full"
-                        />
-                    </div>
+<div className="px-6 pt-1 pb-14">
+  <div className="text-center mb-14">
+    <h2 className="text-4xl font-bold text-gray-800">
+      Tentang <span className="text-indigo-600 underline underline-offset-4">Layanan Kami</span>
+    </h2>
+
+    <motion.div
+      initial={{ scaleX: 0 }}
+      whileInView={{ scaleX: 1 }}
+      transition={{ duration: 0.8 }}
+      viewport={{ once: true }}
+      className="w-24 h-1 bg-indigo-600 mx-auto mt-4 origin-left rounded-full"
+    />
+  </div>
+</div>
+
 
                     {/* Content Grid */}
                     <div className="grid md:grid-cols-12 gap-12 items-start">

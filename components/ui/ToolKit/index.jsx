@@ -122,14 +122,17 @@ const ToolKit = () => {
   id="toolkit"
   className="max-w-screen-xl mx-auto px-6 text-gray-700 md:px-10"
 >
-  <div className="max-w-3xl mx-auto text-center mb-10">
-    <h2 className="text-center text-2xl font-medium text-gray-800 mb-4">
-      Software Unggulan untuk Layanan Berkualitas
+<div className="max-w-3xl mx-auto px-6 pt-20 pb-14">
+  <div className="text-center mb-14">
+    <h2 className="text-4xl font-bold text-gray-800">
+      Software Unggulan Kami
     </h2>
-    <p className="text-base text-gray-600 leading-relaxed">
-        Kami mengandalkan software terbaik untuk mendukung setiap tahapan layanan—mulai dari desain hingga produksi—agar hasil akhir selalu memuaskan dan profesional.
+    <p className="text-lg text-gray-600 mt-4 max-w-xl mx-auto">
+     Kami menggunakan software terbaik untuk mendukung layanan profesional yang konsisten dan berkualitas.
     </p>
   </div>
+</div>
+
 
         <motion.ul
           className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3"

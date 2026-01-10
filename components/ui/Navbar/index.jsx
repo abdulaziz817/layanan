@@ -19,7 +19,6 @@ export default function Navbar() {
     { title: 'Tentang', path: '/#cta' },
     { title: 'Software', path: '/#toolkit' },
     { title: 'Testimoni', path: '/#testimonials' },
-    // ⛔ Blog & Reward hanya muncul kalau PWA
     ...(pwa
       ? [
           { title: 'Blog', path: '/blog' },
@@ -32,12 +31,16 @@ export default function Navbar() {
     const element = document.getElementById(id)
     if (!element) return
     const yOffset = -80
-    const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset
+    const y =
+      element.getBoundingClientRect().top +
+      window.pageYOffset +
+      yOffset
     window.scrollTo({ top: y, behavior: 'smooth' })
   }
 
   const handleNavClick = (path) => {
     setMenuOpen(false)
+
     if (path.startsWith('/#')) {
       const id = path.replace('/#', '')
       if (window.location.pathname === '/') {
@@ -48,6 +51,7 @@ export default function Navbar() {
       }
       return
     }
+
     if (window.location.pathname !== path) {
       router.push(path)
     }
@@ -62,18 +66,19 @@ export default function Navbar() {
 
   return (
     <header className="fixed top-0 left-0 w-full bg-white z-50 shadow-md">
+      {/* ===== TOP BAR ===== */}
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900 select-none">
           Layanan Nusantara
         </h1>
 
-        {/* Desktop Navigation */}
+        {/* ===== DESKTOP NAV ===== */}
         <nav className="hidden md:flex items-center space-x-4">
           {navigation.map((item, idx) => (
             <button
               key={idx}
               onClick={() => handleNavClick(item.path)}
-              className="px-3 py-2 rounded-md text-gray-700 hover:text-blue-600 transition-colors duration-300 select-none"
+              className="px-3 py-2 rounded-md text-gray-700 hover:text-blue-600 transition"
             >
               {item.title}
             </button>
@@ -81,19 +86,17 @@ export default function Navbar() {
 
           <Link
             href="/order"
-            className="bg-gray-800 text-white px-5 py-2 rounded-md hover:bg-gray-700 transition duration-300"
+            className="bg-gray-800 text-white px-5 py-2 rounded-md hover:bg-gray-700 transition"
           >
             Pesan Sekarang
           </Link>
         </nav>
 
-        {/* Mobile Toggle */}
+        {/* ===== MOBILE TOGGLE ===== */}
         <button
-          onClick={() => setMenuOpen(!menuOpen)}
+          onClick={() => setMenuOpen(true)}
           aria-label="Toggle menu"
-          className={`md:hidden p-3 rounded-md text-gray-700 hover:text-black transition-transform duration-300 ${
-            menuOpen ? 'rotate-90' : 'rotate-0'
-          }`}
+          className="md:hidden p-3 rounded-md text-gray-700 hover:text-black transition"
         >
           <svg
             className="w-7 h-7"
@@ -111,70 +114,80 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* Mobile Overlay */}
+      {/* ===== MOBILE OVERLAY ===== */}
       <div
-        className={`fixed inset-0 z-40 md:hidden flex justify-end transition ${
+        className={`fixed inset-0 z-40 md:hidden transition ${
           menuOpen ? 'pointer-events-auto' : 'pointer-events-none'
         }`}
       >
+        {/* Backdrop */}
         <div
-          className={`absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${
+          onClick={() => setMenuOpen(false)}
+          className={`absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity ${
             menuOpen ? 'opacity-100' : 'opacity-0'
           }`}
-          onClick={() => setMenuOpen(false)}
         />
 
-        {/* Mobile Sidebar */}
-{/* Mobile Sidebar */}
-<aside
-  className={`relative min-w-[260px] bg-white rounded-l-xl shadow-2xl px-2.5 py-4 flex flex-col items-center space-y-2 transform transition-transform duration-500 ${
-    menuOpen ? 'translate-x-0' : 'translate-x-full'
-  }`}
->
-  <button
-    onClick={() => setMenuOpen(false)}
-    aria-label="Close menu"
-    className="absolute top-2.5 right-2.5 text-gray-500 hover:text-black transition"
-  >
-    <svg
-      className="w-6 h-6"
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-      strokeWidth="2"
-    >
-      <path
-        d="M6 18L18 6M6 6l12 12"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  </button>
+        {/* ===== MOBILE SIDEBAR ===== */}
+        <aside
+          className={`absolute right-0 top-0 h-full w-[280px] bg-white rounded-l-2xl shadow-2xl transform transition-transform duration-500 ${
+            menuOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b">
+            <span className="text-lg font-semibold text-gray-800">
+              Menu
+            </span>
 
-  <nav className="flex flex-col space-y-2 mt-2 font-medium text-gray-700 w-full items-center">
-    {navigation.map((item, idx) => (
-      <button
-        key={idx}
-        onClick={() => handleNavClick(item.path)}
-        className="w-full text-center hover:text-blue-600 transition select-none px-2 py-1.5 rounded-md"
-      >
-        {item.title}
-      </button>
-    ))}
-  </nav>
+            <button
+              onClick={() => setMenuOpen(false)}
+              aria-label="Close menu"
+              className="p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-black transition"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                strokeWidth="2"
+              >
+                <path
+                  d="M6 18L18 6M6 6l12 12"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
 
-  <Link
-    href="/order"
-    onClick={() => setMenuOpen(false)}
-    className="block w-full text-center bg-gray-800 text-white px-5 py-2 rounded-lg shadow hover:bg-gray-700 hover:scale-105 transition-transform"
-  >
-    Pesan Sekarang
-  </Link>
-</aside>
+          {/* Menu */}
+          <nav className="flex flex-col gap-2 px-5 pt-4 font-medium text-gray-700">
+            {navigation.map((item, idx) => (
+              <button
+                key={idx}
+                onClick={() => handleNavClick(item.path)}
+                className="w-full text-center py-2.5 rounded-lg hover:bg-gray-100 hover:text-blue-600 transition"
+              >
+                {item.title}
+              </button>
+            ))}
+          </nav>
 
+          {/* CTA */}
+          <div className="px-5 pt-4 pb-6">
+            <Link
+              href="/order"
+              onClick={() => setMenuOpen(false)}
+              className="block w-full text-center bg-gray-800 text-white py-3 rounded-xl shadow hover:bg-gray-700 hover:scale-[1.02] transition-transform"
+            >
+              Pesan Sekarang
+            </Link>
+          </div>
+        </aside>
       </div>
 
-      {/* Offset anchor */}
+      {/* ===== OFFSET ANCHOR ===== */}
       <style jsx global>{`
         [id] {
           scroll-margin-top: 80px;
