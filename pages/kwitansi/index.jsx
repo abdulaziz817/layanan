@@ -15,8 +15,8 @@ function extractAfter(label, text) {
 }
 
 function extractMoney(text) {
-  const m = text.match(/Rp\s*([\d.]+)/i);
-  return m ? m[1].replace(/\./g, "") : "";
+  const m = text.match(/Rp\\s*([\\d.]+)/i);
+  return m ? m[1].replace(/\\./g, "") : "";
 }
 
 function makeNoKwitansi() {
@@ -148,10 +148,23 @@ export default function KwitansiPage() {
   const layananText = [data.layananUtama, data.layananDetail].filter(Boolean).join(" - ");
 
   return (
-    <div style={{ maxWidth: 1100, margin: "30px auto", padding: 16 }}>
+    <div className="page">
       <style>{`
+        /* ====== OFFSET biar aman dari navbar fixed ======
+           Kalau navbar kamu fixed dan tinggi beda, set aja:
+           :root { --app-navbar-height: 64px; }
+        */
+        .page{
+          max-width: 1100px;
+          margin: 0 auto;
+          padding: calc(var(--app-navbar-height, 72px) + 18px) 16px 30px;
+        }
+        @media (max-width: 640px){
+          .page{ padding: calc(var(--app-navbar-height, 72px) + 14px) 12px 22px; }
+        }
+
         .two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        @media (max-width: 900px) { .two { grid-template-columns: 1fr; } }
+        @media (max-width: 1024px) { .two { grid-template-columns: 1fr; } }
 
         .card { border: 1px solid #e5e7eb; border-radius: 14px; padding: 16px; background: white; }
         .grid { display: grid; gap: 12px; }
@@ -171,16 +184,45 @@ export default function KwitansiPage() {
         .btnGhost:hover { background: rgba(249,250,251,1); }
 
         .muted { color:#6b7280; font-size: 13px; }
-
         .no-select { user-select: none; -webkit-user-select: none; -ms-user-select: none; }
 
-        /* ====== KWITANSI STYLE (elegan, tidak tinggi) ====== */
+        /* ====== HEADER (judul doang, responsif, logout aman) ====== */
+        .topbar{
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+          gap: 12px;
+          flex-wrap: wrap;
+          margin-bottom: 14px;
+        }
+        .titleWrap{
+          min-width: 220px;
+        }
+        .pageTitle{
+          margin: 0;
+          font-size: 34px;
+          line-height: 1.1;
+          font-weight: 900;
+          color:#111827;
+          letter-spacing: -0.2px;
+        }
+        @media (max-width: 640px){
+          .pageTitle{ font-size: 28px; }
+          .topbar{ align-items: flex-start; }
+          .logoutWrap{ width: 100%; display:flex; justify-content:flex-end; }
+        }
+
+        /* ====== KWITANSI STYLE (elegan, responsif) ====== */
         .kw-wrap {
           position: relative;
           overflow: hidden;
           padding: 18px 18px 16px;
           border-radius: 16px;
           background: #fff;
+          border: 1px solid #e5e7eb;
+        }
+        @media (max-width: 640px){
+          .kw-wrap{ padding: 16px 14px 14px; border-radius: 14px; }
         }
 
         .kw-header {
@@ -198,6 +240,7 @@ export default function KwitansiPage() {
           gap: 10px;
           font-size: 11.5px;
           color:#6b7280;
+          flex-wrap: wrap;
         }
         .kw-meta b { color:#111827; }
 
@@ -208,11 +251,14 @@ export default function KwitansiPage() {
         }
         .kv-row {
           display: grid;
-          grid-template-columns: 120px 1fr;
+          grid-template-columns: 130px 1fr;
           gap: 10px;
           padding: 8px 0;
           border-bottom: 1px dashed #eef2f7;
           font-size: 13px;
+        }
+        @media (max-width: 480px){
+          .kv-row{ grid-template-columns: 105px 1fr; font-size: 12.5px; }
         }
         .kv-key { color:#6b7280; }
         .kv-val { color:#111827; font-weight: 600; word-break: break-word; }
@@ -235,12 +281,15 @@ export default function KwitansiPage() {
           margin-top: 16px;
           padding-top: 12px;
           border-top: 1px solid #eef2f7;
+          flex-wrap: wrap;
         }
         .kw-sign .box { width: 48%; }
+        @media (max-width: 520px){
+          .kw-sign .box{ width: 100%; }
+        }
         .kw-sign .label { font-size: 11px; color:#6b7280; }
         .kw-sign .name { margin-top: 18px; font-size: 13px; font-weight: 800; color:#111827; }
 
-        /* watermark simple (tidak norak) */
         .kw-watermark {
           position:absolute;
           inset:0;
@@ -255,29 +304,30 @@ export default function KwitansiPage() {
           color:#111827;
           white-space: nowrap;
         }
-        .kw-watermark-code {
-          position:absolute;
-          right: 14px;
-          bottom: 12px;
-          font-size: 10px;
-          color:#9ca3af;
-          pointer-events:none;
-        }
+       .kw-watermark-code{
+  margin-top: 10px;
+  font-size: 10px;
+  color:#9ca3af;
+  text-align: center;
+  pointer-events: none;
+}
+
       `}</style>
 
-      {/* HEADER + LOGOUT */}
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
-        <div>
-          <h1 style={{ marginBottom: 6 }}>🧾 Kwitansi</h1>
-          <div className="muted">Paste pesan WhatsApp → auto isi → Download PNG (hanya kwitansi).</div>
+      {/* ====== JUDUL (mirip referensi: h2 doang, tanpa deskripsi) ====== */}
+      <div className="topbar">
+        <div className="titleWrap">
+          <h1 className="pageTitle">🧾 Kwitansi</h1>
         </div>
 
-        <button className="btn btnGhost" onClick={logout} title="Keluar">
-          Logout
-        </button>
+        <div className="logoutWrap">
+          <button className="btn btnGhost" onClick={logout} title="Keluar">
+            Logout
+          </button>
+        </div>
       </div>
 
-      <div className="two" style={{ marginTop: 16 }}>
+      <div className="two">
         {/* INPUT */}
         <div className="card">
           <h3 style={{ marginTop: 0 }}>Paste Pesan WhatsApp (Opsional)</h3>
@@ -343,7 +393,9 @@ export default function KwitansiPage() {
                 <label>
                   Harga (angka)
                   <input value={data.harga} onChange={(e) => set("harga", e.target.value)} placeholder="37000" />
-                  <div className="muted" style={{ marginTop: 6 }}>Preview: {hargaView || "-"}</div>
+                  <div className="muted" style={{ marginTop: 6 }}>
+                    Preview: {hargaView || "-"}
+                  </div>
                 </label>
               </>
             ) : (
@@ -351,7 +403,9 @@ export default function KwitansiPage() {
                 <label>
                   Budget (angka)
                   <input value={data.budget} onChange={(e) => set("budget", e.target.value)} placeholder="150000" />
-                  <div className="muted" style={{ marginTop: 6 }}>Preview: {budgetView || "-"}</div>
+                  <div className="muted" style={{ marginTop: 6 }}>
+                    Preview: {budgetView || "-"}
+                  </div>
                 </label>
 
                 <label>
@@ -363,7 +417,11 @@ export default function KwitansiPage() {
 
             <label>
               Metode Pembayaran
-              <input value={data.metode} onChange={(e) => set("metode", e.target.value)} placeholder="GoPay / QRIS / BCA / PayPal" />
+              <input
+                value={data.metode}
+                onChange={(e) => set("metode", e.target.value)}
+                placeholder="GoPay / QRIS / BCA / PayPal"
+              />
             </label>
 
             <label>
@@ -377,11 +435,12 @@ export default function KwitansiPage() {
           </div>
         </div>
 
-        {/* PREVIEW -> elegan, tidak panjang */}
+        {/* PREVIEW */}
         <div ref={kwitansiRef} className="kw-wrap no-select">
           <div className="kw-watermark">LAYANAN NUSANTARA</div>
           <div className="kw-watermark-code">
-            No: <b style={{ color: "#6b7280" }}>{noKwitansi}</b> • Kode: <b style={{ color: "#6b7280" }}>{verifyCode}</b>
+            No: <b style={{ color: "#6b7280" }}>{noKwitansi}</b> • Kode:{" "}
+            <b style={{ color: "#6b7280" }}>{verifyCode}</b>
           </div>
 
           <div className="kw-header">
@@ -390,10 +449,12 @@ export default function KwitansiPage() {
 
             <div className="kw-meta">
               <div>
-                <span>No: </span><b>{noKwitansi}</b>
+                <span>No: </span>
+                <b>{noKwitansi}</b>
               </div>
               <div>
-                <span>Tanggal: </span><b>{data.tanggal || "-"}</b>
+                <span>Tanggal: </span>
+                <b>{data.tanggal || "-"}</b>
               </div>
             </div>
           </div>
