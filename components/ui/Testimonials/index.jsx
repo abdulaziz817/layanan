@@ -19,7 +19,7 @@ const Testimonials = () => {
     const testimonials = [
      {
         id: 1,
-        name: "Muhammad Rizky Pratama",
+        name: "Rizky Aditiya",
         role: "Customer",
         stars: 4.5,
         service: "Desain Logo Usaha Kopi",
