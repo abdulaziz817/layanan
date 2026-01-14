@@ -315,17 +315,28 @@ export default function KwitansiPage() {
       `}</style>
 
       {/* ====== JUDUL (mirip referensi: h2 doang, tanpa deskripsi) ====== */}
-      <div className="topbar">
-        <div className="titleWrap">
-          <h1 className="pageTitle">🧾 Kwitansi</h1>
-        </div>
+<div className="max-w-7xl mx-auto px-6 py-12 bg-white">
+  <div className="text-center mb-10">
+    <h2 className="text-4xl font-bold text-gray-800">
+      Kwitansi
+    </h2>
+    <p className="text-lg text-gray-600 mt-4 max-w-xl mx-auto">
+      Kelola dan catat data kwitansi pembayaran dengan rapi dan jelas.
 
-        <div className="logoutWrap">
-          <button className="btn btnGhost" onClick={logout} title="Keluar">
-            Logout
-          </button>
-        </div>
-      </div>
+    </p>
+  </div>
+
+  <div className="flex justify-end">
+    <button
+      className="btn btnGhost"
+      onClick={logout}
+      title="Keluar"
+    >
+      Logout
+    </button>
+  </div>
+</div>
+
 
       <div className="two">
         {/* INPUT */}
