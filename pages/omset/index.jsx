@@ -24,8 +24,7 @@ const ui = {
 };
 
 function IconEye({ off = false, size = 18 }) {
-  // simple, clean, no emoji
-   if (off) {
+  if (off) {
     return (
       <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path d="M3 3l18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
@@ -46,37 +45,39 @@ function IconEye({ off = false, size = 18 }) {
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path
         d="M2 12s3.8-7.25 10-7.25S22 12 22 12s-3.8 7.25-10 7.25S2 12 2 12z"
-        stroke="currentColor" strokeWidth="2" strokeLinejoin="round"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
       />
       <path
         d="M12 15.25a3.25 3.25 0 100-6.5 3.25 3.25 0 000 6.5z"
-        stroke="currentColor" strokeWidth="2"
+        stroke="currentColor"
+        strokeWidth="2"
       />
     </svg>
   );
-};
+}
 
 function IconButton({ onClick, label, children }) {
   return (
     <button
-    
       type="button"
       onClick={onClick}
       aria-label={label}
       title={label}
       style={{
-       width: 36,
-  height: 36,
-  borderRadius: 10,
-  border: "none",
-  background: "transparent",
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-  color: ui.text,
-  cursor: "pointer",
-  transition: "background 120ms ease, transform 120ms ease",
-}}
+        width: 36,
+        height: 36,
+        borderRadius: 10,
+        border: "none",
+        background: "transparent",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: ui.text,
+        cursor: "pointer",
+        transition: "background 120ms ease, transform 120ms ease",
+      }}
       onMouseEnter={(e) => {
         e.currentTarget.style.background = "rgba(15,23,42,0.06)";
       }}
@@ -90,8 +91,7 @@ function IconButton({ onClick, label, children }) {
       {children}
     </button>
   );
-};
-
+}
 
 function Button({ children, onClick, variant = "ghost", disabled = false }) {
   const base = {
@@ -149,9 +149,7 @@ function Card({ title, value, sub }) {
         boxShadow: ui.shadow,
       }}
     >
-      <div style={{ color: ui.muted, fontSize: 12, marginBottom: 6, fontWeight: 800 }}>
-        {title}
-      </div>
+      <div style={{ color: ui.muted, fontSize: 12, marginBottom: 6, fontWeight: 800 }}>{title}</div>
       <div
         style={{
           fontSize: 20,
@@ -164,9 +162,7 @@ function Card({ title, value, sub }) {
       >
         {value}
       </div>
-      {sub ? (
-        <div style={{ color: ui.muted, fontSize: 12, marginTop: 8 }}>{sub}</div>
-      ) : null}
+      {sub ? <div style={{ color: ui.muted, fontSize: 12, marginTop: 8 }}>{sub}</div> : null}
     </div>
   );
 }
@@ -197,22 +193,34 @@ export default function OmsetPage() {
     [data]
   );
 
+  // ✅ ini yang bener: localhost pakai /api, netlify pakai /.netlify/functions
+  const API_BASE = process.env.NODE_ENV === "production" ? "/.netlify/functions" : "/api";
+
+  // ✅ helper aman baca JSON
+  async function safeJson(res) {
+    try {
+      return await res.json();
+    } catch {
+      return {};
+    }
+  }
+
   async function loadAll() {
     setErr("");
     try {
       const [s, l] = await Promise.all([
-        fetch("/api/omset/summary"),
-        fetch("/api/omset/list"),
+        fetch(`${API_BASE}/omset-summary`),
+        fetch(`${API_BASE}/omset-list`),
       ]);
 
-      const sj = await s.json().catch(() => ({}));
-      const lj = await l.json().catch(() => ({}));
+      const sj = await safeJson(s);
+      const lj = await safeJson(l);
 
       if (!s.ok) throw new Error(sj?.message || "Gagal load summary");
       if (!l.ok) throw new Error(lj?.message || "Gagal load list");
 
       setSummary(sj);
-      setRows(lj.rows || []);
+      setRows(lj?.rows || []);
     } catch (e) {
       setErr(e?.message || "Error");
     }
@@ -220,6 +228,7 @@ export default function OmsetPage() {
 
   useEffect(() => {
     loadAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function handleParse() {
@@ -239,7 +248,7 @@ export default function OmsetPage() {
     setErr("");
 
     try {
-      const res = await fetch("/api/omset/add", {
+      const res = await fetch(`${API_BASE}/omset-add`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -251,7 +260,7 @@ export default function OmsetPage() {
         }),
       });
 
-      const out = await res.json().catch(() => ({}));
+      const out = await safeJson(res);
       if (!res.ok) throw new Error(out?.message || "Gagal simpan");
 
       setRaw("");
@@ -288,15 +297,12 @@ export default function OmsetPage() {
           </div>
 
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-      <IconButton
-  onClick={() => setHideAmount(v => !v)}
-  label={hideAmount ? "Tampilkan angka" : "Sembunyikan angka"}
-  style={{ marginLeft: "auto" }}
->
-  <IconEye off={hideAmount} />
-</IconButton>
-
-
+            <IconButton
+              onClick={() => setHideAmount((v) => !v)}
+              label={hideAmount ? "Tampilkan angka" : "Sembunyikan angka"}
+            >
+              <IconEye off={hideAmount} />
+            </IconButton>
           </div>
         </div>
 
@@ -342,11 +348,7 @@ export default function OmsetPage() {
             value={summary ? maskMoney(summary.year) : "…"}
             sub={summary ? `${summary.transaksi_year} transaksi` : ""}
           />
-          <Card
-            title="Total transaksi"
-            value={summary ? String(summary.transaksi_total) : "…"}
-            sub="Semua data"
-          />
+          <Card title="Total transaksi" value={summary ? String(summary.transaksi_total) : "…"} sub="Semua data" />
         </div>
 
         {/* INPUT + TABLE */}
@@ -368,9 +370,7 @@ export default function OmsetPage() {
               boxShadow: ui.shadow,
             }}
           >
-            <div style={{ fontWeight: 950, color: ui.text, marginBottom: 10 }}>
-              Input dari WhatsApp
-            </div>
+            <div style={{ fontWeight: 950, color: ui.text, marginBottom: 10 }}>Input dari WhatsApp</div>
 
             <textarea
               rows={8}
@@ -412,19 +412,25 @@ export default function OmsetPage() {
               <div style={{ fontWeight: 950, marginBottom: 8, color: ui.text }}>Preview</div>
 
               <div style={{ display: "grid", gap: 8, fontSize: 13, color: ui.text }}>
-                <div><b>Nama:</b> {data.nama || "-"}</div>
-                <div><b>WhatsApp:</b> {data.whatsapp || "-"}</div>
-                <div><b>Layanan:</b> {data.layanan || "-"}</div>
-                <div><b>Metode:</b> {data.metode || "-"}</div>
-                <div><b>Harga:</b> {hideAmount ? "••••••" : rupiah(data.harga || 0)}</div>
+                <div>
+                  <b>Nama:</b> {data.nama || "-"}
+                </div>
+                <div>
+                  <b>WhatsApp:</b> {data.whatsapp || "-"}
+                </div>
+                <div>
+                  <b>Layanan:</b> {data.layanan || "-"}
+                </div>
+                <div>
+                  <b>Metode:</b> {data.metode || "-"}
+                </div>
+                <div>
+                  <b>Harga:</b> {hideAmount ? "••••••" : rupiah(data.harga || 0)}
+                </div>
               </div>
 
               <div style={{ marginTop: 12 }}>
-                <Button
-                  variant="primary"
-                  disabled={!canSave || saving}
-                  onClick={handleSave}
-                >
+                <Button variant="primary" disabled={!canSave || saving} onClick={handleSave}>
                   {saving ? "Menyimpan..." : "Simpan Omset"}
                 </Button>
               </div>
@@ -476,7 +482,7 @@ export default function OmsetPage() {
                     </tr>
                   ))}
 
-                  {(!rows || rows.length === 0) ? (
+                  {!rows || rows.length === 0 ? (
                     <tr>
                       <td colSpan={5} style={{ padding: 12, color: ui.muted, textAlign: "center" }}>
                         Belum ada data omset.
@@ -487,9 +493,7 @@ export default function OmsetPage() {
               </table>
             </div>
 
-            <div style={{ marginTop: 10, fontSize: 12, color: ui.muted }}>
-              Menampilkan 20 data terbaru.
-            </div>
+            <div style={{ marginTop: 10, fontSize: 12, color: ui.muted }}>Menampilkan 20 data terbaru.</div>
           </div>
         </div>
       </div>
