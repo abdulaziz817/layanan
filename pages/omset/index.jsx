@@ -34,6 +34,93 @@ const ui = {
   focusRing: "0 0 0 4px rgba(15, 23, 42, 0.08)",
 };
 
+function Alert({ type = "info", children, onClose }) {
+  const map = {
+    info: {
+      border: "rgba(59,130,246,0.35)",
+      bg: "rgba(59,130,246,0.08)",
+      text: "#1d4ed8",
+      icon: "ℹ️",
+      label: "Info",
+    },
+    success: {
+      border: "rgba(34,197,94,0.35)",
+      bg: "rgba(34,197,94,0.10)",
+      text: "#166534",
+      icon: "✅",
+      label: "Berhasil",
+    },
+    warning: {
+      border: "rgba(245,158,11,0.35)",
+      bg: "rgba(245,158,11,0.10)",
+      text: "#92400e",
+      icon: "⚠️",
+      label: "Peringatan",
+    },
+    error: {
+      border: "rgba(239,68,68,0.35)",
+      bg: "rgba(239,68,68,0.08)",
+      text: "#b91c1c",
+      icon: "⛔",
+      label: "Error",
+    },
+  };
+
+  const t = map[type] || map.info;
+
+  return (
+    <div
+      role="status"
+      style={{
+        border: `1px solid ${t.border}`,
+        background: t.bg,
+        color: t.text,
+        padding: 12,
+        borderRadius: 14,
+        marginBottom: 12,
+        fontSize: 13,
+        boxShadow: ui.shadow,
+        display: "flex",
+        alignItems: "flex-start",
+        gap: 10,
+      }}
+    >
+      <div style={{ fontSize: 16, lineHeight: 1.2, marginTop: 1 }}>{t.icon}</div>
+
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontWeight: 900, fontSize: 12, marginBottom: 4, opacity: 0.9 }}>
+          {t.label}
+        </div>
+        <div style={{ fontWeight: 700, lineHeight: 1.4, wordBreak: "break-word" }}>
+          {children}
+        </div>
+      </div>
+
+      {onClose ? (
+        <button
+          type="button"
+          aria-label="Tutup"
+          onClick={onClose}
+          style={{
+            border: "none",
+            background: "transparent",
+            cursor: "pointer",
+            color: t.text,
+            opacity: 0.8,
+            fontSize: 18,
+            lineHeight: 1,
+            padding: 2,
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.opacity = 1)}
+          onMouseLeave={(e) => (e.currentTarget.style.opacity = 0.8)}
+        >
+          ×
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
 function IconEye({ off = false, size = 18 }) {
   if (off) {
     return (
@@ -198,7 +285,6 @@ export default function OmsetPage() {
   const [user, setUser] = useState(null);
 
   const maskMoney = (n) => (hideAmount ? "••••••" : rupiah(n));
-
   const canSave = useMemo(() => (data?.harga || 0) > 0 && !!(data?.nama || data?.layanan), [data]);
 
   // ✅ localhost pakai /api, netlify pakai /.netlify/functions
@@ -235,7 +321,6 @@ export default function OmsetPage() {
 
     const u = identity.currentUser();
     if (!u) {
-      // jangan auto-open terus menerus, cukup lempar error biar UI minta login
       throw new Error("Silakan login dulu (Netlify Identity).");
     }
 
@@ -286,17 +371,15 @@ export default function OmsetPage() {
       setUser(null);
       setSummary(null);
       setRows([]);
-      setErr("Kamu logout. Silakan login lagi untuk lihat omset.");
+      setErr("Kamu sudah logout. Silakan login lagi untuk melihat omset.");
     };
 
     identity.on("login", onLogin);
     identity.on("logout", onLogout);
 
-    // coba load data pertama kali
     loadAll();
 
     return () => {
-      // beberapa versi widget gak punya off(), jadi try/catch
       try {
         identity.off("login", onLogin);
         identity.off("logout", onLogout);
@@ -345,6 +428,14 @@ export default function OmsetPage() {
       setSaving(false);
     }
   }
+
+  // info vs error biar gak merah untuk logout/login
+  const alertType = useMemo(() => {
+    const msg = String(err || "").toLowerCase();
+    if (!msg) return null;
+    if (msg.includes("logout") || msg.includes("silakan login")) return "info";
+    return "error";
+  }, [err]);
 
   return (
     <div style={{ background: ui.pageBg, minHeight: "100vh" }}>
@@ -395,22 +486,11 @@ export default function OmsetPage() {
           </div>
         </div>
 
-        {/* ERROR */}
+        {/* ALERT */}
         {err ? (
-          <div
-            style={{
-              border: "1px solid rgba(239,68,68,0.35)",
-              background: "rgba(239,68,68,0.06)",
-              color: "#b91c1c",
-              padding: 12,
-              borderRadius: 12,
-              marginBottom: 12,
-              fontSize: 13,
-              boxShadow: ui.shadow,
-            }}
-          >
+          <Alert type={alertType || "info"} onClose={() => setErr("")}>
             {err}
-          </div>
+          </Alert>
         ) : null}
 
         {/* SUMMARY CARDS */}
