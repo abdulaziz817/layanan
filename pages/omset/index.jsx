@@ -1,6 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { parseWhatsapp } from "../../utils/parseWhatsapp";
-import netlifyIdentity from "netlify-identity-widget";
+
+/**
+ * Netlify Identity widget kadang bikin tombol "Login" tidak jalan kalau di-import langsung
+ * di Next.js (SSR/hydration). Jadi kita require hanya di client.
+ */
+function getIdentity() {
+  if (typeof window === "undefined") return null;
+  // eslint-disable-next-line global-require
+  return require("netlify-identity-widget");
+}
 
 const rupiah = (n) =>
   new Intl.NumberFormat("id-ID", {
@@ -32,11 +41,15 @@ function IconEye({ off = false, size = 18 }) {
         <path d="M10.6 10.6a2.5 2.5 0 003.3 3.3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
         <path
           d="M9.8 5.2A10.8 10.8 0 0112 4.75C18.2 4.75 22 12 22 12a18.7 18.7 0 01-3 4"
-          stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
         />
         <path
           d="M6.2 6.2A18.7 18.7 0 002 12s3.8 7.25 10 7.25c1.3 0 2.5-.2 3.6-.55"
-          stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
         />
       </svg>
     );
@@ -78,6 +91,8 @@ function IconButton({ onClick, label, children }) {
         color: ui.text,
         cursor: "pointer",
         transition: "background 120ms ease, transform 120ms ease",
+        position: "relative",
+        zIndex: 10,
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.background = "rgba(15,23,42,0.06)";
@@ -103,6 +118,9 @@ function Button({ children, onClick, variant = "ghost", disabled = false }) {
     fontSize: 13,
     transition: "transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease",
     userSelect: "none",
+    position: "relative",
+    zIndex: 10, // biar gak ketutup overlay
+    pointerEvents: disabled ? "none" : "auto",
   };
 
   const styles =
@@ -187,7 +205,6 @@ export default function OmsetPage() {
   const [err, setErr] = useState("");
   const [hideAmount, setHideAmount] = useState(false);
 
-  // ✅ state buat user identity (biar tombol login/logout enak)
   const [user, setUser] = useState(null);
 
   const maskMoney = (n) => (hideAmount ? "••••••" : rupiah(n));
@@ -200,7 +217,6 @@ export default function OmsetPage() {
   // ✅ localhost pakai /api, netlify pakai /.netlify/functions
   const API_BASE = process.env.NODE_ENV === "production" ? "/.netlify/functions" : "/api";
 
-  // ✅ helper aman baca JSON
   async function safeJson(res) {
     try {
       return await res.json();
@@ -209,14 +225,15 @@ export default function OmsetPage() {
     }
   }
 
-  // ✅ fetch yang otomatis bawa token Netlify Identity
   async function authFetch(path, options = {}) {
-    // pastiin identity udah init
-    netlifyIdentity.init();
+    const identity = getIdentity();
+    if (!identity) throw new Error("Identity belum siap");
 
-    const u = netlifyIdentity.currentUser();
+    identity.init();
+
+    const u = identity.currentUser();
     if (!u) {
-      netlifyIdentity.open(); // munculin popup login
+      identity.open();
       throw new Error("Silakan login dulu (Netlify Identity).");
     }
 
@@ -235,15 +252,11 @@ export default function OmsetPage() {
   async function loadAll() {
     setErr("");
     try {
-      const [s, l] = await Promise.all([
-        authFetch("/omset-summary"),
-        authFetch("/omset-list"),
-      ]);
+      const [s, l] = await Promise.all([authFetch("/omset-summary"), authFetch("/omset-list")]);
 
       const sj = await safeJson(s);
       const lj = await safeJson(l);
 
-      // fungsi kamu balikin { error: "..."} bukan { message: "..."}
       if (!s.ok) throw new Error(sj?.error || sj?.message || "Gagal load summary");
       if (!l.ok) throw new Error(lj?.error || lj?.message || "Gagal load list");
 
@@ -255,25 +268,26 @@ export default function OmsetPage() {
   }
 
   useEffect(() => {
-    netlifyIdentity.init();
+    const identity = getIdentity();
+    if (!identity) return;
 
-    const u = netlifyIdentity.currentUser();
-    setUser(u || null);
+    identity.init();
 
-    netlifyIdentity.on("login", (u2) => {
+    setUser(identity.currentUser() || null);
+
+    identity.on("login", (u2) => {
       setUser(u2);
-      netlifyIdentity.close();
-      loadAll(); // reload data setelah login
+      identity.close();
+      loadAll();
     });
 
-    netlifyIdentity.on("logout", () => {
+    identity.on("logout", () => {
       setUser(null);
       setSummary(null);
       setRows([]);
       setErr("Kamu logout. Silakan login lagi untuk lihat omset.");
     });
 
-    // coba load data (kalau belum login akan munculin error + user bisa klik login)
     loadAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -342,7 +356,7 @@ export default function OmsetPage() {
             </div>
           </div>
 
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center", position: "relative", zIndex: 10 }}>
             <IconButton
               onClick={() => setHideAmount((v) => !v)}
               label={hideAmount ? "Tampilkan angka" : "Sembunyikan angka"}
@@ -350,13 +364,12 @@ export default function OmsetPage() {
               <IconEye off={hideAmount} />
             </IconButton>
 
-            {/* ✅ Login / Logout */}
             {!user ? (
-              <Button variant="primary" onClick={() => netlifyIdentity.open()}>
+              <Button variant="primary" onClick={() => getIdentity()?.open()}>
                 Login
               </Button>
             ) : (
-              <Button onClick={() => netlifyIdentity.logout()}>Logout</Button>
+              <Button onClick={() => getIdentity()?.logout()}>Logout</Button>
             )}
           </div>
         </div>
