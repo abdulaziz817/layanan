@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { parseWhatsapp } from "../../utils/parseWhatsapp";
+import netlifyIdentity from "netlify-identity-widget";
 
 const rupiah = (n) =>
   new Intl.NumberFormat("id-ID", {
@@ -186,6 +187,9 @@ export default function OmsetPage() {
   const [err, setErr] = useState("");
   const [hideAmount, setHideAmount] = useState(false);
 
+  // ✅ state buat user identity (biar tombol login/logout enak)
+  const [user, setUser] = useState(null);
+
   const maskMoney = (n) => (hideAmount ? "••••••" : rupiah(n));
 
   const canSave = useMemo(
@@ -193,7 +197,7 @@ export default function OmsetPage() {
     [data]
   );
 
-  // ✅ ini yang bener: localhost pakai /api, netlify pakai /.netlify/functions
+  // ✅ localhost pakai /api, netlify pakai /.netlify/functions
   const API_BASE = process.env.NODE_ENV === "production" ? "/.netlify/functions" : "/api";
 
   // ✅ helper aman baca JSON
@@ -205,19 +209,43 @@ export default function OmsetPage() {
     }
   }
 
+  // ✅ fetch yang otomatis bawa token Netlify Identity
+  async function authFetch(path, options = {}) {
+    // pastiin identity udah init
+    netlifyIdentity.init();
+
+    const u = netlifyIdentity.currentUser();
+    if (!u) {
+      netlifyIdentity.open(); // munculin popup login
+      throw new Error("Silakan login dulu (Netlify Identity).");
+    }
+
+    const token = await u.jwt(true);
+
+    return fetch(`${API_BASE}${path}`, {
+      ...options,
+      headers: {
+        ...(options.headers || {}),
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+  }
+
   async function loadAll() {
     setErr("");
     try {
       const [s, l] = await Promise.all([
-        fetch(`${API_BASE}/omset-summary`),
-        fetch(`${API_BASE}/omset-list`),
+        authFetch("/omset-summary"),
+        authFetch("/omset-list"),
       ]);
 
       const sj = await safeJson(s);
       const lj = await safeJson(l);
 
-      if (!s.ok) throw new Error(sj?.message || "Gagal load summary");
-      if (!l.ok) throw new Error(lj?.message || "Gagal load list");
+      // fungsi kamu balikin { error: "..."} bukan { message: "..."}
+      if (!s.ok) throw new Error(sj?.error || sj?.message || "Gagal load summary");
+      if (!l.ok) throw new Error(lj?.error || lj?.message || "Gagal load list");
 
       setSummary(sj);
       setRows(lj?.rows || []);
@@ -227,6 +255,25 @@ export default function OmsetPage() {
   }
 
   useEffect(() => {
+    netlifyIdentity.init();
+
+    const u = netlifyIdentity.currentUser();
+    setUser(u || null);
+
+    netlifyIdentity.on("login", (u2) => {
+      setUser(u2);
+      netlifyIdentity.close();
+      loadAll(); // reload data setelah login
+    });
+
+    netlifyIdentity.on("logout", () => {
+      setUser(null);
+      setSummary(null);
+      setRows([]);
+      setErr("Kamu logout. Silakan login lagi untuk lihat omset.");
+    });
+
+    // coba load data (kalau belum login akan munculin error + user bisa klik login)
     loadAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -248,9 +295,8 @@ export default function OmsetPage() {
     setErr("");
 
     try {
-      const res = await fetch(`${API_BASE}/omset-add`, {
+      const res = await authFetch("/omset-add", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           tanggal: new Date().toISOString().slice(0, 10),
           nama: data.nama || "",
@@ -261,7 +307,7 @@ export default function OmsetPage() {
       });
 
       const out = await safeJson(res);
-      if (!res.ok) throw new Error(out?.message || "Gagal simpan");
+      if (!res.ok) throw new Error(out?.error || out?.message || "Gagal simpan");
 
       setRaw("");
       setData({ nama: "", whatsapp: "", layanan: "", durasi: "", metode: "", harga: 0 });
@@ -303,6 +349,15 @@ export default function OmsetPage() {
             >
               <IconEye off={hideAmount} />
             </IconButton>
+
+            {/* ✅ Login / Logout */}
+            {!user ? (
+              <Button variant="primary" onClick={() => netlifyIdentity.open()}>
+                Login
+              </Button>
+            ) : (
+              <Button onClick={() => netlifyIdentity.logout()}>Logout</Button>
+            )}
           </div>
         </div>
 
