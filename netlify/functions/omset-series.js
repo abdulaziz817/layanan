@@ -1,3 +1,4 @@
+// netlify/functions/omset-series.js
 const { google } = require("googleapis");
 
 function requireAdmin(context) {
@@ -34,12 +35,18 @@ function requireAdmin(context) {
 }
 
 exports.handler = async (event, context) => {
-  // 🔒 Guard: wajib admin
+  // 🔒 Guard admin
   const authz = requireAdmin(context);
-  if (!authz.ok) return authz;
+  if (!authz.ok) {
+    return {
+      statusCode: authz.statusCode,
+      headers: { "Content-Type": "application/json" },
+      body: authz.body,
+    };
+  }
 
   try {
-    // (opsional) Biar hanya GET yang boleh
+    // (opsional) batasi hanya GET
     if (event.httpMethod && event.httpMethod !== "GET") {
       return { statusCode: 405, body: "Method Not Allowed" };
     }
@@ -60,21 +67,30 @@ exports.handler = async (event, context) => {
       range: "Omset!A:E",
     });
 
-    const rows = (res.data.values || []).slice(1).reverse().slice(0, 20);
+    const all = res.data.values || [];
+    const rows = all.slice(1); // skip header
 
-    const mapped = rows.map((r, i) => ({
-      id: i + 1,
-      tanggal: r[0] || "",
-      nama: r[1] || "",
-      layanan: r[2] || "",
-      metode: r[3] || "",
-      pemasukan: Number(r[4] || 0),
-    }));
+    // kumpulin total per tanggal
+    const map = new Map(); // tanggal => total
+    for (const r of rows) {
+      const tanggal = String(r[0] || "").trim();
+      const pemasukan = Number(r[4] || 0);
+      if (!tanggal) continue;
+      map.set(tanggal, (map.get(tanggal) || 0) + (Number.isFinite(pemasukan) ? pemasukan : 0));
+    }
+
+    // sort by tanggal asc
+    const out = Array.from(map.entries())
+      .map(([tanggal, total]) => ({ tanggal, total }))
+      .sort((a, b) => a.tanggal.localeCompare(b.tanggal));
+
+    // ambil 30 data terakhir
+    const last30 = out.slice(-30);
 
     return {
       statusCode: 200,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ rows: mapped }),
+      body: JSON.stringify({ points: last30 }),
     };
   } catch (e) {
     return {

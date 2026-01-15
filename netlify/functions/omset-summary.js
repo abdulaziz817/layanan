@@ -1,10 +1,61 @@
 const { google } = require("googleapis");
 
-exports.handler = async () => {
+function requireAdmin(context) {
+  const user = context && context.clientContext && context.clientContext.user;
+
+  if (!user) {
+    return {
+      ok: false,
+      statusCode: 401,
+      body: JSON.stringify({ error: "Unauthorized: login dulu" }),
+    };
+  }
+
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const userEmail = user.email;
+
+  if (!adminEmail) {
+    return {
+      ok: false,
+      statusCode: 500,
+      body: JSON.stringify({ error: "Server misconfig: ADMIN_EMAIL belum di-set" }),
+    };
+  }
+
+  if (!userEmail || userEmail.toLowerCase() !== adminEmail.toLowerCase()) {
+    return {
+      ok: false,
+      statusCode: 403,
+      body: JSON.stringify({ error: "Forbidden: bukan admin" }),
+    };
+  }
+
+  return { ok: true, user };
+}
+
+exports.handler = async (event, context) => {
+  // 🔒 Guard admin
+  const authz = requireAdmin(context);
+  if (!authz.ok) {
+    return {
+      statusCode: authz.statusCode,
+      headers: { "Content-Type": "application/json" },
+      body: authz.body,
+    };
+  }
+
   try {
+    // (opsional) batasi hanya GET
+    if (event.httpMethod && event.httpMethod !== "GET") {
+      return { statusCode: 405, body: "Method Not Allowed" };
+    }
+
+    const privateKeyRaw = process.env.GOOGLE_PRIVATE_KEY || "";
+    const privateKey = privateKeyRaw.replace(/\\n/g, "\n");
+
     const auth = new google.auth.JWT({
       email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-      key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+      key: privateKey,
       scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
     });
 
@@ -31,18 +82,18 @@ exports.handler = async () => {
       transaksi_total = data.length;
 
     data.forEach((r) => {
-      const tanggal = r[0];
+      const tanggal = String(r[0] || "").trim();
       const pemasukan = Number(r[4] || 0);
 
       if (tanggal === todayStr) {
         today += pemasukan;
         transaksi_today++;
       }
-      if (tanggal?.startsWith(monthStr)) {
+      if (tanggal.startsWith(monthStr)) {
         month += pemasukan;
         transaksi_month++;
       }
-      if (tanggal?.startsWith(yearStr)) {
+      if (tanggal.startsWith(yearStr)) {
         year += pemasukan;
         transaksi_year++;
       }
@@ -50,6 +101,7 @@ exports.handler = async () => {
 
     return {
       statusCode: 200,
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         today,
         month,
@@ -63,6 +115,7 @@ exports.handler = async () => {
   } catch (e) {
     return {
       statusCode: 500,
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ error: e.message }),
     };
   }
