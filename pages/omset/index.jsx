@@ -8,7 +8,8 @@ import { parseWhatsapp } from "../../utils/parseWhatsapp";
 function getIdentity() {
   if (typeof window === "undefined") return null;
   // eslint-disable-next-line global-require
-  return require("netlify-identity-widget");
+  const mod = require("netlify-identity-widget");
+  return mod?.default || mod; // aman kalau export default
 }
 
 const rupiah = (n) =>
@@ -63,11 +64,7 @@ function IconEye({ off = false, size = 18 }) {
         strokeWidth="2"
         strokeLinejoin="round"
       />
-      <path
-        d="M12 15.25a3.25 3.25 0 100-6.5 3.25 3.25 0 000 6.5z"
-        stroke="currentColor"
-        strokeWidth="2"
-      />
+      <path d="M12 15.25a3.25 3.25 0 100-6.5 3.25 3.25 0 000 6.5z" stroke="currentColor" strokeWidth="2" />
     </svg>
   );
 }
@@ -91,8 +88,6 @@ function IconButton({ onClick, label, children }) {
         color: ui.text,
         cursor: "pointer",
         transition: "background 120ms ease, transform 120ms ease",
-        position: "relative",
-        zIndex: 10,
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.background = "rgba(15,23,42,0.06)";
@@ -118,9 +113,6 @@ function Button({ children, onClick, variant = "ghost", disabled = false }) {
     fontSize: 13,
     transition: "transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease",
     userSelect: "none",
-    position: "relative",
-    zIndex: 10, // biar gak ketutup overlay
-    pointerEvents: disabled ? "none" : "auto",
   };
 
   const styles =
@@ -188,7 +180,6 @@ function Card({ title, value, sub }) {
 
 export default function OmsetPage() {
   const [raw, setRaw] = useState("");
-
   const [data, setData] = useState({
     nama: "",
     whatsapp: "",
@@ -204,15 +195,11 @@ export default function OmsetPage() {
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
   const [hideAmount, setHideAmount] = useState(false);
-
   const [user, setUser] = useState(null);
 
   const maskMoney = (n) => (hideAmount ? "••••••" : rupiah(n));
 
-  const canSave = useMemo(
-    () => (data?.harga || 0) > 0 && !!(data?.nama || data?.layanan),
-    [data]
-  );
+  const canSave = useMemo(() => (data?.harga || 0) > 0 && !!(data?.nama || data?.layanan), [data]);
 
   // ✅ localhost pakai /api, netlify pakai /.netlify/functions
   const API_BASE = process.env.NODE_ENV === "production" ? "/.netlify/functions" : "/api";
@@ -225,6 +212,21 @@ export default function OmsetPage() {
     }
   }
 
+  function openLogin() {
+    const identity = getIdentity();
+    if (!identity) {
+      setErr("Netlify Identity belum siap. Coba refresh.");
+      return;
+    }
+
+    try {
+      identity.init();
+      identity.open("login"); // paksa mode login
+    } catch (e) {
+      setErr(e?.message || "Gagal buka login.");
+    }
+  }
+
   async function authFetch(path, options = {}) {
     const identity = getIdentity();
     if (!identity) throw new Error("Identity belum siap");
@@ -233,7 +235,7 @@ export default function OmsetPage() {
 
     const u = identity.currentUser();
     if (!u) {
-      identity.open();
+      // jangan auto-open terus menerus, cukup lempar error biar UI minta login
       throw new Error("Silakan login dulu (Netlify Identity).");
     }
 
@@ -272,23 +274,34 @@ export default function OmsetPage() {
     if (!identity) return;
 
     identity.init();
-
     setUser(identity.currentUser() || null);
 
-    identity.on("login", (u2) => {
+    const onLogin = (u2) => {
       setUser(u2);
       identity.close();
       loadAll();
-    });
+    };
 
-    identity.on("logout", () => {
+    const onLogout = () => {
       setUser(null);
       setSummary(null);
       setRows([]);
       setErr("Kamu logout. Silakan login lagi untuk lihat omset.");
-    });
+    };
 
+    identity.on("login", onLogin);
+    identity.on("logout", onLogout);
+
+    // coba load data pertama kali
     loadAll();
+
+    return () => {
+      // beberapa versi widget gak punya off(), jadi try/catch
+      try {
+        identity.off("login", onLogin);
+        identity.off("logout", onLogout);
+      } catch {}
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -356,7 +369,7 @@ export default function OmsetPage() {
             </div>
           </div>
 
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center", position: "relative", zIndex: 10 }}>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
             <IconButton
               onClick={() => setHideAmount((v) => !v)}
               label={hideAmount ? "Tampilkan angka" : "Sembunyikan angka"}
@@ -365,11 +378,19 @@ export default function OmsetPage() {
             </IconButton>
 
             {!user ? (
-              <Button variant="primary" onClick={() => getIdentity()?.open()}>
+              <Button variant="primary" onClick={openLogin}>
                 Login
               </Button>
             ) : (
-              <Button onClick={() => getIdentity()?.logout()}>Logout</Button>
+              <Button
+                onClick={() => {
+                  const identity = getIdentity();
+                  if (!identity) return;
+                  identity.logout();
+                }}
+              >
+                Logout
+              </Button>
             )}
           </div>
         </div>
