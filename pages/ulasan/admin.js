@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import RatingStars from "../../components/ui/RatingStars";
+import netlifyIdentity from "netlify-identity-widget";
 
 export default function UlasanAdminPage() {
   const [items, setItems] = useState([]);
@@ -22,7 +23,29 @@ export default function UlasanAdminPage() {
     }
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+
+    const onLogin = () => {
+      netlifyIdentity.close();
+      // setelah login, token sudah ada -> ambil data lagi
+      load();
+    };
+
+    const onLogout = () => {
+      // habis logout, data kosongin + tampil error lagi
+      setItems([]);
+      setErr("Unauthorized: login dulu");
+    };
+
+    netlifyIdentity.on("login", onLogin);
+    netlifyIdentity.on("logout", onLogout);
+
+    return () => {
+      netlifyIdentity.off("login", onLogin);
+      netlifyIdentity.off("logout", onLogout);
+    };
+  }, []);
 
   const filtered = useMemo(() => {
     const qq = q.trim().toLowerCase();
@@ -36,8 +59,10 @@ export default function UlasanAdminPage() {
 
   const stats = useMemo(() => {
     const n = items.length || 1;
-    const avgP = items.reduce((a, b) => a + (Number(b.rating_produk) || 0), 0) / n;
-    const avgT = items.reduce((a, b) => a + (Number(b.rating_toko) || 0), 0) / n;
+    const avgP =
+      items.reduce((a, b) => a + (Number(b.rating_produk) || 0), 0) / n;
+    const avgT =
+      items.reduce((a, b) => a + (Number(b.rating_toko) || 0), 0) / n;
     return {
       total: items.length,
       avgProduk: Math.round(avgP * 10) / 10,
@@ -55,17 +80,57 @@ export default function UlasanAdminPage() {
             <p style={a.sub}>Semua ulasan dari tab “ulasan” di spreadsheet kamu.</p>
           </div>
 
-          <button onClick={load} disabled={loading} style={{ ...a.btn, opacity: loading ? 0.6 : 1 }}>
-            {loading ? "Loading..." : "Refresh"}
-          </button>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <button
+              onClick={() => netlifyIdentity.open()}
+              style={{
+                ...a.btn,
+                borderColor: "#0F172A",
+                background: "#0F172A",
+                color: "#fff",
+              }}
+            >
+              Login Admin
+            </button>
+
+            <button onClick={() => netlifyIdentity.logout()} style={a.btn}>
+              Logout
+            </button>
+
+            <button
+              onClick={load}
+              disabled={loading}
+              style={{ ...a.btn, opacity: loading ? 0.6 : 1 }}
+            >
+              {loading ? "Loading..." : "Refresh"}
+            </button>
+          </div>
         </div>
 
         {err && (
           <div style={a.alert}>
             <div style={{ fontWeight: 900 }}>Akses ditolak / error</div>
             <div style={{ marginTop: 6 }}>{err}</div>
-            <div style={{ marginTop: 6, color: "#64748B" }}>
-              Login dulu pakai Netlify Identity dengan email admin.
+            <div style={{ marginTop: 8, color: "#64748B" }}>
+              Klik <b>Login Admin</b> lalu masuk pakai akun Netlify Identity dengan email yang sama seperti <b>ADMIN_EMAIL</b>.
+            </div>
+
+            <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <button
+                onClick={() => netlifyIdentity.open()}
+                style={{
+                  ...a.btn,
+                  borderColor: "#0F172A",
+                  background: "#0F172A",
+                  color: "#fff",
+                }}
+              >
+                Login Admin
+              </button>
+
+              <button onClick={load} style={a.btn}>
+                Coba lagi
+              </button>
             </div>
           </div>
         )}
@@ -99,7 +164,9 @@ export default function UlasanAdminPage() {
 
             <div style={a.list}>
               {loading && <div style={a.muted}>Mengambil data…</div>}
-              {!loading && filtered.length === 0 && <div style={a.muted}>Belum ada ulasan.</div>}
+              {!loading && filtered.length === 0 && (
+                <div style={a.muted}>Belum ada ulasan.</div>
+              )}
 
               {!loading &&
                 filtered.map((it) => (
@@ -108,7 +175,9 @@ export default function UlasanAdminPage() {
                       <div>
                         <div style={a.name}>{it.nama || "-"}</div>
                         <div style={a.time}>
-                          {it.created_at ? new Date(it.created_at).toLocaleString() : "-"}
+                          {it.created_at
+                            ? new Date(it.created_at).toLocaleString()
+                            : "-"}
                         </div>
                       </div>
 
@@ -143,8 +212,20 @@ const a = {
       "radial-gradient(900px 500px at 10% 0%, rgba(15,23,42,0.08), transparent 60%), linear-gradient(180deg, #fff 0%, #F8FAFC 100%)",
   },
   shell: { maxWidth: 1100, margin: "0 auto" },
-  kicker: { fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", color: "#64748B", fontWeight: 900 },
-  top: { display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 16, marginBottom: 18 },
+  kicker: {
+    fontSize: 12,
+    letterSpacing: "0.12em",
+    textTransform: "uppercase",
+    color: "#64748B",
+    fontWeight: 900,
+  },
+  top: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+    gap: 16,
+    marginBottom: 18,
+  },
   h1: { margin: "8px 0 8px", fontSize: 34, letterSpacing: "-0.04em", color: "#0F172A" },
   sub: { margin: 0, color: "#64748B", lineHeight: 1.7 },
 
@@ -166,7 +247,12 @@ const a = {
     color: "#991B1B",
   },
 
-  stats: { display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 12 },
+  stats: {
+    display: "grid",
+    gridTemplateColumns: "repeat(3, 1fr)",
+    gap: 12,
+    marginBottom: 12,
+  },
   statCard: {
     borderRadius: 18,
     border: "1px solid rgba(15,23,42,0.10)",
@@ -177,7 +263,12 @@ const a = {
   statLabel: { fontSize: 12, color: "#64748B", fontWeight: 900 },
   statValue: { marginTop: 6, fontSize: 24, fontWeight: 1000, color: "#0F172A" },
 
-  toolbar: { display: "flex", alignItems: "center", gap: 12, margin: "10px 0 12px" },
+  toolbar: {
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    margin: "10px 0 12px",
+  },
   search: {
     flex: 1,
     borderRadius: 16,
@@ -204,7 +295,12 @@ const a = {
     boxShadow: "0 14px 50px rgba(2,6,23,0.07)",
     padding: 14,
   },
-  itemHead: { display: "flex", justifyContent: "space-between", gap: 12, alignItems: "flex-start" },
+  itemHead: {
+    display: "flex",
+    justifyContent: "space-between",
+    gap: 12,
+    alignItems: "flex-start",
+  },
   name: { fontWeight: 1000, color: "#0F172A", fontSize: 16 },
   time: { marginTop: 4, fontSize: 12, color: "#94A3B8" },
 
@@ -218,7 +314,12 @@ const a = {
   },
   rLabel: { fontSize: 12, color: "#64748B", fontWeight: 900, marginBottom: 6 },
 
-  msg: { marginTop: 10, whiteSpace: "pre-wrap", color: "#0F172A", lineHeight: 1.7 },
+  msg: {
+    marginTop: 10,
+    whiteSpace: "pre-wrap",
+    color: "#0F172A",
+    lineHeight: 1.7,
+  },
   muted: {
     borderRadius: 18,
     border: "1px solid rgba(15,23,42,0.10)",
