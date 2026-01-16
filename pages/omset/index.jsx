@@ -1,17 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { parseWhatsapp } from "../../utils/parseWhatsapp";
 import RatingStars from "../../components/ui/RatingStars";
-
-/**
- * Netlify Identity widget kadang bikin tombol "Login" tidak jalan kalau di-import langsung
- * di Next.js (SSR/hydration). Jadi kita require hanya di client.
- */
-function getIdentity() {
-  if (typeof window === "undefined") return null;
-  // eslint-disable-next-line global-require
-  const mod = require("netlify-identity-widget");
-  return mod?.default || mod; // aman kalau export default
-}
+import netlifyIdentity from "netlify-identity-widget";
 
 const rupiah = (n) =>
   new Intl.NumberFormat("id-ID", {
@@ -37,36 +27,11 @@ const ui = {
 
 function Alert({ type = "info", children, onClose }) {
   const map = {
-    info: {
-      border: "rgba(59,130,246,0.35)",
-      bg: "rgba(59,130,246,0.08)",
-      text: "#1d4ed8",
-      icon: "ℹ️",
-      label: "Info",
-    },
-    success: {
-      border: "rgba(34,197,94,0.35)",
-      bg: "rgba(34,197,94,0.10)",
-      text: "#166534",
-      icon: "✅",
-      label: "Berhasil",
-    },
-    warning: {
-      border: "rgba(245,158,11,0.35)",
-      bg: "rgba(245,158,11,0.10)",
-      text: "#92400e",
-      icon: "⚠️",
-      label: "Peringatan",
-    },
-    error: {
-      border: "rgba(239,68,68,0.35)",
-      bg: "rgba(239,68,68,0.08)",
-      text: "#b91c1c",
-      icon: "⛔",
-      label: "Error",
-    },
+    info: { border: "rgba(59,130,246,0.35)", bg: "rgba(59,130,246,0.08)", text: "#1d4ed8", icon: "ℹ️", label: "Info" },
+    success: { border: "rgba(34,197,94,0.35)", bg: "rgba(34,197,94,0.10)", text: "#166534", icon: "✅", label: "Berhasil" },
+    warning: { border: "rgba(245,158,11,0.35)", bg: "rgba(245,158,11,0.10)", text: "#92400e", icon: "⚠️", label: "Peringatan" },
+    error: { border: "rgba(239,68,68,0.35)", bg: "rgba(239,68,68,0.08)", text: "#b91c1c", icon: "⛔", label: "Error" },
   };
-
   const t = map[type] || map.info;
 
   return (
@@ -87,16 +52,10 @@ function Alert({ type = "info", children, onClose }) {
       }}
     >
       <div style={{ fontSize: 16, lineHeight: 1.2, marginTop: 1 }}>{t.icon}</div>
-
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontWeight: 900, fontSize: 12, marginBottom: 4, opacity: 0.9 }}>
-          {t.label}
-        </div>
-        <div style={{ fontWeight: 700, lineHeight: 1.4, wordBreak: "break-word" }}>
-          {children}
-        </div>
+        <div style={{ fontWeight: 900, fontSize: 12, marginBottom: 4, opacity: 0.9 }}>{t.label}</div>
+        <div style={{ fontWeight: 700, lineHeight: 1.4, wordBreak: "break-word" }}>{children}</div>
       </div>
-
       {onClose ? (
         <button
           type="button"
@@ -143,7 +102,6 @@ function IconEye({ off = false, size = 18 }) {
       </svg>
     );
   }
-
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path
@@ -205,18 +163,8 @@ function Button({ children, onClick, variant = "ghost", disabled = false }) {
 
   const styles =
     variant === "primary"
-      ? {
-          border: "1px solid #0f172a",
-          background: disabled ? "#94a3b8" : "#0f172a",
-          color: "white",
-          boxShadow: ui.shadow,
-        }
-      : {
-          border: `1px solid ${ui.border}`,
-          background: ui.cardBg,
-          color: ui.text,
-          boxShadow: ui.shadow,
-        };
+      ? { border: "1px solid #0f172a", background: disabled ? "#94a3b8" : "#0f172a", color: "white", boxShadow: ui.shadow }
+      : { border: `1px solid ${ui.border}`, background: ui.cardBg, color: ui.text, boxShadow: ui.shadow };
 
   return (
     <button
@@ -249,7 +197,6 @@ function Card({ title, value, sub }) {
       }}
     >
       <div style={{ color: ui.muted, fontSize: 12, marginBottom: 6, fontWeight: 800 }}>{title}</div>
-
       <div
         style={{
           fontSize: 20,
@@ -262,7 +209,6 @@ function Card({ title, value, sub }) {
       >
         {value}
       </div>
-
       {sub ? <div style={{ color: ui.muted, fontSize: 12, marginTop: 8 }}>{sub}</div> : null}
     </div>
   );
@@ -281,8 +227,6 @@ export default function OmsetPage() {
 
   const [rows, setRows] = useState([]);
   const [summary, setSummary] = useState(null);
-
-  // ✅ tambah: data ulasan buat rating
   const [ulasanItems, setUlasanItems] = useState([]);
 
   const [saving, setSaving] = useState(false);
@@ -293,7 +237,6 @@ export default function OmsetPage() {
   const maskMoney = (n) => (hideAmount ? "••••••" : rupiah(n));
   const canSave = useMemo(() => (data?.harga || 0) > 0 && !!(data?.nama || data?.layanan), [data]);
 
-  // ✅ localhost pakai /api, netlify pakai /.netlify/functions
   const API_BASE = process.env.NODE_ENV === "production" ? "/.netlify/functions" : "/api";
 
   async function safeJson(res) {
@@ -305,32 +248,19 @@ export default function OmsetPage() {
   }
 
   function openLogin() {
-    const identity = getIdentity();
-    if (!identity) {
-      setErr("Netlify Identity belum siap. Coba refresh.");
-      return;
-    }
-
     try {
-      identity.init();
-      identity.open("login"); // paksa mode login
+      netlifyIdentity.init();
+      netlifyIdentity.open("login");
     } catch (e) {
       setErr(e?.message || "Gagal buka login.");
     }
   }
 
   async function authFetch(path, options = {}) {
-    const identity = getIdentity();
-    if (!identity) throw new Error("Identity belum siap");
-
-    identity.init();
-
-    const u = identity.currentUser();
-    if (!u) {
-      throw new Error("Silakan login dulu (Netlify Identity).");
-    }
-
-    const token = await u.jwt(true);
+    netlifyIdentity.init();
+    const u = netlifyIdentity.currentUser();
+    if (!u) throw new Error("Silakan login dulu (Netlify Identity).");
+    const token = await u.jwt(); // ✅ ini penting
 
     return fetch(`${API_BASE}${path}`, {
       ...options,
@@ -345,8 +275,12 @@ export default function OmsetPage() {
   async function loadAll() {
     setErr("");
     try {
-      // ✅ tambah ulasan-list
-      const [s, l, u] = await Promise.all([
+      const u = netlifyIdentity.currentUser();
+      setUser(u || null);
+
+      if (!u) throw new Error("Silakan login dulu (Netlify Identity).");
+
+      const [s, l, ul] = await Promise.all([
         authFetch("/omset-summary"),
         authFetch("/omset-list"),
         authFetch("/ulasan-list"),
@@ -354,32 +288,31 @@ export default function OmsetPage() {
 
       const sj = await safeJson(s);
       const lj = await safeJson(l);
-      const uj = await safeJson(u);
+      const uj = await safeJson(ul);
 
       if (!s.ok) throw new Error(sj?.error || sj?.message || "Gagal load summary");
       if (!l.ok) throw new Error(lj?.error || lj?.message || "Gagal load list");
-      if (!u.ok) throw new Error(uj?.error || uj?.message || "Gagal load ulasan");
+      if (!ul.ok) throw new Error(uj?.error || uj?.message || "Gagal load ulasan");
 
       setSummary(sj);
       setRows(lj?.rows || []);
-
-      // ✅ simpan items ulasan
       setUlasanItems(Array.isArray(uj?.items) ? uj.items : []);
     } catch (e) {
+      setSummary(null);
+      setRows([]);
+      setUlasanItems([]);
       setErr(e?.message || "Error");
     }
   }
 
   useEffect(() => {
-    const identity = getIdentity();
-    if (!identity) return;
+    netlifyIdentity.init();
 
-    identity.init();
-    setUser(identity.currentUser() || null);
+    setUser(netlifyIdentity.currentUser() || null);
 
-    const onLogin = (u2) => {
-      setUser(u2);
-      identity.close();
+    const onLogin = () => {
+      netlifyIdentity.close();
+      setUser(netlifyIdentity.currentUser() || null);
       loadAll();
     };
 
@@ -388,19 +321,18 @@ export default function OmsetPage() {
       setSummary(null);
       setRows([]);
       setUlasanItems([]);
-      setErr("Kamu sudah logout. Silakan login lagi untuk melihat omset.");
+      setErr("Kamu sudah logout. Silakan login lagi (Netlify Identity).");
     };
 
-    identity.on("login", onLogin);
-    identity.on("logout", onLogout);
+    netlifyIdentity.on("login", onLogin);
+    netlifyIdentity.on("logout", onLogout);
 
-    loadAll();
+    // coba load kalau sudah ada session
+    if (netlifyIdentity.currentUser()) loadAll();
 
     return () => {
-      try {
-        identity.off("login", onLogin);
-        identity.off("logout", onLogout);
-      } catch {}
+      netlifyIdentity.off("login", onLogin);
+      netlifyIdentity.off("logout", onLogout);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -446,7 +378,6 @@ export default function OmsetPage() {
     }
   }
 
-  // info vs error biar gak merah untuk logout/login
   const alertType = useMemo(() => {
     const msg = String(err || "").toLowerCase();
     if (!msg) return null;
@@ -454,11 +385,9 @@ export default function OmsetPage() {
     return "error";
   }, [err]);
 
-  // ✅ tambah: hitung rating stats
   const ulasanStats = useMemo(() => {
     const arr = Array.isArray(ulasanItems) ? ulasanItems : [];
     const n = arr.length || 0;
-
     const avgP = n ? arr.reduce((a, b) => a + (Number(b.rating_produk) || 0), 0) / n : 0;
     const avgT = n ? arr.reduce((a, b) => a + (Number(b.rating_toko) || 0), 0) / n : 0;
 
@@ -506,7 +435,6 @@ export default function OmsetPage() {
             Rekap otomatis dari Google Sheets (harian, bulanan, hingga tahunan)
           </p>
 
-          {/* BUTTON AREA */}
           <div
             style={{
               marginTop: 28,
@@ -529,16 +457,12 @@ export default function OmsetPage() {
                 Login
               </Button>
             ) : (
-              <Button
-                onClick={() => {
-                  const identity = getIdentity();
-                  if (!identity) return;
-                  identity.logout();
-                }}
-              >
-                Logout
-              </Button>
+              <Button onClick={() => netlifyIdentity.logout()}>Logout</Button>
             )}
+
+            {user ? (
+              <Button onClick={loadAll}>Refresh</Button>
+            ) : null}
           </div>
         </div>
 
@@ -575,7 +499,6 @@ export default function OmsetPage() {
           />
           <Card title="Total transaksi" value={summary ? String(summary.transaksi_total) : "…"} sub="Semua data" />
 
-          {/* ✅ TAMBAH 2 CARD RATING DI SINI (UI TETAP SAMA) */}
           <Card
             title="Rating Produk"
             value={
