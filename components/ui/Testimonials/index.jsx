@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import RatingStars from "../../components/ui/RatingStars";
+import RatingStars from "../RatingStars";
 
 export default function UlasanPage() {
   const [nama, setNama] = useState("");
