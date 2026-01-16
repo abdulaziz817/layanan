@@ -7,16 +7,34 @@ export default function UlasanAdminPage() {
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
+  const [me, setMe] = useState(null); // buat nampilin status login
+
+  async function getJwt() {
+    const user = netlifyIdentity.currentUser();
+    if (!user) return null;
+    // netlify-identity-widget: jwt() return Promise<string>
+    return await user.jwt();
+  }
 
   async function load() {
     setLoading(true);
     setErr("");
+
     try {
-      const res = await fetch("/.netlify/functions/ulasan-list");
+      const user = netlifyIdentity.currentUser();
+      setMe(user || null);
+
+      const token = await getJwt();
+      const res = await fetch("/.netlify/functions/ulasan-list", {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data?.error || data?.message || "Unauthorized");
+
       setItems(Array.isArray(data?.items) ? data.items : []);
     } catch (e) {
+      setItems([]);
       setErr(e.message || "Gagal mengambil data");
     } finally {
       setLoading(false);
@@ -24,16 +42,22 @@ export default function UlasanAdminPage() {
   }
 
   useEffect(() => {
+    // init kalau belum
+    netlifyIdentity.init();
+
+    // set status user awal
+    setMe(netlifyIdentity.currentUser() || null);
+
     load();
 
     const onLogin = () => {
       netlifyIdentity.close();
-      // setelah login, token sudah ada -> ambil data lagi
+      setMe(netlifyIdentity.currentUser() || null);
       load();
     };
 
     const onLogout = () => {
-      // habis logout, data kosongin + tampil error lagi
+      setMe(null);
       setItems([]);
       setErr("Unauthorized: login dulu");
     };
@@ -70,6 +94,12 @@ export default function UlasanAdminPage() {
     };
   }, [items]);
 
+  const meLabel =
+    me?.user_metadata?.full_name ||
+    me?.user_metadata?.name ||
+    me?.email ||
+    null;
+
   return (
     <div style={a.page}>
       <div style={a.shell}>
@@ -78,6 +108,11 @@ export default function UlasanAdminPage() {
             <div style={a.kicker}>Admin • Founder only</div>
             <h1 style={a.h1}>Ulasan</h1>
             <p style={a.sub}>Semua ulasan dari tab “ulasan” di spreadsheet kamu.</p>
+            {meLabel ? (
+              <div style={a.mePill}>Logged in as: <b>{meLabel}</b></div>
+            ) : (
+              <div style={a.mePillMuted}>Belum login</div>
+            )}
           </div>
 
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
@@ -112,25 +147,7 @@ export default function UlasanAdminPage() {
             <div style={{ fontWeight: 900 }}>Akses ditolak / error</div>
             <div style={{ marginTop: 6 }}>{err}</div>
             <div style={{ marginTop: 8, color: "#64748B" }}>
-              Klik <b>Login Admin</b> lalu masuk pakai akun Netlify Identity dengan email yang sama seperti <b>ADMIN_EMAIL</b>.
-            </div>
-
-            <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <button
-                onClick={() => netlifyIdentity.open()}
-                style={{
-                  ...a.btn,
-                  borderColor: "#0F172A",
-                  background: "#0F172A",
-                  color: "#fff",
-                }}
-              >
-                Login Admin
-              </button>
-
-              <button onClick={load} style={a.btn}>
-                Coba lagi
-              </button>
+              Kalau sudah login tapi masih 403, biasanya email kamu tidak sama dengan <b>ADMIN_EMAIL</b> di Netlify.
             </div>
           </div>
         )}
@@ -228,6 +245,27 @@ const a = {
   },
   h1: { margin: "8px 0 8px", fontSize: 34, letterSpacing: "-0.04em", color: "#0F172A" },
   sub: { margin: 0, color: "#64748B", lineHeight: 1.7 },
+
+  mePill: {
+    marginTop: 10,
+    display: "inline-block",
+    fontSize: 12,
+    color: "#0F172A",
+    border: "1px solid rgba(15,23,42,0.10)",
+    background: "rgba(255,255,255,0.85)",
+    padding: "8px 12px",
+    borderRadius: 999,
+  },
+  mePillMuted: {
+    marginTop: 10,
+    display: "inline-block",
+    fontSize: 12,
+    color: "#64748B",
+    border: "1px solid rgba(15,23,42,0.10)",
+    background: "rgba(255,255,255,0.85)",
+    padding: "8px 12px",
+    borderRadius: 999,
+  },
 
   btn: {
     borderRadius: 14,
