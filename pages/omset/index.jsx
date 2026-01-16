@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { parseWhatsapp } from "../../utils/parseWhatsapp";
-import RatingStars from "../../components/ui/RatingStars";
 import netlifyIdentity from "netlify-identity-widget";
 
 const rupiah = (n) =>
@@ -9,6 +8,13 @@ const rupiah = (n) =>
     currency: "IDR",
     maximumFractionDigits: 0,
   }).format(Number(n || 0));
+
+  const fmt1 = (n) => {
+  const x = Number(n || 0);
+  if (!Number.isFinite(x)) return "0.0";
+  return (Math.round(x * 10) / 10).toFixed(1);
+};
+
 
 /** ---------- UI TOKENS (biar konsisten & minimalis) ---------- */
 const ui = {
@@ -499,34 +505,40 @@ export default function OmsetPage() {
           />
           <Card title="Total transaksi" value={summary ? String(summary.transaksi_total) : "…"} sub="Semua data" />
 
-          <Card
-            title="Rating Produk"
-            value={
-              ulasanStats.total ? (
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <RatingStars value={Math.round(ulasanStats.avgProduk)} readOnly size={18} />
-                  <span style={{ fontWeight: 900 }}>{ulasanStats.avgProduk}/5</span>
-                </div>
-              ) : (
-                "—"
-              )
-            }
-            sub={ulasanStats.total ? `${ulasanStats.total} ulasan` : "Belum ada ulasan"}
-          />
-          <Card
-            title="Rating Toko"
-            value={
-              ulasanStats.total ? (
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <RatingStars value={Math.round(ulasanStats.avgToko)} readOnly size={18} />
-                  <span style={{ fontWeight: 900 }}>{ulasanStats.avgToko}/5</span>
-                </div>
-              ) : (
-                "—"
-              )
-            }
-            sub={ulasanStats.total ? `${ulasanStats.total} ulasan` : "Belum ada ulasan"}
-          />
+         <Card
+  title="Rating Produk"
+  value={
+    ulasanStats.total ? (
+      <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+        <span style={{ fontSize: 34, fontWeight: 950, letterSpacing: -0.8 }}>
+          {fmt1(ulasanStats.avgProduk)}
+        </span>
+        <span style={{ color: ui.muted, fontWeight: 800, fontSize: 14 }}>/ 5</span>
+      </div>
+    ) : (
+      "—"
+    )
+  }
+  sub={ulasanStats.total ? `${ulasanStats.total} ulasan` : "Belum ada ulasan"}
+/>
+
+<Card
+  title="Rating Toko"
+  value={
+    ulasanStats.total ? (
+      <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+        <span style={{ fontSize: 34, fontWeight: 950, letterSpacing: -0.8 }}>
+          {fmt1(ulasanStats.avgToko)}
+        </span>
+        <span style={{ color: ui.muted, fontWeight: 800, fontSize: 14 }}>/ 5</span>
+      </div>
+    ) : (
+      "—"
+    )
+  }
+  sub={ulasanStats.total ? `${ulasanStats.total} ulasan` : "Belum ada ulasan"}
+/>
+
         </div>
 
         {/* INPUT + TABLE */}
