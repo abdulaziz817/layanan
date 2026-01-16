@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { parseWhatsapp } from "../../utils/parseWhatsapp";
+import RatingStars from "../../components/ui/RatingStars";
 
 /**
  * Netlify Identity widget kadang bikin tombol "Login" tidak jalan kalau di-import langsung
@@ -248,6 +249,7 @@ function Card({ title, value, sub }) {
       }}
     >
       <div style={{ color: ui.muted, fontSize: 12, marginBottom: 6, fontWeight: 800 }}>{title}</div>
+
       <div
         style={{
           fontSize: 20,
@@ -260,6 +262,7 @@ function Card({ title, value, sub }) {
       >
         {value}
       </div>
+
       {sub ? <div style={{ color: ui.muted, fontSize: 12, marginTop: 8 }}>{sub}</div> : null}
     </div>
   );
@@ -278,6 +281,9 @@ export default function OmsetPage() {
 
   const [rows, setRows] = useState([]);
   const [summary, setSummary] = useState(null);
+
+  // ✅ tambah: data ulasan buat rating
+  const [ulasanItems, setUlasanItems] = useState([]);
 
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
@@ -339,16 +345,26 @@ export default function OmsetPage() {
   async function loadAll() {
     setErr("");
     try {
-      const [s, l] = await Promise.all([authFetch("/omset-summary"), authFetch("/omset-list")]);
+      // ✅ tambah ulasan-list
+      const [s, l, u] = await Promise.all([
+        authFetch("/omset-summary"),
+        authFetch("/omset-list"),
+        authFetch("/ulasan-list"),
+      ]);
 
       const sj = await safeJson(s);
       const lj = await safeJson(l);
+      const uj = await safeJson(u);
 
       if (!s.ok) throw new Error(sj?.error || sj?.message || "Gagal load summary");
       if (!l.ok) throw new Error(lj?.error || lj?.message || "Gagal load list");
+      if (!u.ok) throw new Error(uj?.error || uj?.message || "Gagal load ulasan");
 
       setSummary(sj);
       setRows(lj?.rows || []);
+
+      // ✅ simpan items ulasan
+      setUlasanItems(Array.isArray(uj?.items) ? uj.items : []);
     } catch (e) {
       setErr(e?.message || "Error");
     }
@@ -371,6 +387,7 @@ export default function OmsetPage() {
       setUser(null);
       setSummary(null);
       setRows([]);
+      setUlasanItems([]);
       setErr("Kamu sudah logout. Silakan login lagi untuk melihat omset.");
     };
 
@@ -437,78 +454,93 @@ export default function OmsetPage() {
     return "error";
   }, [err]);
 
+  // ✅ tambah: hitung rating stats
+  const ulasanStats = useMemo(() => {
+    const arr = Array.isArray(ulasanItems) ? ulasanItems : [];
+    const n = arr.length || 0;
+
+    const avgP = n ? arr.reduce((a, b) => a + (Number(b.rating_produk) || 0), 0) / n : 0;
+    const avgT = n ? arr.reduce((a, b) => a + (Number(b.rating_toko) || 0), 0) / n : 0;
+
+    return {
+      total: n,
+      avgProduk: Math.round(avgP * 10) / 10,
+      avgToko: Math.round(avgT * 10) / 10,
+    };
+  }, [ulasanItems]);
+
   return (
     <div style={{ background: ui.pageBg, minHeight: "100vh" }}>
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "22px 16px 28px" }}>
         {/* HEADER */}
-<div
-  style={{
-    marginTop: 80,
-    marginBottom: 64,
-    textAlign: "center",
-  }}
->
-  <h1
-    style={{
-      margin: 0,
-      fontSize: 36,
-      fontWeight: 700,
-      color: "#1f2937",
-      letterSpacing: -0.5,
-    }}
-  >
-    Dashboard Omset
-  </h1>
+        <div
+          style={{
+            marginTop: 80,
+            marginBottom: 64,
+            textAlign: "center",
+          }}
+        >
+          <h1
+            style={{
+              margin: 0,
+              fontSize: 36,
+              fontWeight: 700,
+              color: "#1f2937",
+              letterSpacing: -0.5,
+            }}
+          >
+            Dashboard Omset
+          </h1>
 
-  <p
-    style={{
-      marginTop: 16,
-      marginLeft: "auto",
-      marginRight: "auto",
-      maxWidth: 520,
-      fontSize: 18,
-      lineHeight: 1.6,
-      color: "#4b5563",
-    }}
-  >
-    Rekap otomatis dari Google Sheets (harian, bulanan, hingga tahunan)
-  </p>
+          <p
+            style={{
+              marginTop: 16,
+              marginLeft: "auto",
+              marginRight: "auto",
+              maxWidth: 520,
+              fontSize: 18,
+              lineHeight: 1.6,
+              color: "#4b5563",
+            }}
+          >
+            Rekap otomatis dari Google Sheets (harian, bulanan, hingga tahunan)
+          </p>
 
-  {/* BUTTON AREA */}
-  <div
-    style={{
-      marginTop: 28,
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      gap: 12,
-      flexWrap: "wrap",
-    }}
-  >
-    <IconButton
-      onClick={() => setHideAmount((v) => !v)}
-      label={hideAmount ? "Tampilkan angka" : "Sembunyikan angka"}
-    >
-      <IconEye off={hideAmount} />
-    </IconButton>
+          {/* BUTTON AREA */}
+          <div
+            style={{
+              marginTop: 28,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: 12,
+              flexWrap: "wrap",
+            }}
+          >
+            <IconButton
+              onClick={() => setHideAmount((v) => !v)}
+              label={hideAmount ? "Tampilkan angka" : "Sembunyikan angka"}
+            >
+              <IconEye off={hideAmount} />
+            </IconButton>
 
-    {!user ? (
-      <Button variant="primary" onClick={openLogin}>
-        Login
-      </Button>
-    ) : (
-      <Button
-        onClick={() => {
-          const identity = getIdentity();
-          if (!identity) return;
-          identity.logout();
-        }}
-      >
-        Logout
-      </Button>
-    )}
-  </div>
-</div>
+            {!user ? (
+              <Button variant="primary" onClick={openLogin}>
+                Login
+              </Button>
+            ) : (
+              <Button
+                onClick={() => {
+                  const identity = getIdentity();
+                  if (!identity) return;
+                  identity.logout();
+                }}
+              >
+                Logout
+              </Button>
+            )}
+          </div>
+        </div>
 
         {/* ALERT */}
         {err ? (
@@ -542,6 +574,36 @@ export default function OmsetPage() {
             sub={summary ? `${summary.transaksi_year} transaksi` : ""}
           />
           <Card title="Total transaksi" value={summary ? String(summary.transaksi_total) : "…"} sub="Semua data" />
+
+          {/* ✅ TAMBAH 2 CARD RATING DI SINI (UI TETAP SAMA) */}
+          <Card
+            title="Rating Produk"
+            value={
+              ulasanStats.total ? (
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <RatingStars value={Math.round(ulasanStats.avgProduk)} readOnly size={18} />
+                  <span style={{ fontWeight: 900 }}>{ulasanStats.avgProduk}/5</span>
+                </div>
+              ) : (
+                "—"
+              )
+            }
+            sub={ulasanStats.total ? `${ulasanStats.total} ulasan` : "Belum ada ulasan"}
+          />
+          <Card
+            title="Rating Toko"
+            value={
+              ulasanStats.total ? (
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <RatingStars value={Math.round(ulasanStats.avgToko)} readOnly size={18} />
+                  <span style={{ fontWeight: 900 }}>{ulasanStats.avgToko}/5</span>
+                </div>
+              ) : (
+                "—"
+              )
+            }
+            sub={ulasanStats.total ? `${ulasanStats.total} ulasan` : "Belum ada ulasan"}
+          />
         </div>
 
         {/* INPUT + TABLE */}
