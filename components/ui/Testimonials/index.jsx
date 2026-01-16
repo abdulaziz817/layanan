@@ -1,311 +1,239 @@
-import { useEffect, useMemo, useState } from "react";
-import RatingStars from "../RatingStars";
+"use client"
+import SectionWrapper from "../../SectionWrapper"
+import {
+    FaStar,
+    FaStarHalfAlt,
+    FaRegStar,
+    FaUserCircle,
+    FaCheckCircle,
+    FaHeart,
+} from "react-icons/fa"
+import { Swiper, SwiperSlide } from "swiper/react"
+import { Autoplay, Pagination } from "swiper/modules"
+import "swiper/css"
+import "swiper/css/pagination"
+import { useEffect, useState } from "react"
+import clsx from "clsx"
 
-export default function UlasanPage() {
-  const [nama, setNama] = useState("");
-  const [ratingProduk, setRatingProduk] = useState(5);
-  const [ratingToko, setRatingToko] = useState(5);
-  const [kritikSaran, setKritikSaran] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [toast, setToast] = useState(null); // {type:'ok'|'err', text:''}
-
-  // simple responsive detector (tanpa tailwind, tetap inline style)
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const onResize = () => setIsMobile(window.innerWidth < 900);
-    onResize();
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
-
-  const canSubmit = useMemo(() => {
-    return (
-      !loading &&
-      nama.trim().length >= 2 &&
-      kritikSaran.trim().length >= 5 &&
-      [1, 2, 3, 4, 5].includes(Number(ratingProduk)) &&
-      [1, 2, 3, 4, 5].includes(Number(ratingToko))
-    );
-  }, [loading, nama, kritikSaran, ratingProduk, ratingToko]);
-
-  async function submit(e) {
-    e.preventDefault();
-    setToast(null);
-    setLoading(true);
-
-    try {
-      const res = await fetch("/.netlify/functions/ulasan-add", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nama: nama.trim(),
-          rating_produk: Number(ratingProduk),
-          rating_toko: Number(ratingToko),
-          kritik_saran: kritikSaran.trim(),
-        }),
-      });
-
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.message || data?.error || "Gagal kirim ulasan");
-
-      setToast({ type: "ok", text: "Terima kasih! Ulasan kamu sudah terkirim ✅" });
-      setNama("");
-      setRatingProduk(5);
-      setRatingToko(5);
-      setKritikSaran("");
-    } catch (err) {
-      setToast({ type: "err", text: err.message || "Terjadi kesalahan" });
-    } finally {
-      setLoading(false);
+const Testimonials = () => {
+    const testimonials = [
+     {
+        id: 1,
+        name: "Rizky Aditiya",
+        role: "Customer",
+        stars: 4.5,
+        service: "Desain Logo Usaha Kopi",
+        comment:
+            "Gila sih, logo yang dibikinin bener-bener ngehit 🥹✨ toko kopi gue langsung keliatan ‘berjiwa’ banget. Banyak yang bilang keren juga!",
+        time: "2 minggu lalu",
+    },
+    {
+        id: 2,
+        name: "Dimas",
+        role: "Customer",
+        stars: 5,
+        service: "Pembuatan Website Portfolio",
+        comment:
+            "Web gue jadi super clean, responsif, dan keliatan profesional banget 😭🔥 sekarang kalo ngelamar kerja tuh auto diliat HR!",
+        time: "1 bulan lalu",
+    },
+    {
+        id: 3,
+        name: "Aditya Nugroho",
+        role: "Customer",
+        stars: 4,
+        service: "Preset Fotografi Outdoor",
+        comment:
+            "Presetnya cakep parah sih 🌿📸 feed IG gue auto glow up, jadi betah scroll sendiri wkwk.",
+        time: "4 hari lalu",
+    },
+    {
+        id: 4,
+        name: "Muhammad Iqbal",
+        role: "Customer",
+        stars: 5,
+        service: "Desain Banner Promosi",
+        comment:
+            "Bannernya eye-catching banget 😆🔥 banyak yang nanya bikin di mana, jualan gue langsung rame cuy!",
+        time: "3 minggu lalu",
+    },
+    {
+        id: 5,
+        name: "Salsabila Putri",
+        role: "Customer",
+        stars: 4.5,
+        service: "Desain Kartu Nama & Branding",
+        comment:
+            "Kartu namanya elegan parah 😍 bikin makin pede tiap ketemu klien!",
+        time: "1 bulan lalu",
+    },
+    {
+        id: 6,
+        name: "Putri Lestari",
+        role: "Customer",
+        stars: 5,
+        service: "Canva Pro",
+        comment:
+            "Aktifnya cepet, aman, fitur pro semua kebuka 😎👍 edit konten jadi sat-set!",
+        time: "2 minggu lalu",
     }
-  }
 
-  return (
-    <div style={s.page}>
-      <div style={s.shell}>
-        {/* ====== HEADER (referensi: Apa Kata Mereka) ====== */}
-        <div style={s.header}>
-          <h2 style={s.title}>Tulis Ulasan</h2>
-          <p style={s.desc}>
-            Layanan Nusantara selalu berusaha memberikan layanan terbaik. Ceritakan pengalaman kamu—kritik & saran
-            singkat juga sangat membantu.
-          </p>
-        </div>
+    ]
 
-        {/* ====== CONTENT GRID ====== */}
-        <div
-          style={{
-            ...s.grid,
-            gridTemplateColumns: isMobile ? "1fr" : "1.35fr 0.65fr",
-          }}
-        >
-          {/* FORM */}
-          <div style={s.card}>
-            <div style={s.cardHead}>
-              <div>
-                <div style={s.cardTitle}>Isi ulasan kamu ya 🙏</div>
-                <div style={s.cardSub}>Ulasan ini private. Hanya founder yang bisa lihat.</div>
-              </div>
+    // State untuk menyimpan liked testimonial dan animasi trigger
+    const [liked, setLiked] = useState({})
+    const [animating, setAnimating] = useState({})
 
-              <div style={s.privacyBadge}>
-                <div style={{ fontWeight: 900, color: "#0F172A" }}>Privasi</div>
-                <div style={{ color: "#64748B", fontSize: 12 }}>Founder only</div>
-              </div>
-            </div>
+    // Load liked dari localStorage
+    useEffect(() => {
+        const storedLikes = localStorage.getItem("testimonialLikes")
+        if (storedLikes) {
+            setLiked(JSON.parse(storedLikes))
+        }
+    }, [])
 
-            <form onSubmit={submit} style={{ display: "grid", gap: 14, marginTop: 12 }}>
-              <div style={s.field}>
-                <label style={s.label}>Nama</label>
-                <input
-                  value={nama}
-                  onChange={(e) => setNama(e.target.value)}
-                  placeholder="Nama kamu"
-                  style={s.input}
+    // Handle klik like
+    const handleLike = (id) => {
+        const newLikes = { ...liked, [id]: !liked[id] }
+        setLiked(newLikes)
+        localStorage.setItem("testimonialLikes", JSON.stringify(newLikes))
+
+        // Trigger animasi
+        setAnimating((prev) => ({ ...prev, [id]: true }))
+
+        // Hapus animasi setelah 600ms supaya bisa trigger ulang
+        setTimeout(() => {
+            setAnimating((prev) => ({ ...prev, [id]: false }))
+        }, 600)
+    }
+
+    const renderStars = (rating) => {
+        const stars = []
+        const fullStars = Math.floor(rating)
+        const halfStar = rating % 1 !== 0
+
+        for (let i = 0; i < fullStars; i++) {
+            stars.push(<FaStar key={`full-${i}`} className="text-yellow-400" />)
+        }
+
+        if (halfStar) {
+            stars.push(<FaStarHalfAlt key="half" className="text-yellow-400" />)
+        }
+
+        while (stars.length < 5) {
+            stars.push(
+                <FaRegStar
+                    key={`empty-${stars.length}`}
+                    className="text-gray-300"
                 />
-                <div style={s.hint}>Minimal 2 karakter.</div>
-              </div>
+            )
+        }
 
-              <div
-                style={{
-                  ...s.twoCol,
-                  gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
-                }}
-              >
-                <div style={s.miniCard}>
-                  <RatingStars label="Rating Produk" value={ratingProduk} onChange={setRatingProduk} />
+        return <div className="flex gap-0.5">{stars}</div>
+    }
+
+    return (
+        <SectionWrapper className="bg-white">
+            <div id="testimonials" className="max-w-7xl mx-auto px-6 py-20 bg-white">
+                <div className="text-center mb-14">
+                    <h2 className="text-4xl font-bold text-gray-800">
+                        Apa Kata Mereka
+                    </h2>
+                    <p className="text-lg text-gray-600 mt-4 max-w-xl mx-auto">
+                        Layanan Nusantara selalu berusaha memberikan layanan terbaik. Berikut adalah beberapa testimoni dari klien kami yang puas dengan hasil kerja kami.
+                    </p>
                 </div>
-                <div style={s.miniCard}>
-                  <RatingStars label="Rating Toko" value={ratingToko} onChange={setRatingToko} />
-                </div>
-              </div>
 
-              <div style={s.field}>
-                <label style={s.label}>Kritik & Saran</label>
-                <textarea
-                  value={kritikSaran}
-                  onChange={(e) => setKritikSaran(e.target.value)}
-                  placeholder="Tulis kritik & saran kamu..."
-                  rows={isMobile ? 5 : 6}
-                  style={s.textarea}
-                />
-                <div style={s.hint}>Minimal 5 karakter.</div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={!canSubmit}
-                style={{
-                  ...s.button,
-                  opacity: canSubmit ? 1 : 0.55,
-                  cursor: canSubmit ? "pointer" : "not-allowed",
-                }}
-              >
-                {loading ? "Mengirim..." : "Kirim Ulasan"}
-              </button>
-
-              {toast && (
-                <div
-                  style={{
-                    ...s.toast,
-                    borderColor:
-                      toast.type === "ok" ? "rgba(16,185,129,0.25)" : "rgba(239,68,68,0.25)",
-                    background:
-                      toast.type === "ok" ? "rgba(16,185,129,0.08)" : "rgba(239,68,68,0.08)",
-                    color: toast.type === "ok" ? "#065F46" : "#991B1B",
-                  }}
+                <Swiper
+                    modules={[Autoplay, Pagination]}
+                    spaceBetween={30}
+                    slidesPerView={1}
+                    autoplay={{ delay: 4000, disableOnInteraction: false }}
+                    pagination={{ clickable: true }}
+                    breakpoints={{
+                        768: { slidesPerView: 2 },
+                        1024: { slidesPerView: 3 },
+                    }}
                 >
-                  {toast.text}
-                </div>
-              )}
-            </form>
-          </div>
+                    {testimonials.map((item, i) => (
+                        <SwiperSlide key={i}>
+                            <div className="relative h-full bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between min-h-[380px]">
+                                {/* Tombol like di pojok kanan atas */}
+                                <button
+                                    onClick={() => handleLike(item.id)}
+                                    className={clsx(
+                                        "absolute top-4 right-4 text-2xl transition-colors duration-300 ease-in-out",
+                                        liked[item.id] ? "text-red-500" : "text-gray-400 hover:text-red-400",
+                                        animating[item.id] && "animate-like"
+                                    )}
+                                    aria-label={liked[item.id] ? "Unlike" : "Like"}
+                                >
+                                    <FaHeart />
+                                </button>
 
-          {/* SIDE */}
-          <div style={{ display: "grid", gap: 14 }}>
-            <div style={s.sideCard}>
-              <div style={s.sideTitle}>Yang paling membantu</div>
-              <div style={s.sideText}>
-                • Apa yang harus kami perbaiki?
-                <br />• Bagian mana yang bikin bingung?
-                <br />• Kalau ada saran fitur, tulis aja.
-              </div>
+                                <div>
+                                    <div className="flex items-center gap-4 mb-5">
+                                        <FaUserCircle className="text-gray-400 w-12 h-12" />
+                                        <div>
+                                            <h4 className="font-semibold text-gray-800 text-lg flex items-center gap-1">
+                                                {item.name}
+                                                <FaCheckCircle className="text-green-500 text-xs" />
+                                            </h4>
+                                            <p className="text-sm text-gray-500">{item.role}</p>
+                                        </div>
+                                    </div>
+
+                                    <p className="text-gray-700 italic leading-relaxed text-base mb-6 line-clamp-4">
+                                        “{item.comment}”
+                                    </p>
+                                </div>
+
+                                <div className="flex justify-between items-center text-sm mt-4">
+                                    <div>
+                                        {renderStars(item.stars)}
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            {item.service}
+                                        </p>
+                                    </div>
+                                    <div className="text-right text-xs text-gray-500">
+                                        <p>{item.time}</p>
+                                        <p className="mt-1 font-semibold text-purple-600">
+                                            {item.budget}
+                                        </p>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </SwiperSlide>
+                    ))}
+                </Swiper>
             </div>
 
-            <div style={s.sideCard}>
-              <div style={s.sideTitle}>Catatan</div>
-              <div style={s.sideText}>
-                Ulasan langsung tersimpan ke sistem (Google Sheets). Tidak ditampilkan publik.
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* spacing bawah biar enak di HP */}
-        <div style={{ height: isMobile ? 24 : 10 }} />
-      </div>
-    </div>
-  );
+            {/* Animasi like heartbeat mirip Instagram */}
+            <style jsx>{`
+                @keyframes likePulse {
+                    0% {
+                        transform: scale(1);
+                    }
+                    25% {
+                        transform: scale(1.4);
+                    }
+                    50% {
+                        transform: scale(1.2);
+                    }
+                    75% {
+                        transform: scale(1.4);
+                    }
+                    100% {
+                        transform: scale(1);
+                    }
+                }
+                .animate-like {
+                    animation: likePulse 0.6s ease forwards;
+                }
+            `}</style>
+        </SectionWrapper>
+    )
 }
 
-const s = {
-  page: {
-    minHeight: "calc(100vh - 80px)",
-    padding: "56px 16px",
-    background:
-      "radial-gradient(900px 520px at 15% 0%, rgba(15,23,42,0.10), transparent 60%), radial-gradient(900px 520px at 85% 0%, rgba(99,102,241,0.12), transparent 60%), linear-gradient(180deg, #fff 0%, #F8FAFC 100%)",
-  },
-
-  shell: { maxWidth: 1120, margin: "0 auto" },
-
-  /* header referensi */
-  header: { textAlign: "center", marginBottom: 28 },
-  title: {
-    margin: 0,
-    fontSize: 40,
-    fontWeight: 800,
-    color: "#1F2937",
-    letterSpacing: "-0.04em",
-  },
-  desc: {
-    marginTop: 12,
-    marginLeft: "auto",
-    marginRight: "auto",
-    maxWidth: 620,
-    fontSize: 18,
-    lineHeight: 1.7,
-    color: "#4B5563",
-  },
-
-  grid: { display: "grid", gap: 16, alignItems: "start" },
-
-  card: {
-    borderRadius: 22,
-    border: "1px solid rgba(15,23,42,0.10)",
-    background: "rgba(255,255,255,0.88)",
-    boxShadow: "0 18px 50px rgba(2,6,23,0.08)",
-    padding: 18,
-    backdropFilter: "blur(10px)",
-  },
-
-  cardHead: {
-    display: "flex",
-    gap: 12,
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    flexWrap: "wrap",
-  },
-  cardTitle: { fontSize: 16, fontWeight: 950, color: "#0F172A" },
-  cardSub: { marginTop: 4, color: "#64748B", fontSize: 13, lineHeight: 1.6 },
-
-  privacyBadge: {
-    borderRadius: 16,
-    border: "1px solid rgba(15,23,42,0.10)",
-    background: "rgba(248,250,252,0.75)",
-    padding: "10px 12px",
-    minWidth: 160,
-    boxShadow: "0 10px 30px rgba(2,6,23,0.06)",
-  },
-
-  field: { display: "grid", gap: 8 },
-  label: { fontSize: 12, color: "#0F172A", fontWeight: 900, letterSpacing: "0.02em" },
-  hint: { fontSize: 12, color: "#94A3B8" },
-
-  input: {
-    width: "100%",
-    borderRadius: 16,
-    border: "1px solid rgba(15,23,42,0.12)",
-    padding: "12px 14px",
-    fontSize: 14,
-    outline: "none",
-    background: "rgba(255,255,255,0.95)",
-  },
-
-  textarea: {
-    width: "100%",
-    borderRadius: 16,
-    border: "1px solid rgba(15,23,42,0.12)",
-    padding: "12px 14px",
-    fontSize: 14,
-    outline: "none",
-    background: "rgba(255,255,255,0.95)",
-    resize: "vertical",
-  },
-
-  twoCol: { display: "grid", gap: 12 },
-
-  miniCard: {
-    borderRadius: 18,
-    border: "1px solid rgba(15,23,42,0.08)",
-    background: "rgba(248,250,252,0.75)",
-    padding: 14,
-  },
-
-  button: {
-    marginTop: 2,
-    borderRadius: 16,
-    padding: "13px 14px",
-    border: "1px solid #0F172A",
-    background: "#0F172A",
-    color: "#fff",
-    fontWeight: 950,
-    letterSpacing: "0.01em",
-  },
-
-  toast: {
-    borderRadius: 16,
-    border: "1px solid",
-    padding: "12px 14px",
-    fontWeight: 800,
-    lineHeight: 1.5,
-  },
-
-  sideCard: {
-    borderRadius: 22,
-    border: "1px solid rgba(15,23,42,0.10)",
-    background: "rgba(255,255,255,0.86)",
-    boxShadow: "0 12px 40px rgba(2,6,23,0.06)",
-    padding: 16,
-  },
-  sideTitle: { fontWeight: 950, color: "#0F172A", marginBottom: 8 },
-  sideText: { color: "#64748B", lineHeight: 1.75, fontSize: 14 },
-};
+export default Testimonials

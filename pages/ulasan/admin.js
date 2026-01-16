@@ -2,17 +2,30 @@ import { useEffect, useMemo, useState } from "react";
 import RatingStars from "../../components/ui/RatingStars";
 import netlifyIdentity from "netlify-identity-widget";
 
+/** kecil & simpel untuk responsif */
+function useIsMobile(breakpoint = 820) {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < breakpoint);
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [breakpoint]);
+  return isMobile;
+}
+
 export default function UlasanAdminPage() {
+  const isMobile = useIsMobile(860);
+
   const [items, setItems] = useState([]);
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
-  const [me, setMe] = useState(null); // buat nampilin status login
+  const [me, setMe] = useState(null);
 
   async function getJwt() {
     const user = netlifyIdentity.currentUser();
     if (!user) return null;
-    // netlify-identity-widget: jwt() return Promise<string>
     return await user.jwt();
   }
 
@@ -42,12 +55,8 @@ export default function UlasanAdminPage() {
   }
 
   useEffect(() => {
-    // init kalau belum
     netlifyIdentity.init();
-
-    // set status user awal
     setMe(netlifyIdentity.currentUser() || null);
-
     load();
 
     const onLogin = () => {
@@ -83,10 +92,8 @@ export default function UlasanAdminPage() {
 
   const stats = useMemo(() => {
     const n = items.length || 1;
-    const avgP =
-      items.reduce((a, b) => a + (Number(b.rating_produk) || 0), 0) / n;
-    const avgT =
-      items.reduce((a, b) => a + (Number(b.rating_toko) || 0), 0) / n;
+    const avgP = items.reduce((a, b) => a + (Number(b.rating_produk) || 0), 0) / n;
+    const avgT = items.reduce((a, b) => a + (Number(b.rating_toko) || 0), 0) / n;
     return {
       total: items.length,
       avgProduk: Math.round(avgP * 10) / 10,
@@ -100,85 +107,207 @@ export default function UlasanAdminPage() {
     me?.email ||
     null;
 
-  return (
-    <div style={a.page}>
-      <div style={a.shell}>
-        <div style={a.top}>
-          <div>
-            <div style={a.kicker}>Admin • Founder only</div>
-            <h1 style={a.h1}>Ulasan</h1>
-            <p style={a.sub}>Semua ulasan dari tab “ulasan” di spreadsheet kamu.</p>
-            {meLabel ? (
-              <div style={a.mePill}>Logged in as: <b>{meLabel}</b></div>
-            ) : (
-              <div style={a.mePillMuted}>Belum login</div>
-            )}
-          </div>
+  const headerTitle = "Kelola Ulasan";
+  const headerDesc = "Pantau, cari, dan review masukan pelanggan.";
 
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            <button
-              onClick={() => netlifyIdentity.open()}
+return (
+  <div
+    style={{
+      ...a.page,
+
+      /* OFFSET NAVBAR */
+      paddingTop: isMobile ? "110px" : "130px",
+      paddingLeft: isMobile ? "14px" : "16px",
+      paddingRight: isMobile ? "14px" : "16px",
+      paddingBottom: isMobile ? "36px" : a.page.padding,
+    }}
+  >
+    <div style={a.shell}>
+      {/* ===== HEADER (kaya referensi) ===== */}
+      <div
+        style={{
+          ...a.header,
+          marginBottom: isMobile ? 16 : 24,
+
+          /* penting: jangan 2 kolom lagi */
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          textAlign: "center",
+          gap: 12,
+        }}
+      >
+        {/* TOP TEXT */}
+        <div
+          style={{
+            ...a.headerLeft,
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            textAlign: "center",
+            gap: 8,
+          }}
+        >
+          <div style={a.kicker}>Admin • Founder only</div>
+
+          <h2
+            style={{
+              fontSize: isMobile ? 22 : 30,
+              fontWeight: 700,
+              color: "#0F172A",
+              margin: 0,
+              letterSpacing: "-0.02em",
+              textAlign: "center",
+            }}
+          >
+            Kelola Ulasan
+          </h2>
+
+          <p
+            style={{
+              fontSize: isMobile ? 13 : 14,
+              color: "#64748B",
+              lineHeight: 1.7,
+              maxWidth: 520,
+              margin: 0,
+              textAlign: "center",
+            }}
+          >
+            Pantau dan kelola semua ulasan pelanggan di sini.
+          </p>
+
+          {/* STATUS PILL */}
+          {meLabel ? (
+            <div
               style={{
-                ...a.btn,
-                borderColor: "#0F172A",
-                background: "#0F172A",
-                color: "#fff",
+                ...a.mePill,
+                marginTop: 6,
+                marginLeft: "auto",
+                marginRight: "auto",
               }}
             >
-              Login Admin
-            </button>
-
-            <button onClick={() => netlifyIdentity.logout()} style={a.btn}>
-              Logout
-            </button>
-
-            <button
-              onClick={load}
-              disabled={loading}
-              style={{ ...a.btn, opacity: loading ? 0.6 : 1 }}
+              Login sebagai: <b>{meLabel}</b>
+            </div>
+          ) : (
+            <div
+              style={{
+                ...a.mePillMuted,
+                marginTop: 6,
+                marginLeft: "auto",
+                marginRight: "auto",
+              }}
             >
-              {loading ? "Loading..." : "Refresh"}
-            </button>
-          </div>
+              Belum login
+            </div>
+          )}
         </div>
 
-        {err && (
-          <div style={a.alert}>
-            <div style={{ fontWeight: 900 }}>Akses ditolak / error</div>
-            <div style={{ marginTop: 6 }}>{err}</div>
-            <div style={{ marginTop: 8, color: "#64748B" }}>
-              Kalau sudah login tapi masih 403, biasanya email kamu tidak sama dengan <b>ADMIN_EMAIL</b> di Netlify.
-            </div>
+        {/* ACTION BUTTONS (CENTER, RESPONSIVE) */}
+        <div
+          style={{
+            ...a.headerActions,
+            justifyContent: "center",
+            width: "100%",
+            display: "flex",
+            gap: 10,
+            flexWrap: "wrap",
+            marginTop: 8,
+          }}
+        >
+          <button
+            onClick={() => netlifyIdentity.open()}
+            style={{
+              ...a.btn,
+              ...a.btnPrimary,
+              width: isMobile ? "100%" : "auto",
+              minWidth: isMobile ? "100%" : 120,
+            }}
+          >
+            Login
+          </button>
+
+          <button
+            onClick={() => netlifyIdentity.logout()}
+            style={{
+              ...a.btn,
+              width: isMobile ? "100%" : "auto",
+              minWidth: isMobile ? "100%" : 120,
+            }}
+          >
+            Logout
+          </button>
+
+          <button
+            onClick={load}
+            disabled={loading}
+            style={{
+              ...a.btn,
+              opacity: loading ? 0.6 : 1,
+              width: isMobile ? "100%" : "auto",
+              minWidth: isMobile ? "100%" : 120,
+            }}
+          >
+            {loading ? "Loading..." : "Refresh"}
+          </button>
+        </div>
+      </div>
+
+      {err && (
+        <div style={a.alert}>
+          <div style={{ fontWeight: 900 }}>Akses ditolak / error</div>
+          <div style={{ marginTop: 6 }}>{err}</div>
+          <div style={{ marginTop: 8, color: "#64748B" }}>
+            Perlu akses khusus untuk masuk ke halaman ini.
           </div>
-        )}
+        </div>
+      )}
 
         {!err && (
           <>
-            <div style={a.stats}>
+            {/* ===== STATS ===== */}
+            <div
+              style={{
+                ...a.stats,
+                gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)",
+              }}
+            >
               <div style={a.statCard}>
-                <div style={a.statLabel}>Total</div>
+                <div style={a.statLabel}>Total Ulasan</div>
                 <div style={a.statValue}>{stats.total}</div>
               </div>
+
               <div style={a.statCard}>
                 <div style={a.statLabel}>Rata-rata Produk</div>
                 <div style={a.statValue}>{stats.avgProduk}</div>
               </div>
+
               <div style={a.statCard}>
                 <div style={a.statLabel}>Rata-rata Toko</div>
                 <div style={a.statValue}>{stats.avgToko}</div>
               </div>
             </div>
 
-            <div style={a.toolbar}>
+            {/* ===== TOOLBAR ===== */}
+            <div
+              style={{
+                ...a.toolbar,
+                flexDirection: isMobile ? "column" : "row",
+                alignItems: isMobile ? "stretch" : "center",
+              }}
+            >
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Cari nama / kata di kritik-saran…"
-                style={a.search}
+                placeholder="Cari nama atau isi ulasan…"
+                style={{ ...a.search, width: "100%" }}
               />
-              <div style={a.count}>{filtered.length} tampil</div>
+              <div style={{ ...a.count, alignSelf: isMobile ? "flex-end" : "center" }}>
+                {filtered.length} tampil
+              </div>
             </div>
 
+            {/* ===== LIST ===== */}
             <div style={a.list}>
               {loading && <div style={a.muted}>Mengambil data…</div>}
               {!loading && filtered.length === 0 && (
@@ -188,7 +317,13 @@ export default function UlasanAdminPage() {
               {!loading &&
                 filtered.map((it) => (
                   <div key={it.id} style={a.item}>
-                    <div style={a.itemHead}>
+                    <div
+                      style={{
+                        ...a.itemHead,
+                        flexDirection: isMobile ? "column" : "row",
+                        alignItems: isMobile ? "stretch" : "flex-start",
+                      }}
+                    >
                       <div>
                         <div style={a.name}>{it.nama || "-"}</div>
                         <div style={a.time}>
@@ -198,12 +333,30 @@ export default function UlasanAdminPage() {
                         </div>
                       </div>
 
-                      <div style={a.ratingWrap}>
-                        <div style={a.ratingBox}>
+                      <div
+                        style={{
+                          ...a.ratingWrap,
+                          width: isMobile ? "100%" : "auto",
+                          justifyContent: isMobile ? "space-between" : "flex-end",
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <div
+                          style={{
+                            ...a.ratingBox,
+                            minWidth: isMobile ? "100%" : 170,
+                          }}
+                        >
                           <div style={a.rLabel}>Produk</div>
                           <RatingStars value={it.rating_produk} readOnly size={18} />
                         </div>
-                        <div style={a.ratingBox}>
+
+                        <div
+                          style={{
+                            ...a.ratingBox,
+                            minWidth: isMobile ? "100%" : 170,
+                          }}
+                        >
                           <div style={a.rLabel}>Toko</div>
                           <RatingStars value={it.rating_toko} readOnly size={18} />
                         </div>
@@ -229,6 +382,18 @@ const a = {
       "radial-gradient(900px 500px at 10% 0%, rgba(15,23,42,0.08), transparent 60%), linear-gradient(180deg, #fff 0%, #F8FAFC 100%)",
   },
   shell: { maxWidth: 1100, margin: "0 auto" },
+
+  /* ===== HEADER (mirip referensi) ===== */
+  header: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+    gap: 16,
+    flexWrap: "wrap",
+  },
+  headerLeft: { maxWidth: 640 },
+  headerActions: { display: "flex", gap: 10, flexWrap: "wrap" },
+
   kicker: {
     fontSize: 12,
     letterSpacing: "0.12em",
@@ -236,15 +401,14 @@ const a = {
     color: "#64748B",
     fontWeight: 900,
   },
-  top: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-end",
-    gap: 16,
-    marginBottom: 18,
+  h2: {
+    margin: "8px 0 8px",
+    fontSize: 32,
+    letterSpacing: "-0.04em",
+    color: "#0F172A",
+    lineHeight: 1.15,
   },
-  h1: { margin: "8px 0 8px", fontSize: 34, letterSpacing: "-0.04em", color: "#0F172A" },
-  sub: { margin: 0, color: "#64748B", lineHeight: 1.7 },
+  p: { margin: 0, color: "#64748B", lineHeight: 1.7 },
 
   mePill: {
     marginTop: 10,
@@ -276,6 +440,11 @@ const a = {
     fontWeight: 900,
     cursor: "pointer",
   },
+  btnPrimary: {
+    borderColor: "#0F172A",
+    background: "#0F172A",
+    color: "#fff",
+  },
 
   alert: {
     borderRadius: 18,
@@ -283,13 +452,14 @@ const a = {
     background: "rgba(239,68,68,0.08)",
     padding: 14,
     color: "#991B1B",
+    marginTop: 10,
   },
 
   stats: {
     display: "grid",
     gridTemplateColumns: "repeat(3, 1fr)",
     gap: 12,
-    marginBottom: 12,
+    margin: "12px 0 12px",
   },
   statCard: {
     borderRadius: 18,
