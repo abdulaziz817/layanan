@@ -1,7 +1,26 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import RatingStars from "../../components/ui/RatingStars";
 
+function useBreakpoints() {
+  const [w, setW] = useState(1200);
+
+  useEffect(() => {
+    const onResize = () => setW(window.innerWidth || 1200);
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  const isMobile = w < 640;   // HP
+  const isTablet = w >= 640 && w < 1024; // Tablet
+  const isDesktop = w >= 1024;
+
+  return { w, isMobile, isTablet, isDesktop };
+}
+
 export default function UlasanPage() {
+  const { isMobile, isTablet } = useBreakpoints();
+
   const [nama, setNama] = useState("");
   const [ratingProduk, setRatingProduk] = useState(5);
   const [ratingToko, setRatingToko] = useState(5);
@@ -51,42 +70,73 @@ export default function UlasanPage() {
     }
   }
 
+  // ====== RESPONSIVE LAYOUT TOKENS ======
+  const containerPadX = isMobile ? 16 : 24;
+  const sectionPadY = isMobile ? 44 : isTablet ? 64 : 80;
+
+  const gridCols = isMobile ? "1fr" : "1.35fr 0.65fr";
+  const gridGap = isMobile ? 14 : 16;
+
+  const titleSize = isMobile ? 28 : isTablet ? 34 : 40;
+  const descSize = isMobile ? 15 : 18;
+
+  const cardPad = isMobile ? 16 : 18;
+  const inputPad = isMobile ? "12px 12px" : "12px 14px";
+
+  const ratingCols = isMobile ? "1fr" : "1fr 1fr";
+
   return (
-    <div style={s.page}>
-      <div style={s.shell}>
-        <div style={s.hero}>
-          <div>
-            <div style={s.kicker}>Layanan Nusantara</div>
-            <h1 style={s.h1}>Tulis Ulasan</h1>
-            <p style={s.sub}>
-              Bantu kami makin rapi dan cepat. Isi ulasan dengan jujur—singkat aja gak apa.
-            </p>
-          </div>
+<div style={s.page}>
+  <div
+    style={{
+      ...s.shell,
+      paddingLeft: containerPadX,
+      paddingRight: containerPadX,
 
-          <div style={s.pill}>
-            <div style={{ fontWeight: 800, color: "#0F172A" }}>Privasi</div>
-            <div style={{ color: "#64748B", fontSize: 13 }}>
-              Hanya founder yang bisa lihat ulasan.
-            </div>
-          </div>
-        </div>
+      /* OFFSET NAVBAR */
+      paddingTop: `calc(${sectionPadY}px + clamp(70px, 8vw, 100px))`,
+      paddingBottom: sectionPadY,
+    }}
+  >
+    {/* ===== HEADER (sesuai referensi) ===== */}
+    <div style={{ ...s.header, marginBottom: isMobile ? 18 : 28 }}>
+      <h2 style={{ ...s.h2, fontSize: titleSize }}>
+        Ulasan
+      </h2>
 
-        <div style={s.grid}>
+      <p style={{ ...s.p, fontSize: descSize }}>
+        Bagikan pengalaman Anda tentang layanan kami.
+      </p>
+    </div>
+
+        {/* ===== CONTENT ===== */}
+        <div style={{ ...s.grid, gridTemplateColumns: gridCols, gap: gridGap }}>
           {/* FORM */}
-          <div style={s.card}>
-            <form onSubmit={submit} style={{ display: "grid", gap: 14 }}>
+          <div style={{ ...s.card, padding: cardPad }}>
+            <div style={s.cardTop}>
+              <div>
+                <div style={s.cardTitle}>Tulis Ulasan</div>
+                <div style={s.cardSub}>
+                  Isi ulasan dengan jujur—singkat aja gak apa.
+                </div>
+              </div>
+
+             
+            </div>
+
+            <form onSubmit={submit} style={{ display: "grid", gap: 14, marginTop: 14 }}>
               <div style={s.field}>
                 <label style={s.label}>Nama</label>
                 <input
                   value={nama}
                   onChange={(e) => setNama(e.target.value)}
                   placeholder="Nama kamu"
-                  style={s.input}
+                  style={{ ...s.input, padding: inputPad }}
                 />
                 <div style={s.hint}>Minimal 2 karakter.</div>
               </div>
 
-              <div style={s.twoCol}>
+              <div style={{ ...s.twoCol, gridTemplateColumns: ratingCols }}>
                 <div style={s.miniCard}>
                   <RatingStars
                     label="Rating Produk"
@@ -109,8 +159,8 @@ export default function UlasanPage() {
                   value={kritikSaran}
                   onChange={(e) => setKritikSaran(e.target.value)}
                   placeholder="Tulis kritik & saran kamu..."
-                  rows={6}
-                  style={s.textarea}
+                  rows={isMobile ? 5 : 7}
+                  style={{ ...s.textarea, padding: inputPad }}
                 />
                 <div style={s.hint}>Minimal 5 karakter.</div>
               </div>
@@ -131,8 +181,14 @@ export default function UlasanPage() {
                 <div
                   style={{
                     ...s.toast,
-                    borderColor: toast.type === "ok" ? "rgba(16,185,129,0.25)" : "rgba(239,68,68,0.25)",
-                    background: toast.type === "ok" ? "rgba(16,185,129,0.08)" : "rgba(239,68,68,0.08)",
+                    borderColor:
+                      toast.type === "ok"
+                        ? "rgba(16,185,129,0.30)"
+                        : "rgba(239,68,68,0.30)",
+                    background:
+                      toast.type === "ok"
+                        ? "rgba(16,185,129,0.08)"
+                        : "rgba(239,68,68,0.08)",
                     color: toast.type === "ok" ? "#065F46" : "#991B1B",
                   }}
                 >
@@ -144,19 +200,19 @@ export default function UlasanPage() {
 
           {/* SIDE */}
           <div style={{ display: "grid", gap: 14 }}>
-            <div style={s.sideCard}>
-              <div style={s.sideTitle}>Yang paling membantu</div>
+            <div style={{ ...s.sideCard, padding: cardPad }}>
+              <div style={s.sideTitle}>Ceritakan pengalaman kamu</div>
               <div style={s.sideText}>
-                • Apa yang harus kami perbaiki?<br />
-                • Bagian mana yang bikin bingung?<br />
-                • Kalau ada saran fitur, tulis aja.
+                • Ceritakan pengalaman kamu
+                <br />• Sebutkan hal yang perlu diperbaiki
+                <br />• Kalau ada saran fitur, tulis aja.
               </div>
             </div>
 
-            <div style={s.sideCard}>
+            <div style={{ ...s.sideCard, padding: cardPad }}>
               <div style={s.sideTitle}>Catatan</div>
               <div style={s.sideText}>
-                Ulasan langsung tersimpan ke sistem (Google Sheets). Tidak ditampilkan publik.
+                Ulasan langsung tersimpan ke sistem. Tidak ditampilkan publik.
               </div>
             </div>
           </div>
@@ -167,116 +223,150 @@ export default function UlasanPage() {
 }
 
 const s = {
+  // background putih doang (sesuai permintaan)
   page: {
     minHeight: "calc(100vh - 80px)",
-    padding: "52px 16px",
-    background:
-      "radial-gradient(900px 500px at 15% 0%, rgba(15,23,42,0.10), transparent 60%), radial-gradient(900px 500px at 85% 0%, rgba(99,102,241,0.12), transparent 60%), linear-gradient(180deg, #fff 0%, #F8FAFC 100%)",
+    background: "#FFFFFF",
   },
-  shell: { maxWidth: 1040, margin: "0 auto" },
 
-  hero: {
+  // container mirip max-w-7xl mx-auto px-6
+  shell: {
+    maxWidth: 1280,
+    margin: "0 auto",
+  },
+
+  // header referensi "text-center mb-14"
+  header: {
+    textAlign: "center",
+  },
+
+  // h2 text-4xl font-bold text-gray-800
+  h2: {
+    margin: 0,
+    fontWeight: 800,
+    color: "#1F2937",
+    letterSpacing: "-0.02em",
+  },
+
+  // p text-lg text-gray-600 mt-4 max-w-xl mx-auto
+  p: {
+    marginTop: 12,
+    marginLeft: "auto",
+    marginRight: "auto",
+    maxWidth: 620,
+    lineHeight: 1.75,
+    color: "#4B5563",
+  },
+
+  grid: {
+    display: "grid",
+    alignItems: "start",
+  },
+
+  card: {
+    borderRadius: 18,
+    border: "1px solid #E5E7EB",
+    background: "#FFFFFF",
+    boxShadow: "0 10px 30px rgba(17,24,39,0.06)",
+  },
+
+  cardTop: {
     display: "flex",
     justifyContent: "space-between",
-    gap: 16,
-    alignItems: "flex-end",
-    marginBottom: 18,
-  },
-  kicker: {
-    fontSize: 12,
-    letterSpacing: "0.12em",
-    textTransform: "uppercase",
-    color: "#64748B",
-    fontWeight: 800,
-  },
-  h1: {
-    margin: "8px 0 8px",
-    fontSize: 40,
-    letterSpacing: "-0.04em",
-    color: "#0F172A",
-    lineHeight: 1.05,
-  },
-  sub: { margin: 0, color: "#64748B", lineHeight: 1.7, maxWidth: 640 },
-
-  pill: {
-    borderRadius: 18,
-    border: "1px solid rgba(15,23,42,0.10)",
-    background: "rgba(255,255,255,0.8)",
-    padding: "12px 14px",
-    boxShadow: "0 10px 30px rgba(2,6,23,0.06)",
-    minWidth: 220,
+    alignItems: "flex-start",
+    gap: 12,
+    flexWrap: "wrap",
   },
 
-  grid: { display: "grid", gridTemplateColumns: "1.35fr 0.65fr", gap: 14 },
-  card: {
-    borderRadius: 22,
-    border: "1px solid rgba(15,23,42,0.10)",
-    background: "rgba(255,255,255,0.85)",
-    boxShadow: "0 18px 50px rgba(2,6,23,0.08)",
-    padding: 18,
-    backdropFilter: "blur(10px)",
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: 900,
+    color: "#111827",
+  },
+
+  cardSub: {
+    marginTop: 6,
+    fontSize: 14,
+    color: "#6B7280",
+    lineHeight: 1.6,
+  },
+
+  privacy: {
+    borderRadius: 14,
+    border: "1px solid #E5E7EB",
+    background: "#FFFFFF",
+    padding: "10px 12px",
+    boxShadow: "0 10px 20px rgba(17,24,39,0.05)",
   },
 
   field: { display: "grid", gap: 8 },
-  label: { fontSize: 12, color: "#0F172A", fontWeight: 800 },
-  hint: { fontSize: 12, color: "#94A3B8" },
+
+  label: {
+    fontSize: 13,
+    color: "#111827",
+    fontWeight: 800,
+  },
+
+  hint: { fontSize: 12, color: "#9CA3AF" },
 
   input: {
     width: "100%",
-    borderRadius: 16,
-    border: "1px solid rgba(15,23,42,0.12)",
-    padding: "12px 14px",
+    borderRadius: 14,
+    border: "1px solid #E5E7EB",
     fontSize: 14,
     outline: "none",
-    background: "rgba(255,255,255,0.9)",
+    background: "#FFFFFF",
   },
+
   textarea: {
     width: "100%",
-    borderRadius: 16,
-    border: "1px solid rgba(15,23,42,0.12)",
-    padding: "12px 14px",
+    borderRadius: 14,
+    border: "1px solid #E5E7EB",
     fontSize: 14,
     outline: "none",
-    background: "rgba(255,255,255,0.9)",
+    background: "#FFFFFF",
     resize: "vertical",
   },
 
-  twoCol: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 },
+  twoCol: {
+    display: "grid",
+    gap: 12,
+  },
+
   miniCard: {
-    borderRadius: 18,
-    border: "1px solid rgba(15,23,42,0.08)",
-    background: "rgba(248,250,252,0.75)",
+    borderRadius: 16,
+    border: "1px solid #E5E7EB",
+    background: "#FFFFFF",
     padding: 14,
   },
 
   button: {
     marginTop: 4,
-    borderRadius: 16,
+    borderRadius: 14,
     padding: "13px 14px",
-    border: "1px solid #0F172A",
-    background: "#0F172A",
+    border: "1px solid #111827",
+    background: "#111827",
     color: "#fff",
     fontWeight: 900,
     letterSpacing: "0.01em",
   },
 
   toast: {
-    borderRadius: 16,
+    borderRadius: 14,
     border: "1px solid",
     padding: "12px 14px",
-    fontWeight: 700,
+    fontWeight: 800,
+    lineHeight: 1.5,
   },
 
   sideCard: {
-    borderRadius: 22,
-    border: "1px solid rgba(15,23,42,0.10)",
-    background: "rgba(255,255,255,0.8)",
-    boxShadow: "0 12px 40px rgba(2,6,23,0.06)",
-    padding: 16,
+    borderRadius: 18,
+    border: "1px solid #E5E7EB",
+    background: "#FFFFFF",
+    boxShadow: "0 10px 30px rgba(17,24,39,0.06)",
   },
-  sideTitle: { fontWeight: 900, color: "#0F172A", marginBottom: 8 },
-  sideText: { color: "#64748B", lineHeight: 1.75, fontSize: 14 },
 
-  // responsive fallback (biar gak pecah)
-  "@media": {},
+  sideTitle: { fontWeight: 900, color: "#111827", marginBottom: 8 },
+
+  sideText: { color: "#6B7280", lineHeight: 1.75, fontSize: 14 },
 };
