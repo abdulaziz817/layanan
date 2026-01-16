@@ -8,8 +8,16 @@ export default function App({ Component, pageProps }) {
   useEffect(() => {
     netlifyIdentity.init();
 
-    // Optional: kalau login berhasil, auto close popup
-    netlifyIdentity.on("login", () => netlifyIdentity.close());
+    const handleLogin = () => {
+      netlifyIdentity.close();
+      window.location.reload(); // refresh halaman supaya admin langsung kebaca
+    };
+
+    netlifyIdentity.on("login", handleLogin);
+
+    return () => {
+      netlifyIdentity.off("login", handleLogin);
+    };
   }, []);
 
   return (
