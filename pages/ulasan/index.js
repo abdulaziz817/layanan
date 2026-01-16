@@ -1,26 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import RatingStars from "../../components/ui/RatingStars";
 
-function useBreakpoints() {
-  const [w, setW] = useState(1200);
-
-  useEffect(() => {
-    const onResize = () => setW(window.innerWidth || 1200);
-    onResize();
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
-
-  const isMobile = w < 640;   // HP
-  const isTablet = w >= 640 && w < 1024; // Tablet
-  const isDesktop = w >= 1024;
-
-  return { w, isMobile, isTablet, isDesktop };
-}
-
 export default function UlasanPage() {
-  const { isMobile, isTablet } = useBreakpoints();
-
   const [nama, setNama] = useState("");
   const [ratingProduk, setRatingProduk] = useState(5);
   const [ratingToko, setRatingToko] = useState(5);
@@ -70,150 +51,353 @@ export default function UlasanPage() {
     }
   }
 
-  // ====== RESPONSIVE LAYOUT TOKENS ======
-  const containerPadX = isMobile ? 16 : 24;
-  const sectionPadY = isMobile ? 44 : isTablet ? 64 : 80;
-
-  const gridCols = isMobile ? "1fr" : "1.35fr 0.65fr";
-  const gridGap = isMobile ? 14 : 16;
-
-  const titleSize = isMobile ? 28 : isTablet ? 34 : 40;
-  const descSize = isMobile ? 15 : 18;
-
-  const cardPad = isMobile ? 16 : 18;
-  const inputPad = isMobile ? "12px 12px" : "12px 14px";
-
-  const ratingCols = isMobile ? "1fr" : "1fr 1fr";
-
   return (
-<div style={s.page}>
-  <div
-    style={{
-      ...s.shell,
-      paddingLeft: containerPadX,
-      paddingRight: containerPadX,
+    <div className="ulasan-page">
+      {/* CSS RESPONSIVE (GLOBAL DI KOMPONEN INI) */}
+      <style>{`
+        /* ===== Base reset kecil biar layout stabil di semua device ===== */
+        .ulasan-page, .ulasan-page * { box-sizing: border-box; }
+        .ulasan-page { background:#fff; min-height: 100vh; }
 
-      /* OFFSET NAVBAR */
-      paddingTop: `calc(${sectionPadY}px + clamp(70px, 8vw, 100px))`,
-      paddingBottom: sectionPadY,
-    }}
-  >
-    {/* ===== HEADER (sesuai referensi) ===== */}
-    <div style={{ ...s.header, marginBottom: isMobile ? 18 : 28 }}>
-      <h2 style={{ ...s.h2, fontSize: titleSize }}>
-        Ulasan
-      </h2>
+        /* ===== Container utama ===== */
+        .ulasan-shell{
+          width: 100%;
+          max-width: 1280px;
+          margin: 0 auto;
+          /* aman untuk notch & nav gesture */
+          padding-left: max(16px, env(safe-area-inset-left));
+          padding-right: max(16px, env(safe-area-inset-right));
 
-      <p style={{ ...s.p, fontSize: descSize }}>
-        Bagikan pengalaman Anda tentang layanan kami.
-      </p>
-    </div>
+          /* OFFSET NAVBAR: gunakan variable biar gampang */
+          padding-top: calc(var(--sectionY) + var(--navbarOffset));
+          padding-bottom: var(--sectionY);
+        }
 
-        {/* ===== CONTENT ===== */}
-        <div style={{ ...s.grid, gridTemplateColumns: gridCols, gap: gridGap }}>
+        /* default: desktop */
+        .ulasan-shell{
+          --sectionY: 80px;
+          --navbarOffset: clamp(70px, 8vw, 100px);
+        }
+
+        /* tablet */
+        @media (max-width: 1023.98px){
+          .ulasan-shell{
+            --sectionY: 64px;
+          }
+        }
+
+        /* mobile */
+        @media (max-width: 639.98px){
+          .ulasan-shell{
+            --sectionY: 44px;
+          }
+        }
+
+        /* ===== Header ===== */
+        .ulasan-header{
+          text-align: center;
+          margin-bottom: 28px;
+        }
+
+        .ulasan-title{
+          margin: 0;
+          font-weight: 800;
+          color: #1F2937;
+          letter-spacing: -0.02em;
+          font-size: 40px; /* desktop */
+          line-height: 1.15;
+        }
+
+        .ulasan-desc{
+          margin: 12px auto 0;
+          max-width: 620px;
+          line-height: 1.75;
+          color: #4B5563;
+          font-size: 18px; /* desktop */
+        }
+
+        @media (max-width: 1023.98px){
+          .ulasan-title{ font-size: 34px; }
+          .ulasan-desc{ font-size: 17px; }
+          .ulasan-header{ margin-bottom: 24px; }
+        }
+
+        @media (max-width: 639.98px){
+          .ulasan-title{ font-size: 28px; }
+          .ulasan-desc{ font-size: 15px; }
+          .ulasan-header{ margin-bottom: 18px; }
+        }
+
+        /* ===== Layout grid utama ===== */
+        .ulasan-grid{
+          display: grid;
+          align-items: start;
+          gap: 16px;
+          grid-template-columns: 1.35fr 0.65fr; /* desktop */
+        }
+
+        /* tablet & mobile: jadi 1 kolom biar aman */
+        @media (max-width: 1023.98px){
+          .ulasan-grid{
+            grid-template-columns: 1fr;
+            gap: 14px;
+          }
+        }
+
+        /* ===== Card umum ===== */
+        .card{
+          border-radius: 18px;
+          border: 1px solid #E5E7EB;
+          background: #FFFFFF;
+          box-shadow: 0 10px 30px rgba(17,24,39,0.06);
+        }
+
+        .card-pad{
+          padding: 18px; /* desktop */
+        }
+        @media (max-width: 639.98px){
+          .card-pad{ padding: 16px; }
+        }
+
+        /* ===== Card header form ===== */
+        .card-top{
+          display:flex;
+          justify-content: space-between;
+          align-items:flex-start;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+
+        .card-title{
+          font-size: 18px;
+          font-weight: 900;
+          color: #111827;
+          margin: 0;
+        }
+
+        .card-sub{
+          margin-top: 6px;
+          font-size: 14px;
+          color: #6B7280;
+          line-height: 1.6;
+        }
+
+        /* ===== Form ===== */
+        .form{
+          display: grid;
+          gap: 14px;
+          margin-top: 14px;
+        }
+
+        .field{
+          display: grid;
+          gap: 8px;
+          min-width: 0; /* penting biar input gak overflow */
+        }
+
+        .label{
+          font-size: 13px;
+          color: #111827;
+          font-weight: 800;
+        }
+
+        .hint{
+          font-size: 12px;
+          color: #9CA3AF;
+        }
+
+        .input, .textarea{
+          width: 100%;
+          border-radius: 14px;
+          border: 1px solid #E5E7EB;
+          font-size: 14px;
+          outline: none;
+          background: #FFFFFF;
+          padding: 12px 14px; /* desktop */
+          min-width: 0;
+        }
+
+        @media (max-width: 639.98px){
+          .input, .textarea{
+            padding: 12px 12px;
+          }
+        }
+
+        .textarea{
+          resize: vertical;
+        }
+
+        /* ===== Rating area ===== */
+        .rating-grid{
+          display: grid;
+          gap: 12px;
+          grid-template-columns: 1fr 1fr; /* desktop & tablet */
+        }
+
+        /* mobile: stack */
+        @media (max-width: 639.98px){
+          .rating-grid{
+            grid-template-columns: 1fr;
+          }
+        }
+
+        .mini-card{
+          border-radius: 16px;
+          border: 1px solid #E5E7EB;
+          background: #FFFFFF;
+          padding: 14px;
+          min-width: 0;
+        }
+
+        /* ===== Button ===== */
+        .btn{
+          margin-top: 4px;
+          border-radius: 14px;
+          padding: 13px 14px;
+          border: 1px solid #111827;
+          background: #111827;
+          color: #fff;
+          font-weight: 900;
+          letter-spacing: 0.01em;
+          width: 100%;
+        }
+
+        .btn:disabled{
+          opacity: 0.55;
+          cursor: not-allowed;
+        }
+        .btn:not(:disabled){
+          cursor: pointer;
+        }
+
+        /* ===== Toast ===== */
+        .toast{
+          border-radius: 14px;
+          border: 1px solid;
+          padding: 12px 14px;
+          font-weight: 800;
+          line-height: 1.5;
+        }
+
+        .toast.ok{
+          border-color: rgba(16,185,129,0.30);
+          background: rgba(16,185,129,0.08);
+          color: #065F46;
+        }
+        .toast.err{
+          border-color: rgba(239,68,68,0.30);
+          background: rgba(239,68,68,0.08);
+          color: #991B1B;
+        }
+
+        /* ===== Side area ===== */
+        .side-wrap{
+          display: grid;
+          gap: 14px;
+        }
+
+        /* tablet: side cards jadi 2 kolom biar enak (opsional & rapi) */
+        @media (min-width: 640px) and (max-width: 1023.98px){
+          .side-wrap{
+            grid-template-columns: 1fr 1fr;
+          }
+        }
+
+        /* mobile: tetap 1 kolom */
+        @media (max-width: 639.98px){
+          .side-wrap{
+            grid-template-columns: 1fr;
+          }
+        }
+
+        .side-title{
+          font-weight: 900;
+          color: #111827;
+          margin-bottom: 8px;
+        }
+
+        .side-text{
+          color: #6B7280;
+          line-height: 1.75;
+          font-size: 14px;
+        }
+      `}</style>
+
+      <div className="ulasan-shell">
+        {/* HEADER */}
+        <div className="ulasan-header">
+          <h2 className="ulasan-title">Ulasan</h2>
+          <p className="ulasan-desc">Bagikan pengalaman Anda tentang layanan kami.</p>
+        </div>
+
+        {/* CONTENT */}
+        <div className="ulasan-grid">
           {/* FORM */}
-          <div style={{ ...s.card, padding: cardPad }}>
-            <div style={s.cardTop}>
+          <div className="card card-pad">
+            <div className="card-top">
               <div>
-                <div style={s.cardTitle}>Tulis Ulasan</div>
-                <div style={s.cardSub}>
-                  Isi ulasan dengan jujur—singkat aja gak apa.
-                </div>
+                <div className="card-title">Tulis Ulasan</div>
+                <div className="card-sub">Isi ulasan dengan jujur—singkat aja gak apa.</div>
               </div>
-
-             
             </div>
 
-            <form onSubmit={submit} style={{ display: "grid", gap: 14, marginTop: 14 }}>
-              <div style={s.field}>
-                <label style={s.label}>Nama</label>
+            <form onSubmit={submit} className="form">
+              <div className="field">
+                <label className="label">Nama</label>
                 <input
+                  className="input"
                   value={nama}
                   onChange={(e) => setNama(e.target.value)}
                   placeholder="Nama kamu"
-                  style={{ ...s.input, padding: inputPad }}
                 />
-                <div style={s.hint}>Minimal 2 karakter.</div>
+                <div className="hint">Minimal 2 karakter.</div>
               </div>
 
-              <div style={{ ...s.twoCol, gridTemplateColumns: ratingCols }}>
-                <div style={s.miniCard}>
-                  <RatingStars
-                    label="Rating Produk"
-                    value={ratingProduk}
-                    onChange={setRatingProduk}
-                  />
+              <div className="rating-grid">
+                <div className="mini-card">
+                  <RatingStars label="Rating Produk" value={ratingProduk} onChange={setRatingProduk} />
                 </div>
-                <div style={s.miniCard}>
-                  <RatingStars
-                    label="Rating Toko"
-                    value={ratingToko}
-                    onChange={setRatingToko}
-                  />
+                <div className="mini-card">
+                  <RatingStars label="Rating Toko" value={ratingToko} onChange={setRatingToko} />
                 </div>
               </div>
 
-              <div style={s.field}>
-                <label style={s.label}>Kritik & Saran</label>
+              <div className="field">
+                <label className="label">Kritik &amp; Saran</label>
                 <textarea
+                  className="textarea"
                   value={kritikSaran}
                   onChange={(e) => setKritikSaran(e.target.value)}
                   placeholder="Tulis kritik & saran kamu..."
-                  rows={isMobile ? 5 : 7}
-                  style={{ ...s.textarea, padding: inputPad }}
+                  rows={6}
                 />
-                <div style={s.hint}>Minimal 5 karakter.</div>
+                <div className="hint">Minimal 5 karakter.</div>
               </div>
 
-              <button
-                type="submit"
-                disabled={!canSubmit}
-                style={{
-                  ...s.button,
-                  opacity: canSubmit ? 1 : 0.55,
-                  cursor: canSubmit ? "pointer" : "not-allowed",
-                }}
-              >
+              <button type="submit" className="btn" disabled={!canSubmit}>
                 {loading ? "Mengirim..." : "Kirim Ulasan"}
               </button>
 
               {toast && (
-                <div
-                  style={{
-                    ...s.toast,
-                    borderColor:
-                      toast.type === "ok"
-                        ? "rgba(16,185,129,0.30)"
-                        : "rgba(239,68,68,0.30)",
-                    background:
-                      toast.type === "ok"
-                        ? "rgba(16,185,129,0.08)"
-                        : "rgba(239,68,68,0.08)",
-                    color: toast.type === "ok" ? "#065F46" : "#991B1B",
-                  }}
-                >
-                  {toast.text}
-                </div>
+                <div className={`toast ${toast.type === "ok" ? "ok" : "err"}`}>{toast.text}</div>
               )}
             </form>
           </div>
 
           {/* SIDE */}
-          <div style={{ display: "grid", gap: 14 }}>
-            <div style={{ ...s.sideCard, padding: cardPad }}>
-              <div style={s.sideTitle}>Ceritakan pengalaman kamu</div>
-              <div style={s.sideText}>
+          <div className="side-wrap">
+            <div className="card card-pad">
+              <div className="side-title">Ceritakan pengalaman kamu</div>
+              <div className="side-text">
                 • Ceritakan pengalaman kamu
                 <br />• Sebutkan hal yang perlu diperbaiki
                 <br />• Kalau ada saran fitur, tulis aja.
               </div>
             </div>
 
-            <div style={{ ...s.sideCard, padding: cardPad }}>
-              <div style={s.sideTitle}>Catatan</div>
-              <div style={s.sideText}>
-                Ulasan langsung tersimpan ke sistem. Tidak ditampilkan publik.
-              </div>
+            <div className="card card-pad">
+              <div className="side-title">Catatan</div>
+              <div className="side-text">Ulasan langsung tersimpan ke sistem. Tidak ditampilkan publik.</div>
             </div>
           </div>
         </div>
@@ -221,152 +405,3 @@ export default function UlasanPage() {
     </div>
   );
 }
-
-const s = {
-  // background putih doang (sesuai permintaan)
-  page: {
-    minHeight: "calc(100vh - 80px)",
-    background: "#FFFFFF",
-  },
-
-  // container mirip max-w-7xl mx-auto px-6
-  shell: {
-    maxWidth: 1280,
-    margin: "0 auto",
-  },
-
-  // header referensi "text-center mb-14"
-  header: {
-    textAlign: "center",
-  },
-
-  // h2 text-4xl font-bold text-gray-800
-  h2: {
-    margin: 0,
-    fontWeight: 800,
-    color: "#1F2937",
-    letterSpacing: "-0.02em",
-  },
-
-  // p text-lg text-gray-600 mt-4 max-w-xl mx-auto
-  p: {
-    marginTop: 12,
-    marginLeft: "auto",
-    marginRight: "auto",
-    maxWidth: 620,
-    lineHeight: 1.75,
-    color: "#4B5563",
-  },
-
-  grid: {
-    display: "grid",
-    alignItems: "start",
-  },
-
-  card: {
-    borderRadius: 18,
-    border: "1px solid #E5E7EB",
-    background: "#FFFFFF",
-    boxShadow: "0 10px 30px rgba(17,24,39,0.06)",
-  },
-
-  cardTop: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    gap: 12,
-    flexWrap: "wrap",
-  },
-
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: 900,
-    color: "#111827",
-  },
-
-  cardSub: {
-    marginTop: 6,
-    fontSize: 14,
-    color: "#6B7280",
-    lineHeight: 1.6,
-  },
-
-  privacy: {
-    borderRadius: 14,
-    border: "1px solid #E5E7EB",
-    background: "#FFFFFF",
-    padding: "10px 12px",
-    boxShadow: "0 10px 20px rgba(17,24,39,0.05)",
-  },
-
-  field: { display: "grid", gap: 8 },
-
-  label: {
-    fontSize: 13,
-    color: "#111827",
-    fontWeight: 800,
-  },
-
-  hint: { fontSize: 12, color: "#9CA3AF" },
-
-  input: {
-    width: "100%",
-    borderRadius: 14,
-    border: "1px solid #E5E7EB",
-    fontSize: 14,
-    outline: "none",
-    background: "#FFFFFF",
-  },
-
-  textarea: {
-    width: "100%",
-    borderRadius: 14,
-    border: "1px solid #E5E7EB",
-    fontSize: 14,
-    outline: "none",
-    background: "#FFFFFF",
-    resize: "vertical",
-  },
-
-  twoCol: {
-    display: "grid",
-    gap: 12,
-  },
-
-  miniCard: {
-    borderRadius: 16,
-    border: "1px solid #E5E7EB",
-    background: "#FFFFFF",
-    padding: 14,
-  },
-
-  button: {
-    marginTop: 4,
-    borderRadius: 14,
-    padding: "13px 14px",
-    border: "1px solid #111827",
-    background: "#111827",
-    color: "#fff",
-    fontWeight: 900,
-    letterSpacing: "0.01em",
-  },
-
-  toast: {
-    borderRadius: 14,
-    border: "1px solid",
-    padding: "12px 14px",
-    fontWeight: 800,
-    lineHeight: 1.5,
-  },
-
-  sideCard: {
-    borderRadius: 18,
-    border: "1px solid #E5E7EB",
-    background: "#FFFFFF",
-    boxShadow: "0 10px 30px rgba(17,24,39,0.06)",
-  },
-
-  sideTitle: { fontWeight: 900, color: "#111827", marginBottom: 8 },
-
-  sideText: { color: "#6B7280", lineHeight: 1.75, fontSize: 14 },
-};
