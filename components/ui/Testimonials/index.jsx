@@ -65,7 +65,8 @@ const Testimonials = () => {
 
                         // bikin "time" sederhana dari created_at kalau ada
                         // (kalau created_at kosong, tetep aman)
-                        const time = u.created_at ? String(u.created_at) : "Baru saja"
+                       const time = formatTime(u.created_at)
+
 
                         return {
                             id: u.id || `${u.created_at || "row"}-${idx}`,
@@ -137,6 +138,44 @@ const Testimonials = () => {
 
         return <div className="flex gap-0.5">{stars}</div>
     }
+const formatTime = (v) => {
+  if (!v) return "Baru saja";
+
+  // kasus: "Date(2026,0,16,15,31,11)"
+  const s = String(v);
+  const m = s.match(/Date\((\d+),(\d+),(\d+)(?:,(\d+),(\d+),(\d+))?\)/i);
+  if (m) {
+    const year = Number(m[1]);
+    const month = Number(m[2]); // 0-based
+    const day = Number(m[3]);
+    const hour = Number(m[4] ?? 0);
+    const min = Number(m[5] ?? 0);
+    const sec = Number(m[6] ?? 0);
+    const d = new Date(year, month, day, hour, min, sec);
+
+    return d.toLocaleString("id-ID", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
+  // kalau sudah ISO atau string biasa
+  const dt = new Date(s);
+  if (!Number.isNaN(dt.getTime())) {
+    return dt.toLocaleString("id-ID", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
+  return s;
+};
 
     return (
         <SectionWrapper className="bg-white">
