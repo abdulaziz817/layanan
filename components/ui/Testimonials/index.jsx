@@ -16,69 +16,9 @@ import { useEffect, useState } from "react"
 import clsx from "clsx"
 
 const Testimonials = () => {
-    const testimonials = [
-     {
-        id: 1,
-        name: "Rizky Aditiya",
-        role: "Customer",
-        stars: 4.5,
-        service: "Desain Logo Usaha Kopi",
-        comment:
-            "Gila sih, logo yang dibikinin bener-bener ngehit 🥹✨ toko kopi gue langsung keliatan ‘berjiwa’ banget. Banyak yang bilang keren juga!",
-        time: "2 minggu lalu",
-    },
-    {
-        id: 2,
-        name: "Dimas",
-        role: "Customer",
-        stars: 5,
-        service: "Pembuatan Website Portfolio",
-        comment:
-            "Web gue jadi super clean, responsif, dan keliatan profesional banget 😭🔥 sekarang kalo ngelamar kerja tuh auto diliat HR!",
-        time: "1 bulan lalu",
-    },
-    {
-        id: 3,
-        name: "Aditya Nugroho",
-        role: "Customer",
-        stars: 4,
-        service: "Preset Fotografi Outdoor",
-        comment:
-            "Presetnya cakep parah sih 🌿📸 feed IG gue auto glow up, jadi betah scroll sendiri wkwk.",
-        time: "4 hari lalu",
-    },
-    {
-        id: 4,
-        name: "Muhammad Iqbal",
-        role: "Customer",
-        stars: 5,
-        service: "Desain Banner Promosi",
-        comment:
-            "Bannernya eye-catching banget 😆🔥 banyak yang nanya bikin di mana, jualan gue langsung rame cuy!",
-        time: "3 minggu lalu",
-    },
-    {
-        id: 5,
-        name: "Salsabila Putri",
-        role: "Customer",
-        stars: 4.5,
-        service: "Desain Kartu Nama & Branding",
-        comment:
-            "Kartu namanya elegan parah 😍 bikin makin pede tiap ketemu klien!",
-        time: "1 bulan lalu",
-    },
-    {
-        id: 6,
-        name: "Putri Lestari",
-        role: "Customer",
-        stars: 5,
-        service: "Canva Pro",
-        comment:
-            "Aktifnya cepet, aman, fitur pro semua kebuka 😎👍 edit konten jadi sat-set!",
-        time: "2 minggu lalu",
-    }
-
-    ]
+    // ✅ Data sekarang dari API, bukan hardcode
+    const [testimonials, setTestimonials] = useState([])
+    const [loading, setLoading] = useState(true)
 
     // State untuk menyimpan liked testimonial dan animasi trigger
     const [liked, setLiked] = useState({})
@@ -89,6 +29,72 @@ const Testimonials = () => {
         const storedLikes = localStorage.getItem("testimonialLikes")
         if (storedLikes) {
             setLiked(JSON.parse(storedLikes))
+        }
+    }, [])
+
+    // ✅ Ambil ulasan dari Netlify function: /.netlify/functions/ulasan-list
+    useEffect(() => {
+        let alive = true
+
+        const loadTestimonials = async () => {
+            setLoading(true)
+            try {
+                const res = await fetch("/.netlify/functions/ulasan-list", {
+                    method: "GET",
+                    headers: { "Content-Type": "application/json" },
+                })
+
+                const data = await res.json().catch(() => ({}))
+
+                if (!res.ok) {
+                    // kalau butuh admin auth, kemungkinan error di sini
+                    if (alive) setTestimonials([])
+                    return
+                }
+
+                const items = Array.isArray(data?.items) ? data.items : []
+
+                const mapped = items
+                    .map((u, idx) => {
+                        const ratingProduk = Number(u.rating_produk || 0)
+                        const ratingToko = Number(u.rating_toko || 0)
+
+                        // gabung jadi 1 nilai bintang (0.5 step)
+                        const avg = (ratingProduk + ratingToko) / 2
+                        const stars = Math.round(avg * 2) / 2 || 5
+
+                        // bikin "time" sederhana dari created_at kalau ada
+                        // (kalau created_at kosong, tetep aman)
+                        const time = u.created_at ? String(u.created_at) : "Baru saja"
+
+                        return {
+                            id: u.id || `${u.created_at || "row"}-${idx}`,
+                            name: u.nama || "Anonim",
+                            role: "Customer",
+                            stars,
+                            service: "Ulasan Pelanggan",
+                            comment: u.kritik_saran || "",
+                            time,
+                            budget: u.budget, // tetap ada seperti UI awal (walau undefined)
+                        }
+                    })
+                    // ✅ HILANGKAN testimoni dari "Dammi"
+                    .filter((t) => String(t.name || "").trim().toLowerCase() !== "dammi")
+                    // ✅ buang yang komentar kosong biar rapi
+                    .filter((t) => String(t.comment || "").trim().length > 0)
+
+                if (alive) setTestimonials(mapped)
+            } catch (e) {
+                if (alive) setTestimonials([])
+            } finally {
+                if (alive) setLoading(false)
+            }
+        }
+
+        loadTestimonials()
+
+        return () => {
+            alive = false
         }
     }, [])
 
@@ -155,7 +161,7 @@ const Testimonials = () => {
                         1024: { slidesPerView: 3 },
                     }}
                 >
-                    {testimonials.map((item, i) => (
+                    {(testimonials || []).map((item, i) => (
                         <SwiperSlide key={i}>
                             <div className="relative h-full bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between min-h-[380px]">
                                 {/* Tombol like di pojok kanan atas */}
@@ -206,6 +212,17 @@ const Testimonials = () => {
                             </div>
                         </SwiperSlide>
                     ))}
+
+                    {/* Kalau kosong, biar tidak blank total (UI tetap rapi) */}
+                    {(!loading && (!testimonials || testimonials.length === 0)) && (
+                        <SwiperSlide>
+                            <div className="relative h-full bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex flex-col justify-center min-h-[380px]">
+                                <div className="text-center text-gray-600">
+                                    Belum ada testimoni yang ditampilkan.
+                                </div>
+                            </div>
+                        </SwiperSlide>
+                    )}
                 </Swiper>
             </div>
 

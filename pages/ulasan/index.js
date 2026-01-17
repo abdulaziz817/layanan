@@ -397,7 +397,7 @@ export default function UlasanPage() {
 
             <div className="card card-pad">
               <div className="side-title">Catatan</div>
-              <div className="side-text">Ulasan langsung tersimpan ke sistem. Tidak ditampilkan publik.</div>
+              <div className="side-text">Ulasan langsung akan di tempilkan di halaman Utama</div>
             </div>
           </div>
         </div>
