@@ -1394,86 +1394,104 @@ export default function BlogUI() {
   </div>
 </section>
 
-     {/* ================= MODAL ================= */}
-      <AnimatePresence>
-        {selectedArticle && (
-        <motion.div
-  onClick={() => setSelectedArticle(null)}
-  className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-4"
-  initial={{ opacity: 0 }}
-  animate={{ opacity: 1 }}
-  exit={{ opacity: 0 }}
-  transition={{ duration: 0.25, ease: 'easeOut' }}
->
-  <motion.div
-    onClick={(e) => e.stopPropagation()}
-    className="bg-white max-w-2xl w-full rounded-3xl p-8 relative max-h-[85vh] overflow-y-auto shadow-2xl"
-    initial={{ opacity: 0, scale: 0.96, y: 20 }}
-    animate={{ opacity: 1, scale: 1, y: 0 }}
-    exit={{ opacity: 0, scale: 0.94, y: 20 }} // scale + fade out smooth
-    transition={{ type: 'spring', stiffness: 500, damping: 35 }} // spring smooth ala MacBook
-  >
-    {/* Close */}
-    <motion.button
-      onClick={(e) => {
-        e.stopPropagation()
-        setSelectedArticle(null) // langsung trigger exit, animasi spring akan jalan
+   {/* ================= MODAL ================= */}
+<AnimatePresence mode="wait">
+  {selectedArticle && (
+    <motion.div
+      key="backdrop"
+      onClick={() => setSelectedArticle(null)}
+      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.18, ease: "easeOut" }}
+      style={{
+        willChange: "opacity",
+        transform: "translateZ(0)",
       }}
-      className="absolute top-4 right-4 rounded-full p-2 text-gray-400 hover:text-black"
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.92 }}
-      aria-label="Close"
     >
-      ✕
-    </motion.button>
+      <motion.div
+        key="modal"
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white max-w-2xl w-full rounded-3xl p-8 relative shadow-2xl"
+        initial={{ opacity: 0, y: 18, scale: 0.985 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 18, scale: 0.985 }}
+        transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+        style={{
+          willChange: "transform, opacity",
+          transform: "translateZ(0)",
+        }}
+      >
+        {/* ✅ Scroll area dipisah biar animasi panel ga berat (anti jank HP) */}
+        <div
+          className="max-h-[85vh] overflow-y-auto overscroll-contain pr-1"
+          style={{ WebkitOverflowScrolling: "touch" }}
+        >
+          {/* Close */}
+          <motion.button
+            onClick={(e) => {
+              e.stopPropagation()
+              setSelectedArticle(null)
+            }}
+            className="absolute top-4 right-4 rounded-full p-2 text-gray-400 hover:text-black"
+            whileTap={{ scale: 0.92 }}
+            transition={{ duration: 0.08 }}
+            aria-label="Close"
+          >
+            ✕
+          </motion.button>
 
+          {/* Category */}
+          <span className="inline-block mb-4 text-xs font-medium px-3 py-1 rounded-full bg-black/5 text-black">
+            {selectedArticle.category}
+          </span>
 
-              {/* Category */}
-              <span className="inline-block mb-4 text-xs font-medium px-3 py-1 rounded-full bg-black/5 text-black">
-                {selectedArticle.category}
-              </span>
+          {/* Title */}
+          <h2 className="text-2xl font-semibold mb-2 leading-snug">
+            {selectedArticle.title}
+          </h2>
 
-              {/* Title */}
-              <h2 className="text-2xl font-semibold mb-2 leading-snug">
-                {selectedArticle.title}
-              </h2>
+          {/* Date */}
+          <p className="text-sm text-gray-400 mb-6">{selectedArticle.date}</p>
 
-              {/* Date */}
-              <p className="text-sm text-gray-400 mb-6">{selectedArticle.date}</p>
+          {/* Content */}
+          <div className="text-gray-700 leading-relaxed whitespace-pre-line mb-10">
+            {selectedArticle.content}
+          </div>
 
-              {/* Content */}
-              <div className="text-gray-700 leading-relaxed whitespace-pre-line mb-10">
-                {selectedArticle.content}
-              </div>
+          {/* Reference */}
+          {selectedArticle.reference && selectedArticle.reference.length > 0 && (
+            <div className="border-t pt-6">
+              <h4 className="text-sm font-semibold mb-3 text-gray-800">
+                Referensi
+              </h4>
 
-              {/* Reference */}
-              {selectedArticle.reference && selectedArticle.reference.length > 0 && (
-                <div className="border-t pt-6">
-                  <h4 className="text-sm font-semibold mb-3 text-gray-800">
-                    Referensi
-                  </h4>
+              <ul className="space-y-2">
+                {selectedArticle.reference.map((ref, idx) => (
+                  <li key={idx}>
+                    <a
+                      href={ref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-gray-600 hover:text-black flex items-center gap-2 transition"
+                    >
+                      <span className="text-gray-400">↗</span>
+                      <span className="truncate">
+                        {new URL(ref).hostname.replace("www.", "")}
+                      </span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
 
-                  <ul className="space-y-2">
-                    {selectedArticle.reference.map((ref, idx) => (
-                      <li key={idx}>
-                        <a
-                          href={ref}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm text-gray-600 hover:text-black flex items-center gap-2 transition"
-                        >
-                          <span className="text-gray-400">↗</span>
-                          <span className="truncate">{new URL(ref).hostname.replace('www.', '')}</span>
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </main>
   )
 }
