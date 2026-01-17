@@ -39,10 +39,10 @@ const Testimonials = () => {
         const loadTestimonials = async () => {
             setLoading(true)
             try {
-                const res = await fetch("/.netlify/functions/ulasan-list", {
-                    method: "GET",
-                    headers: { "Content-Type": "application/json" },
-                })
+               const res = await fetch("/.netlify/functions/ulasan-list-public", {
+  method: "GET",
+  headers: { "Content-Type": "application/json" },
+})
 
                 const data = await res.json().catch(() => ({}))
 
