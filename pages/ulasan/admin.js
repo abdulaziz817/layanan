@@ -23,6 +23,9 @@ export default function UlasanAdminPage() {
   const [err, setErr] = useState("");
   const [me, setMe] = useState(null);
 
+  // ✅ tambahan untuk tombol hapus
+  const [deletingId, setDeletingId] = useState(null);
+
   async function getJwt() {
     const user = netlifyIdentity.currentUser();
     if (!user) return null;
@@ -51,6 +54,40 @@ export default function UlasanAdminPage() {
       setErr(e.message || "Gagal mengambil data");
     } finally {
       setLoading(false);
+    }
+  }
+
+  // ✅ fungsi hapus ulasan (frontend)
+  async function handleDelete(id) {
+    if (!id) {
+      alert("ID ulasan kosong. Pastikan data punya field 'id'.");
+      return;
+    }
+
+    if (!confirm("Yakin mau hapus ulasan ini?")) return;
+
+    try {
+      setDeletingId(id);
+
+      const token = await getJwt();
+      const res = await fetch("/.netlify/functions/ulasan-delete", {
+        method: "POST",
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error || data?.message || "Gagal hapus ulasan");
+
+      // update UI tanpa refresh
+      setItems((prev) => prev.filter((x) => x.id !== id));
+    } catch (e) {
+      alert(e.message || "Error");
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -110,162 +147,141 @@ export default function UlasanAdminPage() {
   const headerTitle = "Kelola Ulasan";
   const headerDesc = "Pantau, cari, dan review masukan pelanggan.";
 
-return (
-  <div
-    style={{
-      ...a.page,
-
-      /* OFFSET NAVBAR */
-      paddingTop: isMobile ? "110px" : "130px",
-      paddingLeft: isMobile ? "14px" : "16px",
-      paddingRight: isMobile ? "14px" : "16px",
-      paddingBottom: isMobile ? "36px" : a.page.padding,
-    }}
-  >
-    <div style={a.shell}>
-      {/* ===== HEADER (kaya referensi) ===== */}
-      <div
-        style={{
-          ...a.header,
-          marginBottom: isMobile ? 16 : 24,
-
-          /* penting: jangan 2 kolom lagi */
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          textAlign: "center",
-          gap: 12,
-        }}
-      >
-        {/* TOP TEXT */}
+  return (
+    <div
+      style={{
+        ...a.page,
+        paddingTop: isMobile ? "110px" : "130px",
+        paddingLeft: isMobile ? "14px" : "16px",
+        paddingRight: isMobile ? "14px" : "16px",
+        paddingBottom: isMobile ? "36px" : a.page.padding,
+      }}
+    >
+      <div style={a.shell}>
+        {/* ===== HEADER ===== */}
         <div
           style={{
-            ...a.headerLeft,
-            width: "100%",
+            ...a.header,
+            marginBottom: isMobile ? 16 : 24,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             textAlign: "center",
-            gap: 8,
+            gap: 12,
           }}
         >
-          <div style={a.kicker}>Admin • Founder only</div>
-
-          <h2
+          {/* TOP TEXT */}
+          <div
             style={{
-              fontSize: isMobile ? 22 : 30,
-              fontWeight: 700,
-              color: "#0F172A",
-              margin: 0,
-              letterSpacing: "-0.02em",
+              ...a.headerLeft,
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
               textAlign: "center",
+              gap: 8,
             }}
           >
-            Kelola Ulasan
-          </h2>
+            <div style={a.kicker}>Admin • Founder only</div>
 
-          <p
-            style={{
-              fontSize: isMobile ? 13 : 14,
-              color: "#64748B",
-              lineHeight: 1.7,
-              maxWidth: 520,
-              margin: 0,
-              textAlign: "center",
-            }}
-          >
-            Pantau dan kelola semua ulasan pelanggan di sini.
-          </p>
-
-          {/* STATUS PILL */}
-          {meLabel ? (
-            <div
+            <h2
               style={{
-                ...a.mePill,
-                marginTop: 6,
-                marginLeft: "auto",
-                marginRight: "auto",
+                fontSize: isMobile ? 22 : 30,
+                fontWeight: 700,
+                color: "#0F172A",
+                margin: 0,
+                letterSpacing: "-0.02em",
+                textAlign: "center",
               }}
             >
-              Login sebagai: <b>{meLabel}</b>
-            </div>
-          ) : (
-            <div
+              {headerTitle}
+            </h2>
+
+            <p
               style={{
-                ...a.mePillMuted,
-                marginTop: 6,
-                marginLeft: "auto",
-                marginRight: "auto",
+                fontSize: isMobile ? 13 : 14,
+                color: "#64748B",
+                lineHeight: 1.7,
+                maxWidth: 520,
+                margin: 0,
+                textAlign: "center",
               }}
             >
-              Belum login
-            </div>
-          )}
-        </div>
+              {headerDesc}
+            </p>
 
-        {/* ACTION BUTTONS (CENTER, RESPONSIVE) */}
-        <div
-          style={{
-            ...a.headerActions,
-            justifyContent: "center",
-            width: "100%",
-            display: "flex",
-            gap: 10,
-            flexWrap: "wrap",
-            marginTop: 8,
-          }}
-        >
-          <button
-            onClick={() => netlifyIdentity.open()}
+            {meLabel ? (
+              <div style={{ ...a.mePill, marginTop: 6 }}>
+                Login sebagai: <b>{meLabel}</b>
+              </div>
+            ) : (
+              <div style={{ ...a.mePillMuted, marginTop: 6 }}>Belum login</div>
+            )}
+          </div>
+
+          {/* ACTION BUTTONS */}
+          <div
             style={{
-              ...a.btn,
-              ...a.btnPrimary,
-              width: isMobile ? "100%" : "auto",
-              minWidth: isMobile ? "100%" : 120,
+              ...a.headerActions,
+              justifyContent: "center",
+              width: "100%",
+              display: "flex",
+              gap: 10,
+              flexWrap: "wrap",
+              marginTop: 8,
             }}
           >
-            Login
-          </button>
+            <button
+              onClick={() => netlifyIdentity.open()}
+              style={{
+                ...a.btn,
+                ...a.btnPrimary,
+                width: isMobile ? "100%" : "auto",
+                minWidth: isMobile ? "100%" : 120,
+              }}
+            >
+              Login
+            </button>
 
-          <button
-            onClick={() => netlifyIdentity.logout()}
-            style={{
-              ...a.btn,
-              width: isMobile ? "100%" : "auto",
-              minWidth: isMobile ? "100%" : 120,
-            }}
-          >
-            Logout
-          </button>
+            <button
+              onClick={() => netlifyIdentity.logout()}
+              style={{
+                ...a.btn,
+                width: isMobile ? "100%" : "auto",
+                minWidth: isMobile ? "100%" : 120,
+              }}
+            >
+              Logout
+            </button>
 
-          <button
-            onClick={load}
-            disabled={loading}
-            style={{
-              ...a.btn,
-              opacity: loading ? 0.6 : 1,
-              width: isMobile ? "100%" : "auto",
-              minWidth: isMobile ? "100%" : 120,
-            }}
-          >
-            {loading ? "Loading..." : "Refresh"}
-          </button>
-        </div>
-      </div>
-
-      {err && (
-        <div style={a.alert}>
-          <div style={{ fontWeight: 900 }}>Akses ditolak / error</div>
-          <div style={{ marginTop: 6 }}>{err}</div>
-          <div style={{ marginTop: 8, color: "#64748B" }}>
-            Perlu akses khusus untuk masuk ke halaman ini.
+            <button
+              onClick={load}
+              disabled={loading}
+              style={{
+                ...a.btn,
+                opacity: loading ? 0.6 : 1,
+                width: isMobile ? "100%" : "auto",
+                minWidth: isMobile ? "100%" : 120,
+              }}
+            >
+              {loading ? "Loading..." : "Refresh"}
+            </button>
           </div>
         </div>
-      )}
+
+        {err && (
+          <div style={a.alert}>
+            <div style={{ fontWeight: 900 }}>Akses ditolak / error</div>
+            <div style={{ marginTop: 6 }}>{err}</div>
+            <div style={{ marginTop: 8, color: "#64748B" }}>
+              Perlu akses khusus untuk masuk ke halaman ini.
+            </div>
+          </div>
+        )}
 
         {!err && (
           <>
-            {/* ===== STATS ===== */}
+            {/* STATS */}
             <div
               style={{
                 ...a.stats,
@@ -288,7 +304,7 @@ return (
               </div>
             </div>
 
-            {/* ===== TOOLBAR ===== */}
+            {/* TOOLBAR */}
             <div
               style={{
                 ...a.toolbar,
@@ -307,16 +323,14 @@ return (
               </div>
             </div>
 
-            {/* ===== LIST ===== */}
+            {/* LIST */}
             <div style={a.list}>
               {loading && <div style={a.muted}>Mengambil data…</div>}
-              {!loading && filtered.length === 0 && (
-                <div style={a.muted}>Belum ada ulasan.</div>
-              )}
+              {!loading && filtered.length === 0 && <div style={a.muted}>Belum ada ulasan.</div>}
 
               {!loading &&
                 filtered.map((it) => (
-                  <div key={it.id} style={a.item}>
+                  <div key={it.id || `${it.nama}-${it.created_at}`} style={a.item}>
                     <div
                       style={{
                         ...a.itemHead,
@@ -327,9 +341,7 @@ return (
                       <div>
                         <div style={a.name}>{it.nama || "-"}</div>
                         <div style={a.time}>
-                          {it.created_at
-                            ? new Date(it.created_at).toLocaleString()
-                            : "-"}
+                          {it.created_at ? new Date(it.created_at).toLocaleString() : "-"}
                         </div>
                       </div>
 
@@ -341,25 +353,31 @@ return (
                           flexWrap: "wrap",
                         }}
                       >
-                        <div
-                          style={{
-                            ...a.ratingBox,
-                            minWidth: isMobile ? "100%" : 170,
-                          }}
-                        >
+                        <div style={{ ...a.ratingBox, minWidth: isMobile ? "100%" : 170 }}>
                           <div style={a.rLabel}>Produk</div>
                           <RatingStars value={it.rating_produk} readOnly size={18} />
                         </div>
 
-                        <div
-                          style={{
-                            ...a.ratingBox,
-                            minWidth: isMobile ? "100%" : 170,
-                          }}
-                        >
+                        <div style={{ ...a.ratingBox, minWidth: isMobile ? "100%" : 170 }}>
                           <div style={a.rLabel}>Toko</div>
                           <RatingStars value={it.rating_toko} readOnly size={18} />
                         </div>
+
+                        {/* ✅ tombol sampah */}
+                        <button
+                          onClick={() => handleDelete(it.id)}
+                          disabled={deletingId === it.id}
+                          style={{
+                            ...a.trashBtn,
+                            opacity: deletingId === it.id ? 0.6 : 1,
+                            width: isMobile ? "100%" : 46,
+                            height: isMobile ? 44 : 46,
+                            cursor: deletingId === it.id ? "not-allowed" : "pointer",
+                          }}
+                          title="Hapus ulasan"
+                        >
+                          {deletingId === it.id ? "..." : "🗑️"}
+                        </button>
                       </div>
                     </div>
 
@@ -383,7 +401,6 @@ const a = {
   },
   shell: { maxWidth: 1100, margin: "0 auto" },
 
-  /* ===== HEADER (mirip referensi) ===== */
   header: {
     display: "flex",
     justifyContent: "space-between",
@@ -401,17 +418,8 @@ const a = {
     color: "#64748B",
     fontWeight: 900,
   },
-  h2: {
-    margin: "8px 0 8px",
-    fontSize: 32,
-    letterSpacing: "-0.04em",
-    color: "#0F172A",
-    lineHeight: 1.15,
-  },
-  p: { margin: 0, color: "#64748B", lineHeight: 1.7 },
 
   mePill: {
-    marginTop: 10,
     display: "inline-block",
     fontSize: 12,
     color: "#0F172A",
@@ -421,7 +429,6 @@ const a = {
     borderRadius: 999,
   },
   mePillMuted: {
-    marginTop: 10,
     display: "inline-block",
     fontSize: 12,
     color: "#64748B",
@@ -444,6 +451,17 @@ const a = {
     borderColor: "#0F172A",
     background: "#0F172A",
     color: "#fff",
+  },
+
+  trashBtn: {
+    borderRadius: 14,
+    border: "1px solid rgba(239,68,68,0.30)",
+    background: "rgba(239,68,68,0.10)",
+    color: "#B91C1C",
+    fontWeight: 900,
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   alert: {

@@ -76,7 +76,7 @@ mereka membeli kejelasan, kepercayaan, dan kekuatan identitas jangka panjang.
   `,
   date: '12 Jan 2026',
   reference: [
-    'https://www.interaction-design.org/literature/article/minimalism-in-design',
+    'https://glints.com/id/lowongan/gaya-desain-grafis-minimalis/'
   ],
 },
 {
@@ -109,7 +109,7 @@ Logo mahal adalah investasi identitas bisnis.
   `,
   date: '11 Jan 2026',
   reference: [
-    'https://www.entrepreneur.com/growing-a-business/why-a-good-logo-matters/240868'
+    'https://mangcoding.com/id/seni-logo-minimalis-kesederhanaan-yang-menguatkan-identitas-brand/'
   ],
 },
 {
@@ -140,8 +140,7 @@ Jika komunikasinya gagal, maka brand pun ikut gagal.
   `,
   date: '10 Jan 2026',
   reference: [
-    
-    'https://www.blog.turaingrp.com/5-graphic-design-mistakes-to-avoid'
+    'https://maxgrup.co.id/desain-grafis-kunci-kesuksesan-visual/'
   ],
 },
 {
@@ -170,7 +169,7 @@ Mereka fokus menguatkan satu identitas yang sudah dibangun.
   `,
   date: '9 Jan 2026',
   reference: [
-    'https://www.lucidpress.com/blog/brand-consistency',
+    'https://web.unikom.ac.id/desain-logo-dan-packaging-yang-konsisten-sebagai-strategi-visual-branding-produk/'
   ],
 },
 {
@@ -199,10 +198,7 @@ Estetika hanyalah alat, bukan tujuan akhir.
   `,
   date: '8 Jan 2026',
   reference: [
-    // 'https://www.nngroup.com/articles/design-for-conversion/',
-    'https://uxdesign.cc/design-that-sells-ux-conversion-3bfaef'
-
-
+    'https://graphie.co.id/blog/263/mengapa-konsistensi-itu-penting-membangun-merek-yang-kuat-melalui-desain'
   ],
 },
 
@@ -265,8 +261,9 @@ maka kompetitor yang akan mengambil kesempatan tersebut.
   `,
   date: '12 Jan 2026',
   reference: [
-    'https://www.forbes.com/small-business/why-your-business-needs-a-website/',
-    'https://www.shopify.com/blog/why-you-need-a-website'
+    'https://www.niagahoster.co.id/blog/apa-itu-website/',
+    'https://qwords.com/blog/pengertian-website/',
+    'https://idcloudhost.com/blog/apa-itu-website/'
   ],
 },
 {
@@ -294,8 +291,9 @@ Website cocok untuk membangun kepercayaan jangka panjang.
   `,
   date: '11 Jan 2026',
   reference: [
-    'https://www.businessnewsdaily.com/15060-business-website-importance.html',
-    'https://www.bluehost.com/blog/why-business-needs-website/'
+    'https://www.niagahoster.co.id/blog/manfaat-website-untuk-bisnis/',
+    'https://www.dewaweb.com/blog/pentingnya-website-untuk-bisnis/',
+    'https://www.rumahweb.com/journal/manfaat-website-bagi-bisnis/'
   ],
 },
 {
@@ -325,8 +323,9 @@ tapi website profesional jauh lebih menguntungkan dalam jangka panjang.
   `,
   date: '10 Jan 2026',
   reference: [
-    'https://www.websitebuilderexpert.com/building-websites/free-vs-paid/',
-    'https://www.hostinger.com/tutorials/free-vs-paid-website'
+    'https://www.niagahoster.co.id/blog/website-gratis-vs-berbayar/',
+    'https://idcloudhost.com/blog/website-gratis-atau-berbayar/',
+    'https://www.qwords.com/blog/perbedaan-website-gratis-dan-berbayar/'
   ],
 },
 {
@@ -353,8 +352,9 @@ tapi soal kenyamanan pengguna di semua perangkat.
   `,
   date: '9 Jan 2026',
   reference: [
-    'https://www.thinkwithgoogle.com/consumer-insights/mobile-site-design/',
-    'https://www.statista.com/topics/779/mobile-internet/'
+    'https://www.niagahoster.co.id/blog/responsive-web-design/',
+    'https://qwords.com/blog/apa-itu-website-responsive/',
+    'https://www.dewaweb.com/blog/responsive-web-design/'
   ],
 },
 {
@@ -381,8 +381,9 @@ tapi kebutuhan utama.
   `,
   date: '8 Jan 2026',
   reference: [
-    'https://web.dev/performance/',
-    'https://www.thinkwithgoogle.com/marketing-strategies/app-and-mobile/page-load-time-statistics/'
+    'https://www.niagahoster.co.id/blog/kecepatan-website/',
+    'https://idcloudhost.com/blog/website-lambat/',
+    'https://web.dev/performance/'
   ],
 },
 {
@@ -409,8 +410,9 @@ manfaat website bisa dirasakan bertahun-tahun.
   `,
   date: '7 Jan 2026',
   reference: [
-    'https://www.entrepreneur.com/growing-a-business/why-a-website-is-an-investment/427699',
-    'https://www.forbes.com/sites/forbesbusinesscouncil/2022/06/06/why-a-website-is-an-investment/'
+    'https://www.dewaweb.com/blog/manfaat-website-untuk-bisnis/',
+    'https://www.niagahoster.co.id/blog/keuntungan-memiliki-website/',
+    'https://www.rumahweb.com/journal/website-untuk-bisnis/'
   ],
 },
 {
@@ -436,8 +438,9 @@ bukan kerumitan.
   `,
   date: '6 Jan 2026',
   reference: [
-    'https://www.nngroup.com/articles/website-usability/',
-    'https://uxdesign.cc/what-users-want-from-a-website'
+    'https://www.niagahoster.co.id/blog/user-experience-website/',
+    'https://qwords.com/blog/user-experience-adalah/',
+    'https://www.nngroup.com/articles/website-usability/'
   ],
 },
 {
@@ -463,7 +466,8 @@ justru lebih menghasilkan.
   `,
   date: '5 Jan 2026',
   reference: [
-    'https://www.hubspot.com/marketing-statistics',
+    'https://www.niagahoster.co.id/blog/landing-page-adalah/',
+    'https://www.dewaweb.com/blog/conversion-rate-optimization/',
     'https://blog.hubspot.com/marketing/website-conversion'
   ],
 },
@@ -497,8 +501,9 @@ melainkan mereka yang menolak belajar dan beradaptasi dengan teknologi baru.
   `,
   date: '12 Jan 2026',
   reference: [
-    'https://www.adobe.com/sensei/generative-ai.html',
-    'https://www.mckinsey.com/featured-insights/artificial-intelligence'
+    'https://www.dicoding.com/blog/kecerdasan-buatan-adalah/',
+    'https://bce.telkomuniversity.ac.id/apa-itu-kecerdasan-buatan-ai/',
+    'https://www.ibm.com/id-id/think/topics/artificial-intelligence'
   ],
 },
 {
@@ -525,8 +530,8 @@ kini benar-benar turun ke tangan semua orang.
   `,
   date: '11 Jan 2026',
   reference: [
-    'https://www.weforum.org/agenda/2023/06/artificial-intelligence-everyday-life/',
-    'https://www.ibm.com/topics/artificial-intelligence'
+    'https://cloud.google.com/learn/what-is-artificial-intelligence?hl=id',
+    'https://www.ibm.com/id-id/think/topics/artificial-intelligence',
   ],
 },
 {
@@ -553,8 +558,9 @@ Manusia tetap unggul dalam konteks, empati, dan keputusan akhir.
   `,
   date: '10 Jan 2026',
   reference: [
-    'https://hbr.org/2022/07/what-ai-can-and-cant-do',
-    'https://www.britannica.com/technology/artificial-intelligence'
+   'https://www.dicoding.com/blog/kecerdasan-buatan-adalah/',
+    'https://www.britannica.com/technology/artificial-intelligence',
+    'https://cloud.google.com/learn/what-is-artificial-intelligence?hl=id'
   ],
 },
 {
@@ -581,8 +587,9 @@ tapi alat peningkat produktivitas.
   `,
   date: '9 Jan 2026',
   reference: [
-    'https://www.mckinsey.com/capabilities/quantumblack/our-insights',
-    'https://www.weforum.org/reports/future-of-jobs-report-2023'
+     'https://www.ibm.com/id-id/think/topics/artificial-intelligence',
+    'https://openai.com/research/',
+    'https://cloud.google.com/learn/what-is-artificial-intelligence?hl=id'
   ],
 },
 {
@@ -607,8 +614,9 @@ bukan pengganti proses berpikir manusia.
   `,
   date: '8 Jan 2026',
   reference: [
-    'https://www.psychologytoday.com/us/blog/human-ai',
-    'https://www.nature.com/articles/d41586-023-00001-7'
+    'https://www.dicoding.com/blog/kecerdasan-buatan-adalah/',
+    'https://www.ibm.com/id-id/think/topics/artificial-intelligence',
+    'https://cloud.google.com/learn/what-is-artificial-intelligence?hl=id'
   ],
 },
 {
@@ -634,8 +642,9 @@ untuk bersaing secara lebih profesional.
   `,
   date: '7 Jan 2026',
   reference: [
-    'https://www.forbes.com/small-business/ai-for-small-business/',
-    'https://www.shopify.com/blog/ai-for-small-business'
+        'https://berita.upi.edu/umkm-dan-ai/',
+    'https://sk.unikom.ac.id/pelaksanaan-pkm-dosen-sistem-komputer-pemanfaatan-teknologi-ai-untuk-peningkatan-kualitas-umkm/'
+
   ],
 },
 {
@@ -661,7 +670,7 @@ Tanggung jawab moral tetap berada di tangan manusia.
   date: '6 Jan 2026',
   reference: [
     'https://www.unesco.org/en/artificial-intelligence/ethics',
-    'https://www.oecd.org/digital/ai/principles/'
+    'https://ugm.ac.id/id/berita/23566-fakultas-filsafat-ugm-dan-unesco-susun-prinsip-etis-penggunaan-ai-di-indonesia/'
   ],
 },
 {
@@ -687,8 +696,8 @@ tapi sumber kreativitas tetap berasal dari manusia.
   `,
   date: '5 Jan 2026',
   reference: [
-    'https://www.fastcompany.com/ai-creativity',
-    'https://www.forbes.com/sites/forbestechcouncil/2023/ai-and-creativity/'
+    'https://www.britannica.com/technology/artificial-intelligence',
+    'https://www.ibm.com/id-id/think/topics/artificial-intelligence'
   ],
 },
 {
@@ -712,8 +721,8 @@ melainkan alat yang sudah menyatu dengan aktivitas harian.
   `,
   date: '4 Jan 2026',
   reference: [
-    'https://www.sciencedirect.com/topics/artificial-intelligence',
-    'https://www.ibm.com/blogs/watson/ai-in-daily-life/'
+   'https://binus.ac.id/bandung/2023/11/13-kecerdasan-buatan-yang-kita-gunakan-sehari-hari/',
+    'https://primakara.ac.id/blog/info-teknologi/contoh-teknologi-AI'
   ],
 },
 {
@@ -736,8 +745,8 @@ jauh lebih penting daripada sekadar skill teknis.
   `,
   date: '3 Jan 2026',
   reference: [
-    'https://www.coursera.org/articles/what-is-ai',
-    'https://www.edx.org/learn/artificial-intelligence'
+     'https://www.dicoding.com/blog/kecerdasan-buatan-adalah/',
+    'https://cloud.google.com/learn/what-is-artificial-intelligence?hl=id'
   ],
 },
 {
@@ -763,8 +772,10 @@ bukan lebih berat.
   `,
   date: '2 Jan 2026',
   reference: [
-    'https://openai.com/research',
-    'https://hbr.org/2023/04/how-ai-will-change-work'
+     'https://openai.com/research/',
+    'https://www.ibm.com/id-id/think/topics/artificial-intelligence',
+    'https://cloud.google.com/learn/what-is-artificial-intelligence?hl=id'
+  
   ],
 },
 {
@@ -788,8 +799,9 @@ tapi milik mereka yang paling siap.
   `,
   date: '1 Jan 2026',
   reference: [
-    'https://www.weforum.org/agenda/2024/ai-future/',
-    'https://www.mckinsey.com/featured-insights/future-of-work'
+    'https://openai.com/research/',
+    'https://www.ibm.com/id-id/think/topics/artificial-intelligence',
+    'https://www.unesco.org/en/artificial-intelligence/ethics'
   ],
 },
 
