@@ -1,38 +1,196 @@
 const products = require("./products.json");
 
+// ===================== UTIL =====================
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const normalize = (t = "") =>
-  t.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
+  String(t)
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
-// ====== INTENT LANJUTAN / BELI ======
-const followUpIntents = [
-  "iya",
-  "ya",
-  "mau",
-  "beli",
-  "pesan",
-  "lanjut",
-  "oke",
-  "ok",
-  "siap",
-];
+const includesAny = (text, arr) => {
+  const t = normalize(text);
+  return arr.some((w) => t.includes(normalize(w)));
+};
 
-// ====== CARI PRODUK (TYPO FRIENDLY) ======
+const pickLastUserFromHistory = (history = []) =>
+  [...history].reverse().find((h) => h?.role === "user")?.content || "";
+
+const limitHistory = (history = [], max = 12) => {
+  // simpen pesan terakhir biar prompt gak bengkak
+  const clean = Array.isArray(history)
+    ? history
+        .filter((h) => h && typeof h === "object" && h.role && h.content)
+        .slice(-max)
+    : [];
+  return clean;
+};
+
+// ===================== FOLLOW UP INTENTS =====================
+const followUpIntents = ["iya", "ya", "mau", "beli", "pesan", "lanjut", "oke", "ok", "siap"];
+const followUpClues = ["berapa", "itu", "emangnya", "yang mana", "yang ini"];
+
+// ===================== SIMPLE FUZZY MATCH =====================
+// Levenshtein distance (cukup untuk typo ringan)
+function levenshtein(a = "", b = "") {
+  a = normalize(a);
+  b = normalize(b);
+  if (!a || !b) return Math.max(a.length, b.length);
+
+  const dp = Array.from({ length: a.length + 1 }, () => new Array(b.length + 1).fill(0));
+  for (let i = 0; i <= a.length; i++) dp[i][0] = i;
+  for (let j = 0; j <= b.length; j++) dp[0][j] = j;
+
+  for (let i = 1; i <= a.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      dp[i][j] = Math.min(
+        dp[i - 1][j] + 1,
+        dp[i][j - 1] + 1,
+        dp[i - 1][j - 1] + cost
+      );
+    }
+  }
+  return dp[a.length][b.length];
+}
+
+function similarity(a, b) {
+  a = normalize(a);
+  b = normalize(b);
+  if (!a || !b) return 0;
+  const dist = levenshtein(a, b);
+  const maxLen = Math.max(a.length, b.length) || 1;
+  return 1 - dist / maxLen; // 0..1
+}
+
+// ===================== PRODUCT DETECTION =====================
+// 1) exact include keyword
+// 2) fallback fuzzy similarity untuk typo ringan
 function detectProduct(text) {
   const msg = normalize(text);
+  let best = null;
+  let bestScore = 0;
 
   for (const key in products) {
-    const product = products[key];
-    for (const kw of product.keywords) {
-      if (msg.includes(normalize(kw))) {
-        return product;
+    const p = products[key];
+    if (!p?.keywords?.length) continue;
+
+    // exact match (includes)
+    for (const kw of p.keywords) {
+      const nkw = normalize(kw);
+      if (nkw && msg.includes(nkw)) return p;
+    }
+
+    // fuzzy: bandingin keyword vs potongan kalimat
+    for (const kw of p.keywords) {
+      const s = similarity(msg, kw);
+      if (s > bestScore) {
+        bestScore = s;
+        best = p;
       }
     }
   }
-  return null;
+
+  // threshold: biar gak ngawur
+  return bestScore >= 0.62 ? best : null;
 }
 
+// ===================== FETCH WEBSITE (CACHE) =====================
+const siteCache = new Map(); // url -> { text, ts }
+const CACHE_TTL = 1000 * 60 * 10; // 10 menit
+
+async function fetchCleanText(url) {
+  const now = Date.now();
+  const cached = siteCache.get(url);
+  if (cached && now - cached.ts < CACHE_TTL) return cached.text;
+
+  const res = await fetch(url, { method: "GET" });
+  if (!res.ok) throw new Error(`Fetch failed ${url}: ${res.status}`);
+
+  const html = await res.text();
+
+  const clean = html
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, " ")
+    .replace(/<noscript[^>]*>[\s\S]*?<\/noscript>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 8000); // batasi biar token gak meledak
+
+  siteCache.set(url, { text: clean, ts: now });
+  return clean;
+}
+
+// ===================== PROMPTS =====================
+function systemPrompt() {
+  return `
+Kamu adalah Nusantara AI 🤖, asisten untuk layanan Layanan Nusantara.
+
+ATURAN WAJIB:
+- Kalau produk terdeteksi: anggap produk AKTIF dan gunakan datanya (nama + paket + harga).
+- Jika user menyatakan follow-up seperti "iya/ya/mau/beli/pesan/lanjut/ok/oke/siap":
+  → jangan tanya ulang produk
+  → langsung beri langkah pemesanan.
+- Jangan pernah bilang "tidak menemukan informasi".
+- Jawab profesional, jelas, singkat, dan enak dibaca.
+- Jika pertanyaan kurang jelas, ajukan 1 pertanyaan klarifikasi yang paling penting.
+`.trim();
+}
+
+function orderSteps() {
+  return `
+🛒 Cara Melakukan Pemesanan
+1) Klik tombol *Pesan Layanan* di halaman utama
+2) Isi form pemesanan dengan data yang sesuai
+3) Pilih jenis layanan:
+   • Aplikasi Premium → harga & durasi otomatis
+   • Desain Grafis / Preset Foto / Web Development → isi budget & deadline
+4) Pilih metode pembayaran dan lakukan transfer
+5) Klik *Kirim Pesanan via WhatsApp*
+6) Admin verifikasi → pesanan diproses
+`.trim();
+}
+
+function buildProductPrompt(product, userMessage, isFollowUp) {
+  return `
+Produk AKTIF di Layanan Nusantara:
+
+Nama: ${product.name}
+Paket & Harga:
+${product.packages.join("\n")}
+
+${isFollowUp ? `User ingin membeli/lanjut.\n\n${orderSteps()}` : ""}
+
+Jawab pertanyaan user dengan mengutamakan data produk di atas.
+Pertanyaan user: ${userMessage}
+`.trim();
+}
+
+function buildAzizPrompt(cleanSource, userMessage, mode = "ringkas") {
+  return `
+User ingin mengetahui informasi ${mode.toUpperCase()} tentang Abdul Aziz.
+
+Sumber:
+${cleanSource}
+
+Jawab berdasarkan sumber di atas dengan ringkas, rapi, dan relevan.
+Pertanyaan user: ${userMessage}
+`.trim();
+}
+
+function buildGeneralPrompt(cleanSource, userMessage) {
+  return `
+Gunakan informasi berikut untuk menjawab pertanyaan user dengan ringkas:
+${cleanSource}
+
+Pertanyaan user: ${userMessage}
+`.trim();
+}
+
+// ===================== HANDLER =====================
 exports.handler = async (event) => {
   try {
     if (event.httpMethod !== "POST") {
@@ -46,190 +204,83 @@ exports.handler = async (event) => {
       };
     }
 
-    const { message, history = [] } = JSON.parse(event.body || "{}");
+    const body = safeParse(event.body || "{}", {});
+    const message = body?.message;
+    const historyRaw = body?.history || [];
 
-    if (!message) {
+    if (!message || !String(message).trim()) {
       return {
         statusCode: 200,
         body: JSON.stringify({ content: "Silakan ketik pertanyaan 🙂" }),
       };
     }
 
-    // ====== AMBIL PESAN USER TERAKHIR DARI HISTORY ======
-    const lastUser = [...history]
-      .reverse()
-      .find((h) => h.role === "user")?.content;
+    const history = limitHistory(historyRaw, 12);
+    const lastUser = pickLastUserFromHistory(history);
 
-    const isFollowUp = followUpIntents.some((w) =>
-      normalize(message).includes(w)
-    );
+    const isFollowUp =
+      includesAny(message, followUpIntents) ||
+      (includesAny(message, followUpClues) && !!lastUser);
 
-    // ====== GABUNG KONTEKS CHAT ======
-    const combinedMessage =
-      (isFollowUp ||
-        ["berapa", "itu", "emangnya"].some((w) =>
-          normalize(message).includes(w)
-        )) && lastUser
-        ? lastUser
-        : message;
+    // gabung konteks follow-up: kalau user ngomong "iya/berapa itu" => pakai lastUser
+    const combinedMessage = isFollowUp && lastUser ? lastUser : message;
 
-    // ====== CEK PRODUK ======
+    // detect produk berdasarkan combinedMessage
     const product = detectProduct(combinedMessage);
 
-    // ====== CEK APAKAH SEBELUMNYA SUDAH MEMBAHAS PROFIL AZIZ ======
-    const talkedAboutAzizBefore = [...history].some(
-      (h) =>
-        h.role === "assistant" &&
-        normalize(h.content).includes("abdul aziz")
+    // apakah sebelumnya sudah bahas aziz
+    const talkedAboutAzizBefore = history.some(
+      (h) => h.role === "assistant" && normalize(h.content).includes("abdul aziz")
     );
-
-    const systemPrompt = `
-Kamu adalah Nusantara AI 🤖
-
-ATURAN WAJIB:
-- Jika produk sudah terdeteksi, ANGGAP produk AKTIF
-- Jika user bilang "iya", "mau beli", "pesan", "lanjut"
-  → JANGAN tanya ulang produk
-  → LANGSUNG kirim cara pemesanan
-- Jika data produk ada, WAJIB digunakan
-- DILARANG bilang "tidak menemukan informasi"
-- Jawab profesional, jelas, tidak bertele-tele
-`;
 
     let userPrompt = message;
 
-    // ====== LOGIKA PROFIL SESUAI ALUR YANG LU MINTA ======
-    if (
-      normalize(message).includes("aziz") ||
-      normalize(message).includes("abdul") ||
-      normalize(message).includes("pembuat") ||
-      normalize(message).includes("owner")
-    ) {
-
-      // Jika user SUDAH nanya lagi tentang Aziz → pakai SUMBER LEBIH LENGKAP
+    // ====== LOGIKA PROFIL AZIZ ======
+    const askAboutAziz = includesAny(message, ["aziz", "abdul", "pembuat", "owner"]);
+    if (askAboutAziz) {
       if (talkedAboutAzizBefore) {
-        const res = await fetch("https://abdulaziznusantara.netlify.app/");
-        const html = await res.text();
-
-        const clean = html
-          .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
-          .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
-          .replace(/<[^>]+>/g, " ")
-          .replace(/\s+/g, " ");
-
-        userPrompt = `
-User ingin mengetahui informasi LEBIH LENGKAP tentang Abdul Aziz.
-
-Data sumber:
-
-${clean}
-
-Pertanyaan user:
-${message}
-`;
-      }
-
-      // Jika baru pertanyaan awal SEKILAS tentang Aziz → pakai sumber ringkas
-      else {
-        const res = await fetch("https://layanannusantara.store/");
-        const html = await res.text();
-
-        const clean = html
-          .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
-          .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
-          .replace(/<[^>]+>/g, " ")
-          .replace(/\s+/g, " ");
-
-        userPrompt = `
-Gunakan informasi RINGKAS berikut untuk menjawab tentang Abdul Aziz:
-
-${clean}
-
-Pertanyaan user:
-${message}
-`;
+        const clean = await fetchCleanText("https://abdulaziznusantara.netlify.app/");
+        userPrompt = buildAzizPrompt(clean, message, "lebih lengkap");
+      } else {
+        const clean = await fetchCleanText("https://layanannusantara.store/");
+        userPrompt = buildAzizPrompt(clean, message, "ringkas");
       }
     }
 
-    // ====== JIKA PRODUK TERDETEKSI ======
+    // ====== LOGIKA PRODUK ======
     if (product) {
-      userPrompt = `
-Produk AKTIF di Layanan Nusantara (JANGAN DIABAIKAN):
-
-Nama Produk:
-${product.name}
-
-Daftar Paket & Harga:
-${product.packages.join("\n")}
-
-Jika user menyatakan ingin membeli,
-WAJIB kirim langkah pemesanan berikut:
-
-🛒 Cara Melakukan Pemesanan
-🔘 Klik tombol Pesan Layanan di halaman utama
-🖥️ Isi form pemesanan dengan data yang sesuai
-📦 Pilih jenis layanan:
-• Aplikasi Premium → harga & durasi otomatis
-• Desain Grafis / Preset Foto / Web Development → isi budget & deadline
-💳 Pilih metode pembayaran dan lakukan transfer
-💬 Klik Kirim Pesanan via WhatsApp
-📱 Admin akan memverifikasi dan pesanan diproses
-
-Pertanyaan user:
-${message}
-`;
+      userPrompt = buildProductPrompt(product, message, isFollowUp);
     }
 
-    // ====== JIKA NANYA UMUM TENTANG LAYANAN NUSANTARA ======
-    if (
-      message.toLowerCase().includes("layanan nusantara") &&
-      !product
-    ) {
-      const res = await fetch("https://layanannusantara.store/");
-      const html = await res.text();
-
-      const clean = html
-        .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
-        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
-        .replace(/<[^>]+>/g, " ")
-        .replace(/\s+/g, " ");
-
-      userPrompt = `
-Gunakan informasi berikut untuk menjawab:
-${clean}
-
-Pertanyaan:
-${message}
-`;
+    // ====== LOGIKA UMUM TENTANG LAYANAN NUSANTARA ======
+    if (includesAny(message, ["layanan nusantara"]) && !product && !askAboutAziz) {
+      const clean = await fetchCleanText("https://layanannusantara.store/");
+      userPrompt = buildGeneralPrompt(clean, message);
     }
 
-    // ====== KIRIM KE GROQ API ======
-    const groqRes = await fetch(
-      "https://api.groq.com/openai/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: "llama-3.1-8b-instant",
-          temperature: 0.4,
-          max_tokens: 500,
-          messages: [
-            { role: "system", content: systemPrompt },
-            ...history,
-            { role: "user", content: userPrompt },
-          ],
-        }),
-      }
-    );
+    // ====== KIRIM KE GROQ ======
+    const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "llama-3.1-8b-instant",
+        temperature: 0.4,
+        max_tokens: 520,
+        messages: [
+          { role: "system", content: systemPrompt() },
+          ...history,
+          { role: "user", content: userPrompt },
+        ],
+      }),
+    });
 
     const data = await groqRes.json();
-    const reply =
-      data?.choices?.[0]?.message?.content || "Tidak ada jawaban";
+    const reply = data?.choices?.[0]?.message?.content || "Baik, ada yang bisa saya bantu?";
 
-    await delay(200);
+    await delay(120);
 
     return {
       statusCode: 200,
