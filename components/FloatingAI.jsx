@@ -221,6 +221,7 @@ export default function FloatingAI() {
     const raw = (text ?? "").toString();
     if (!raw.trim() || isTyping) return;
 
+    // bersihin error lama saat user kirim lagi
     setSendError(null);
 
     const userMsg = {
@@ -236,7 +237,7 @@ export default function FloatingAI() {
     setInput("");
     setIsTyping(true);
 
-    // quick reply
+    // quick reply (langsung jawab tanpa server)
     const matched = findQuickReply(raw);
     if (matched) {
       setTimeout(() => {
@@ -245,10 +246,11 @@ export default function FloatingAI() {
           { id: uid(), role: "assistant", content: matched.answer, ts: Date.now() },
         ]);
         setIsTyping(false);
-      }, 550);
+      }, 450);
       return;
     }
 
+    // offline guard
     if (!isOnline) {
       setIsTyping(false);
       setSendError("Anda sedang offline. Pesan belum terkirim.");
@@ -259,33 +261,31 @@ export default function FloatingAI() {
       const res = await fetch("/.netlify/functions/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        // PENTING: backend lama kamu aman dengan {message} saja
         body: JSON.stringify({ message: raw.trim() }),
       });
 
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
+      // ambil raw text dulu supaya error bisa kebaca
+      const txt = await res.text();
+      const data = safeParse(txt, {});
+
+      if (!res.ok) {
+        throw new Error(data?.content || txt || `HTTP ${res.status}`);
+      }
 
       setMessages((p) => [
         ...p,
         {
           id: uid(),
           role: "assistant",
-          content: data?.content || "Maaf, saya belum punya jawaban untuk itu.",
+          content: data?.content || "Tidak ada jawaban.",
           ts: Date.now(),
         },
       ]);
-    } catch {
-      setSendError("⚠️ Terjadi kesalahan saat menghubungi server. Coba kirim ulang.");
-      setMessages((p) => [
-        ...p,
-        {
-          id: uid(),
-          role: "assistant",
-          content: "⚠️ Maaf, koneksi bermasalah. Tekan tombol *Retry* untuk mengirim ulang pesan terakhir.",
-          ts: Date.now(),
-          meta: { isError: true },
-        },
-      ]);
+    } catch (err) {
+      // FIX: jangan push bubble error lagi (biar gak dobel)
+      const msg = err?.message || "⚠️ Terjadi kesalahan saat menghubungi server.";
+      setSendError(msg);
     } finally {
       setIsTyping(false);
     }
@@ -496,7 +496,12 @@ export default function FloatingAI() {
                 </div>
               )}
 
-              {sendError && (
+              <div ref={endRef} />
+            </div>
+
+            {/* ERROR PANEL (SINGLE SOURCE OF TRUTH) */}
+            {sendError && (
+              <div className="px-3 pb-2 bg-white border-t">
                 <div className="rounded-2xl border border-red-200 bg-red-50 p-3 text-xs text-red-700 flex items-start gap-2">
                   <FiAlertTriangle className="mt-0.5" />
                   <div className="flex-1">
@@ -511,11 +516,8 @@ export default function FloatingAI() {
                     </button>
                   </div>
                 </div>
-              )}
-
-              <div ref={endRef} />
-            </div>
-
+              </div>
+            )}
 
             {/* QUICK REPLIES (pisah, tidak nabrak input) */}
             <div className="px-3 pt-2 pb-1 bg-white border-t">
@@ -545,11 +547,7 @@ export default function FloatingAI() {
                   disabled={isTyping}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={onKeyDown}
-                  placeholder={
-                    isTyping
-                      ? "AI sedang menjawab…"
-                      : "Tulis pertanyaan Seputar Layanan Nusantara"
-                  }
+                  placeholder={isTyping ? "AI sedang menjawab…" : "Tulis pertanyaan Seputar Layanan Nusantara"}
                   className="flex-1 min-h-[44px] max-h-[120px] resize-none border rounded-2xl px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-600 outline-none disabled:opacity-60"
                   rows={1}
                 />

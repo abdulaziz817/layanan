@@ -10,6 +10,14 @@ const normalize = (t = "") =>
     .replace(/\s+/g, " ")
     .trim();
 
+const safeParse = (s, fallback) => {
+  try {
+    return JSON.parse(s);
+  } catch {
+    return fallback;
+  }
+};
+
 const includesAny = (text, arr) => {
   const t = normalize(text);
   return arr.some((w) => t.includes(normalize(w)));
@@ -18,22 +26,32 @@ const includesAny = (text, arr) => {
 const pickLastUserFromHistory = (history = []) =>
   [...history].reverse().find((h) => h?.role === "user")?.content || "";
 
-const limitHistory = (history = [], max = 12) => {
-  // simpen pesan terakhir biar prompt gak bengkak
-  const clean = Array.isArray(history)
-    ? history
-        .filter((h) => h && typeof h === "object" && h.role && h.content)
-        .slice(-max)
-    : [];
-  return clean;
+// ✅ IMPORTANT: sanitasi history -> hanya role+content
+const sanitizeHistory = (history = [], max = 12) => {
+  if (!Array.isArray(history)) return [];
+  return history
+    .filter((h) => h && typeof h === "object" && h.role && h.content)
+    .map((h) => ({ role: String(h.role), content: String(h.content) }))
+    .slice(-max);
 };
+
+// fetch dengan timeout
+async function fetchWithTimeout(url, opts = {}, timeoutMs = 8000) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { ...opts, signal: controller.signal });
+    return res;
+  } finally {
+    clearTimeout(id);
+  }
+}
 
 // ===================== FOLLOW UP INTENTS =====================
 const followUpIntents = ["iya", "ya", "mau", "beli", "pesan", "lanjut", "oke", "ok", "siap"];
 const followUpClues = ["berapa", "itu", "emangnya", "yang mana", "yang ini"];
 
 // ===================== SIMPLE FUZZY MATCH =====================
-// Levenshtein distance (cukup untuk typo ringan)
 function levenshtein(a = "", b = "") {
   a = normalize(a);
   b = normalize(b);
@@ -46,11 +64,7 @@ function levenshtein(a = "", b = "") {
   for (let i = 1; i <= a.length; i++) {
     for (let j = 1; j <= b.length; j++) {
       const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-      dp[i][j] = Math.min(
-        dp[i - 1][j] + 1,
-        dp[i][j - 1] + 1,
-        dp[i - 1][j - 1] + cost
-      );
+      dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost);
     }
   }
   return dp[a.length][b.length];
@@ -66,8 +80,6 @@ function similarity(a, b) {
 }
 
 // ===================== PRODUCT DETECTION =====================
-// 1) exact include keyword
-// 2) fallback fuzzy similarity untuk typo ringan
 function detectProduct(text) {
   const msg = normalize(text);
   let best = null;
@@ -77,13 +89,13 @@ function detectProduct(text) {
     const p = products[key];
     if (!p?.keywords?.length) continue;
 
-    // exact match (includes)
+    // exact includes
     for (const kw of p.keywords) {
       const nkw = normalize(kw);
       if (nkw && msg.includes(nkw)) return p;
     }
 
-    // fuzzy: bandingin keyword vs potongan kalimat
+    // fuzzy fallback
     for (const kw of p.keywords) {
       const s = similarity(msg, kw);
       if (s > bestScore) {
@@ -93,7 +105,6 @@ function detectProduct(text) {
     }
   }
 
-  // threshold: biar gak ngawur
   return bestScore >= 0.62 ? best : null;
 }
 
@@ -106,7 +117,7 @@ async function fetchCleanText(url) {
   const cached = siteCache.get(url);
   if (cached && now - cached.ts < CACHE_TTL) return cached.text;
 
-  const res = await fetch(url, { method: "GET" });
+  const res = await fetchWithTimeout(url, { method: "GET" }, 9000);
   if (!res.ok) throw new Error(`Fetch failed ${url}: ${res.status}`);
 
   const html = await res.text();
@@ -118,7 +129,7 @@ async function fetchCleanText(url) {
     .replace(/<[^>]+>/g, " ")
     .replace(/\s+/g, " ")
     .trim()
-    .slice(0, 8000); // batasi biar token gak meledak
+    .slice(0, 7000); // ✅ limit lebih ketat biar aman token
 
   siteCache.set(url, { text: clean, ts: now });
   return clean;
@@ -130,13 +141,13 @@ function systemPrompt() {
 Kamu adalah Nusantara AI 🤖, asisten untuk layanan Layanan Nusantara.
 
 ATURAN WAJIB:
-- Kalau produk terdeteksi: anggap produk AKTIF dan gunakan datanya (nama + paket + harga).
-- Jika user menyatakan follow-up seperti "iya/ya/mau/beli/pesan/lanjut/ok/oke/siap":
+- Jika produk terdeteksi: anggap produk AKTIF dan gunakan data produk (nama + paket + harga).
+- Jika user follow-up seperti: "iya/ya/mau/beli/pesan/lanjut/ok/oke/siap":
   → jangan tanya ulang produk
-  → langsung beri langkah pemesanan.
+  → langsung kirim langkah pemesanan.
 - Jangan pernah bilang "tidak menemukan informasi".
 - Jawab profesional, jelas, singkat, dan enak dibaca.
-- Jika pertanyaan kurang jelas, ajukan 1 pertanyaan klarifikasi yang paling penting.
+- Jika pertanyaan kurang jelas, ajukan 1 pertanyaan klarifikasi paling penting.
 `.trim();
 }
 
@@ -160,7 +171,7 @@ Produk AKTIF di Layanan Nusantara:
 
 Nama: ${product.name}
 Paket & Harga:
-${product.packages.join("\n")}
+${Array.isArray(product.packages) ? product.packages.join("\n") : "-"}
 
 ${isFollowUp ? `User ingin membeli/lanjut.\n\n${orderSteps()}` : ""}
 
@@ -215,35 +226,38 @@ exports.handler = async (event) => {
       };
     }
 
-    const history = limitHistory(historyRaw, 12);
+    // ✅ aman walau UI kirim object tambahan
+    const history = sanitizeHistory(historyRaw, 12);
     const lastUser = pickLastUserFromHistory(history);
 
     const isFollowUp =
       includesAny(message, followUpIntents) ||
       (includesAny(message, followUpClues) && !!lastUser);
 
-    // gabung konteks follow-up: kalau user ngomong "iya/berapa itu" => pakai lastUser
     const combinedMessage = isFollowUp && lastUser ? lastUser : message;
 
-    // detect produk berdasarkan combinedMessage
     const product = detectProduct(combinedMessage);
 
-    // apakah sebelumnya sudah bahas aziz
     const talkedAboutAzizBefore = history.some(
       (h) => h.role === "assistant" && normalize(h.content).includes("abdul aziz")
     );
 
-    let userPrompt = message;
+    let userPrompt = String(message);
 
     // ====== LOGIKA PROFIL AZIZ ======
     const askAboutAziz = includesAny(message, ["aziz", "abdul", "pembuat", "owner"]);
     if (askAboutAziz) {
-      if (talkedAboutAzizBefore) {
-        const clean = await fetchCleanText("https://abdulaziznusantara.netlify.app/");
-        userPrompt = buildAzizPrompt(clean, message, "lebih lengkap");
-      } else {
-        const clean = await fetchCleanText("https://layanannusantara.store/");
-        userPrompt = buildAzizPrompt(clean, message, "ringkas");
+      try {
+        if (talkedAboutAzizBefore) {
+          const clean = await fetchCleanText("https://abdulaziznusantara.netlify.app/");
+          userPrompt = buildAzizPrompt(clean, message, "lebih lengkap");
+        } else {
+          const clean = await fetchCleanText("https://layanannusantara.store/");
+          userPrompt = buildAzizPrompt(clean, message, "ringkas");
+        }
+      } catch {
+        // fallback kalau fetch web gagal
+        userPrompt = `Jawab pertanyaan tentang Abdul Aziz secara ringkas dan profesional.\nPertanyaan user: ${message}`;
       }
     }
 
@@ -254,33 +268,52 @@ exports.handler = async (event) => {
 
     // ====== LOGIKA UMUM TENTANG LAYANAN NUSANTARA ======
     if (includesAny(message, ["layanan nusantara"]) && !product && !askAboutAziz) {
-      const clean = await fetchCleanText("https://layanannusantara.store/");
-      userPrompt = buildGeneralPrompt(clean, message);
+      try {
+        const clean = await fetchCleanText("https://layanannusantara.store/");
+        userPrompt = buildGeneralPrompt(clean, message);
+      } catch {
+        userPrompt = `Jawab pertanyaan user tentang Layanan Nusantara secara ringkas dan jelas.\nPertanyaan user: ${message}`;
+      }
     }
 
     // ====== KIRIM KE GROQ ======
-    const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+    const groqRes = await fetchWithTimeout(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "llama-3.1-8b-instant",
+          temperature: 0.4,
+          max_tokens: 520,
+          messages: [{ role: "system", content: systemPrompt() }, ...history, { role: "user", content: userPrompt }],
+        }),
       },
-      body: JSON.stringify({
-        model: "llama-3.1-8b-instant",
-        temperature: 0.4,
-        max_tokens: 520,
-        messages: [
-          { role: "system", content: systemPrompt() },
-          ...history,
-          { role: "user", content: userPrompt },
-        ],
-      }),
-    });
+      12000
+    );
 
-    const data = await groqRes.json();
+    const rawText = await groqRes.text();
+    const data = safeParse(rawText, null);
+
+    // ✅ Kalau Groq error, kasih pesan jelas (biar UI tidak bingung)
+    if (!groqRes.ok) {
+      const detail =
+        data?.error?.message ||
+        data?.message ||
+        rawText ||
+        `Groq error: HTTP ${groqRes.status}`;
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ content: `⚠️ Server AI sedang bermasalah.\nDetail: ${detail}` }),
+      };
+    }
+
     const reply = data?.choices?.[0]?.message?.content || "Baik, ada yang bisa saya bantu?";
 
-    await delay(120);
+    await delay(80);
 
     return {
       statusCode: 200,
