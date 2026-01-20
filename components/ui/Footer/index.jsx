@@ -99,7 +99,7 @@ const Footer = () => {
         <div className="mt-10 py-10 border-t border-gray-300 flex flex-col sm:flex-row items-center justify-between gap-4">
           <a
             href="https://wa.me/6287860592111"
-            className="text-gray-700 text-lg font-semibold hover:text-green-500 transition duration-300"
+            className="text-gray-700 text-lg font-semibold hover:text-indigo-500 transition duration-300"
           >
             Layanan Nusantara
           </a>
