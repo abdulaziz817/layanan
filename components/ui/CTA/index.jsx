@@ -50,22 +50,20 @@ const CTA = () => {
 
                             {/* CTA Button */}
 
-                            <div className="pt-4">
-                                <motion.div
-                                    whileHover="hover"
-                                    variants={{
-                                        hover: { scale: 1.05 },
-                                    }}
-                                    className="inline-block"
-                                >
-                                    <NavLink
-                                        href="https://abdulaziznusantara.netlify.app/"
-                                        className="px-8 py-4 text-base font-semibold text-white bg-indigo-600 rounded-full shadow-lg transition duration-300 ease-in-out"
-                                    >
-                                        Lihat Portofolio Kami
-                                    </NavLink>
-                                </motion.div>
-                            </div>
+                           <div className="pt-4">
+  <motion.div
+    whileHover={{ scale: 1.05 }}
+    className="inline-block"
+  >
+    <NavLink
+      href="/tentang"
+      className="px-8 py-4 text-base font-semibold text-white bg-indigo-600 rounded-full shadow-lg transition duration-300 ease-in-out hover:bg-indigo-700"
+    >
+      Lihat Lebih Lengkap
+    </NavLink>
+  </motion.div>
+</div>
+
                         </motion.div>
 
 

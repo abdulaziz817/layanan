@@ -1,5 +1,15 @@
 const products = require("./products.json");
 
+// ===================== RUNTIME FETCH (SAFE) =====================
+let _fetch = global.fetch;
+async function ensureFetch() {
+  if (typeof _fetch === "function") return _fetch;
+  // fallback kalau runtime lama
+  const mod = await import("node-fetch");
+  _fetch = mod.default;
+  return _fetch;
+}
+
 // ===================== UTIL =====================
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -26,21 +36,48 @@ const includesAny = (text, arr) => {
 const pickLastUserFromHistory = (history = []) =>
   [...history].reverse().find((h) => h?.role === "user")?.content || "";
 
-// ✅ IMPORTANT: sanitasi history -> hanya role+content
+// ✅ IMPORTANT: sanitasi history -> hanya role valid + content
 const sanitizeHistory = (history = [], max = 12) => {
   if (!Array.isArray(history)) return [];
   return history
     .filter((h) => h && typeof h === "object" && h.role && h.content)
-    .map((h) => ({ role: String(h.role), content: String(h.content) }))
+    .map((h) => ({
+      role: ["system", "user", "assistant"].includes(String(h.role)) ? String(h.role) : "user",
+      content: String(h.content),
+    }))
     .slice(-max);
 };
 
+// ✅ Response helper biar konsisten
+function json(statusCode, obj, extraHeaders = {}) {
+  return {
+    statusCode,
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      ...extraHeaders,
+    },
+    body: JSON.stringify(obj),
+  };
+}
+
+// ✅ CORS headers
+function corsHeaders(origin) {
+  // kalau kamu mau strict, ganti jadi domain kamu saja
+  const allowOrigin = origin || "*";
+  return {
+    "Access-Control-Allow-Origin": allowOrigin,
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+  };
+}
+
 // fetch dengan timeout
-async function fetchWithTimeout(url, opts = {}, timeoutMs = 8000) {
+async function fetchWithTimeout(url, opts = {}, timeoutMs = 12000) {
+  const fetchFn = await ensureFetch();
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const res = await fetch(url, { ...opts, signal: controller.signal });
+    const res = await fetchFn(url, { ...opts, signal: controller.signal });
     return res;
   } finally {
     clearTimeout(id);
@@ -129,7 +166,7 @@ async function fetchCleanText(url) {
     .replace(/<[^>]+>/g, " ")
     .replace(/\s+/g, " ")
     .trim()
-    .slice(0, 7000); // ✅ limit lebih ketat biar aman token
+    .slice(0, 7000);
 
   siteCache.set(url, { text: clean, ts: now });
   return clean;
@@ -203,16 +240,26 @@ Pertanyaan user: ${userMessage}
 
 // ===================== HANDLER =====================
 exports.handler = async (event) => {
+  const origin = event.headers?.origin || event.headers?.Origin || "*";
+  const CORS = corsHeaders(origin);
+
+  // ✅ OPTIONS (preflight) biar aman
+  if (event.httpMethod === "OPTIONS") {
+    return {
+      statusCode: 204,
+      headers: { ...CORS },
+      body: "",
+    };
+  }
+
   try {
     if (event.httpMethod !== "POST") {
-      return { statusCode: 405, body: "Method not allowed" };
+      return json(405, { content: "Method not allowed" }, CORS);
     }
 
+    // ✅ cek key
     if (!process.env.GROQ_API_KEY) {
-      return {
-        statusCode: 500,
-        body: JSON.stringify({ content: "API KEY GROQ tidak ada" }),
-      };
+      return json(500, { content: "API KEY GROQ tidak ada" }, CORS);
     }
 
     const body = safeParse(event.body || "{}", {});
@@ -220,13 +267,10 @@ exports.handler = async (event) => {
     const historyRaw = body?.history || [];
 
     if (!message || !String(message).trim()) {
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ content: "Silakan ketik pertanyaan 🙂" }),
-      };
+      return json(200, { content: "Silakan ketik pertanyaan 🙂" }, CORS);
     }
 
-    // ✅ aman walau UI kirim object tambahan
+    // ✅ history aman
     const history = sanitizeHistory(historyRaw, 12);
     const lastUser = pickLastUserFromHistory(history);
 
@@ -256,7 +300,6 @@ exports.handler = async (event) => {
           userPrompt = buildAzizPrompt(clean, message, "ringkas");
         }
       } catch {
-        // fallback kalau fetch web gagal
         userPrompt = `Jawab pertanyaan tentang Abdul Aziz secara ringkas dan profesional.\nPertanyaan user: ${message}`;
       }
     }
@@ -266,7 +309,7 @@ exports.handler = async (event) => {
       userPrompt = buildProductPrompt(product, message, isFollowUp);
     }
 
-    // ====== LOGIKA UMUM TENTANG LAYANAN NUSANTARA ======
+    // ====== LOGIKA UMUM ======
     if (includesAny(message, ["layanan nusantara"]) && !product && !askAboutAziz) {
       try {
         const clean = await fetchCleanText("https://layanannusantara.store/");
@@ -289,7 +332,11 @@ exports.handler = async (event) => {
           model: "llama-3.1-8b-instant",
           temperature: 0.4,
           max_tokens: 520,
-          messages: [{ role: "system", content: systemPrompt() }, ...history, { role: "user", content: userPrompt }],
+          messages: [
+            { role: "system", content: systemPrompt() },
+            ...history,
+            { role: "user", content: userPrompt },
+          ],
         }),
       },
       12000
@@ -298,32 +345,30 @@ exports.handler = async (event) => {
     const rawText = await groqRes.text();
     const data = safeParse(rawText, null);
 
-    // ✅ Kalau Groq error, kasih pesan jelas (biar UI tidak bingung)
     if (!groqRes.ok) {
       const detail =
         data?.error?.message ||
         data?.message ||
-        rawText ||
+        (rawText ? rawText.slice(0, 300) : "") ||
         `Groq error: HTTP ${groqRes.status}`;
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ content: `⚠️ Server AI sedang bermasalah.\nDetail: ${detail}` }),
-      };
+
+      // ✅ status 502 supaya frontend tahu ini error server upstream
+      return json(
+        502,
+        { content: `⚠️ Server AI sedang bermasalah.\nDetail: ${detail}` },
+        CORS
+      );
     }
 
-    const reply = data?.choices?.[0]?.message?.content || "Baik, ada yang bisa saya bantu?";
+    const reply =
+      data?.choices?.[0]?.message?.content ||
+      "Baik, ada yang bisa saya bantu?";
 
-    await delay(80);
+    await delay(50);
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ content: reply }),
-    };
+    return json(200, { content: reply }, CORS);
   } catch (err) {
     console.error("ERROR DETAIL:", err);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ content: "Server error" }),
-    };
+    return json(500, { content: "Server error" }, CORS);
   }
 };

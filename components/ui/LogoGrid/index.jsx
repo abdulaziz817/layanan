@@ -59,7 +59,7 @@ const IconGrid = () => {
         Kenapa Harus Pilih Layanan Ini?
       </motion.h2>
 
-      <motion.div
+      <motion.di
         variants={container}
         initial="hidden"
         whileInView="show"
@@ -89,7 +89,7 @@ const IconGrid = () => {
             </p>
           </motion.div>
         ))}
-      </motion.div>
+      </motion.di>
     </section>
   )
 }
