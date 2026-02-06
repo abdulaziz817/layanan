@@ -159,7 +159,7 @@ export default function OrderForm() {
     "Canva Pro": {
       "1 Bulan · Member · Non Garansi": "15000",
       "1 Bulan · Member · Garansi": "25000",
-      "1 Tahun · Member · Garansi": "50000"
+      "Lifitime · Garansi 6 Bulan": "50000"
     },
 
     "CapCut Pro": {
