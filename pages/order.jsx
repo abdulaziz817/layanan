@@ -6,6 +6,11 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 export default function OrderForm() {
+  const formatIDR = (n) => {
+  const num = Number(n || 0);
+  return num.toLocaleString("id-ID");
+};
+
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
@@ -226,6 +231,17 @@ export default function OrderForm() {
     const dd = String(tomorrow.getDate()).padStart(2, "0");
     setMinDate(`${yyyy}-${mm}-${dd}`);
   }, []);
+// ✅ Reset durasi & harga kalau user ganti layanan utama
+useEffect(() => {
+  setDuration("");
+  setDurationPrice("");
+}, [selectedService]);
+
+// ✅ Reset durasi & harga kalau user ganti detail aplikasi
+useEffect(() => {
+  setDuration("");
+  setDurationPrice("");
+}, [selectedSubService]);
 
   const servicesItems = ["Desain Grafis", "Web Development", "Preset Fotografi", "Aplikasi Premium"];
 
@@ -465,7 +481,7 @@ export default function OrderForm() {
 
   // Promo 40% 25 Des – 2 Jan
   const isPromo =
-    (month === 12 && day >= 25) || (month === 1 && day <= 2);
+    (month === 10 && day >= 25) || (month === 1 && day <= 2);
 
   // ❄ Efek salju akhir tahun
   const isSnowEvent =
@@ -689,39 +705,38 @@ export default function OrderForm() {
                   </>
                 )}
                 {selectedService === "Aplikasi Premium" && (
-                  <>
-                    <label className="font-semibold text-gray-700">Pilih Durasi</label>
+                 <>
+  <div className="mt-1">
+    <label className="font-semibold text-gray-800">Pilih Durasi</label>
 
-                    <select
-                      className="
-    w-full mt-2 p-3 border border-gray-300 rounded-lg
-    bg-white shadow-sm text-sm
-    focus:outline-none focus:ring-2 focus:ring-indigo-600
-  "
-                      value={duration}
-                      onChange={(e) => {
-                        const dur = e.target.value;
-                        setDuration(dur);
+    <select
+      className="
+        mt-2 w-full p-3 border border-gray-300 rounded-lg
+        bg-white shadow-sm text-sm
+        focus:outline-none focus:ring-2 focus:ring-indigo-600
+      "
+      value={duration}
+      onChange={(e) => {
+        const dur = e.target.value;
+        setDuration(dur);
 
-                        const price = appPrices[selectedSubService][dur] || 0;
+        const raw = appPrices?.[selectedSubService]?.[dur] ?? 0;
+        const price = Number(raw) || 0;
+        const finalPrice = isPromo ? Math.round(price * 0.6) : price;
+        setDurationPrice(finalPrice);
+      }}
+      disabled={!selectedSubService || !appPrices?.[selectedSubService]}
+    >
+      <option value="">-- Pilih Durasi --</option>
 
+      {selectedSubService && appPrices?.[selectedSubService] &&
+        Object.keys(appPrices[selectedSubService]).map((dur) => (
+          <option key={dur} value={dur}>{dur}</option>
+        ))
+      }
+    </select>
+  </div>
 
-
-
-                        const finalPrice = isPromo ? price - price * 0.4 : price;
-                        setDurationPrice(finalPrice);
-                      }}
-
-                    >
-                      <option value="">-- Pilih Durasi --</option>
-
-                      {selectedSubService &&
-                        Object.keys(appPrices[selectedSubService]).map((dur) => (
-                          <option key={dur} value={dur}>
-                            {dur}
-                          </option>
-                        ))}
-                    </select>
 
                     {duration && (
                       <div className="relative w-full text-center space-y-2 py-3">
@@ -772,23 +787,62 @@ export default function OrderForm() {
                       </div>
                     )}
 
-                    {/* 🔥 HARGA PREMIUM RINGAN */}
-                    <div
-                      className="mt-5 p-5 rounded-2xl border shadow
-                 bg-gradient-to-br from-white to-blue-50
-                 text-center animate-price"
-                    >
-                      <p className="text-sm tracking-wide text-gray-500 uppercase font-medium">
-                        Harga
-                      </p>
+                  {/* 💳 PRICE CARD — Clean (White/Black/Indigo) */}
+<motion.div
+  initial={{ opacity: 0, y: 10 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.35 }}
+  className="
+    mt-6 rounded-2xl bg-white
+    border border-black/10
+    shadow-[0_14px_40px_rgba(0,0,0,0.10)]
+  "
+>
+  <div className="p-5 sm:p-6">
+    <div className="flex items-start justify-between gap-3">
+      <p className="text-[11px] uppercase tracking-widest text-black/60 font-semibold">
+        Total Harga
+      </p>
 
-                      <p className="text-3xl font-bold mt-1 text-blue-700">
-                        Rp{" "}
-                        {durationPrice
-                          ? durationPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
-                          : "-"}
-                      </p>
-                    </div>
+      <span className="rounded-full border border-indigo-600 px-3 py-1 text-[11px] font-bold text-indigo-600">
+        {isPromo ? "Promo 40%" : "Harga Normal"}
+      </span>
+    </div>
+
+    {/* HERO PRICE */}
+    <div className="mt-2">
+      <p className="text-4xl sm:text-5xl font-extrabold tracking-tight text-black">
+        Rp{" "}
+        {duration
+          ? Number(durationPrice || 0).toLocaleString("id-ID")
+          : "-"}
+      </p>
+
+      {/* promo strike */}
+      {isPromo && duration && selectedSubService && (
+        <p className="mt-1 text-sm text-black/40 line-through">
+          Rp{" "}
+          {Number(appPrices?.[selectedSubService]?.[duration] || 0).toLocaleString("id-ID")}
+        </p>
+      )}
+
+      <p className="mt-2 text-xs text-black/60">
+        {duration ? `Durasi: ${duration}` : "Pilih durasi untuk melihat harga"}
+      </p>
+    </div>
+
+    {/* subtle divider */}
+    <div className="my-4 h-px w-full bg-black/10" />
+
+    {/* bottom info (mobile-friendly) */}
+    <div className="flex flex-col gap-2 text-xs text-black/60 sm:flex-row sm:items-center sm:justify-between">
+      <span>Harga menyesuaikan durasi yang dipilih</span>
+      {/* <span className="font-semibold text-black">Pembayaran Aman</span> */}
+    </div>
+  </div>
+</motion.div>
+
+
                   </>
                 )}
 
