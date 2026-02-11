@@ -144,10 +144,11 @@ const QUICK_REPLIES = [
     answer:
       "⏰ Layanan beroperasi setiap hari.\n🕘 08.00 – 20.00 WIB.\nPesan di luar jam kerja akan dibalas pada jam operasional.",
   },
-  {
-    question: "Metode pembayaran?",
-    answer: "💳 Metode pembayaran:\n• QRIS\n• Transfer Bank (BCA)\n• GoPay\n• PayPal",
-  },
+{
+  question: "Metode pembayaran?",
+  answer: "💳 Metode pembayaran yang tersedia:\n• QRIS\n• Transfer Bank (BCA)\n• GoPay\n• PayPal\n• Crypto (USDT / BTC / ETH / BNB)\n\nPembayaran crypto hanya dapat dilakukan melalui wallet atau exchange crypto.",
+},
+
 
 ];
 
