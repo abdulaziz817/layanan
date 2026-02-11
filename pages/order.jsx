@@ -1,15 +1,19 @@
+// pages/order.jsx
+// ✅ Versi FULL + Crypto Payment (auto update kurs) + FIX bug toFixed(null)
+// ✅ Tambahan: hitung estimasi 1x (useMemo), label network jelas, reset network saat ganti coin,
+// ✅ Copy button aman kalau address kosong, dan WA message konsisten.
 
 import Head from "next/head";
 import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 
 export default function OrderForm() {
   const formatIDR = (n) => {
-  const num = Number(n || 0);
-  return num.toLocaleString("id-ID");
-};
+    const num = Number(n || 0);
+    return num.toLocaleString("id-ID");
+  };
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -30,24 +34,44 @@ export default function OrderForm() {
   const [showPaypal, setShowPaypal] = useState(false);
   const [showBCA, setShowBCA] = useState(false);
 
+  // ✅ Tambahan untuk Crypto
+  const [showCrypto, setShowCrypto] = useState(false);
+  const [cryptoCoin, setCryptoCoin] = useState("USDT");
+  const [cryptoNetwork, setCryptoNetwork] = useState("TRC20"); // khusus USDT
+  const [cryptoRate, setCryptoRate] = useState(null); // IDR per 1 coin
+  const [cryptoLoading, setCryptoLoading] = useState(false);
+  const [cryptoError, setCryptoError] = useState("");
 
-
-
+  // ✅ Wallet address (sesuaikan dengan punyamu)
+  const CRYPTO_WALLETS = {
+    USDT: {
+      TRC20: "TWRsLhJDFTwiZF1bxTUBMGhKWfkvBNxVT5",
+      BEP20: "0x10ba26d331F7D9BdaC445E0F3bF8eb4669E598Af",
+    },
+    BTC: {
+      MAINNET: "bc1q5fmz2e96l9eaqgvnsvzu43sp7xrw8s8qqzfs85",
+    },
+    ETH: {
+      MAINNET: "0x10ba26d331F7D9BdaC445E0F3bF8eb4669E598Af",
+    },
+    BNB: {
+      BEP20: "0x10ba26d331F7D9BdaC445E0F3bF8eb4669E598Af",
+    },
+  };
 
   const appPrices = {
-
-    "ChatGPT": {
+    ChatGPT: {
       "1 Bulan · Sharing · Non Garansi": "20000",
       "1 Bulan · Sharing · Stabil · Non Garansi": "22000",
       "1 Bulan · Sharing · Garansi": "32000",
-      "3 Bulan · Sharing · Garansi": "56000"
+      "3 Bulan · Sharing · Garansi": "56000",
     },
 
     "YouTube Premium": {
       "1 Bulan · Pribadi · Garansi": "35000",
       "1 Bulan · Keluarga · Sharing": "30000",
       "1 Bulan · Pelajar · Garansi": "26000",
-      "1 Bulan · Pelajar · Non Garansi": "13000"
+      "1 Bulan · Pelajar · Non Garansi": "13000",
     },
 
     "Netflix Premium": {
@@ -55,116 +79,116 @@ export default function OrderForm() {
       "1 Bulan · Pribadi · 1 Perangkat": "49000",
       "7 Hari · Sharing · 2 Perangkat": "24000",
       "1 Bulan · Sharing · 2 Perangkat": "40000",
-      "1 Bulan · Semi Private · 2 Perangkat": "61000"
+      "1 Bulan · Semi Private · 2 Perangkat": "61000",
     },
 
     "Disney Hotstar": {
       "1 Bulan · Semua Perangkat": "20000",
-      "1 Tahun · Semua Perangkat": "120000"
+      "1 Tahun · Semua Perangkat": "120000",
     },
 
-    "Vidio": {
+    Vidio: {
       "1 Bulan · Sharing · HP Only · Garansi": "32000",
       "1 Bulan · Sharing · Semua Perangkat · Garansi": "44000",
       "1 Bulan · Pribadi · HP Only · Garansi": "51000",
       "1 Bulan · Pribadi · Semua Perangkat · Garansi": "71000",
-      "1 Tahun · Pribadi · TV Only · Garansi": "10000"
+      "1 Tahun · Pribadi · TV Only · Garansi": "10000",
     },
 
-    "WeTV": {
+    WeTV: {
       "1 Bulan · Sharing · 6 Orang": "18000",
       "1 Bulan · Sharing · 3 Orang": "24000",
-      "1 Bulan · Pribadi · Garansi": "59000"
+      "1 Bulan · Pribadi · Garansi": "59000",
     },
 
-    "iQIYI": {
+    iQIYI: {
       "1 Bulan · Sharing · Paket Basic": "15000",
-      "1 Bulan · Sharing · Paket Lengkap": "20000"
+      "1 Bulan · Sharing · Paket Lengkap": "20000",
     },
 
     "Bstation Premium": {
       "1 Bulan · Sharing · Paket Basic": "15000",
-      "1 Bulan · Sharing · Paket Lengkap": "27000"
+      "1 Bulan · Sharing · Paket Lengkap": "27000",
     },
 
-    "Youku": {
+    Youku: {
       "1 Bulan · Sharing": "16000",
-      "1 Tahun · Sharing": "32000"
+      "1 Tahun · Sharing": "32000",
     },
 
     "Viu Anlim": {
       "1 Bulan · Pribadi": "4000",
-      "1 Tahun · Pribadi": "6000"
+      "1 Tahun · Pribadi": "6000",
     },
 
-    "HBO": {
+    HBO: {
       "1 Bulan · Sharing": "27000",
-      "1 Tahun · Sharing": "33000"
+      "1 Tahun · Sharing": "33000",
     },
 
-    "Loklok": {
+    Loklok: {
       "1 Bulan · Sharing · Paket Basic": "40000",
-      "1 Bulan · Sharing · Paket Standar": "44000"
+      "1 Bulan · Sharing · Paket Standar": "44000",
     },
 
-    "Fizzo": {
-      "1 Tahun · Sharing": "28000"
+    Fizzo: {
+      "1 Tahun · Sharing": "28000",
     },
 
-    "Wibuku": {
-      "1 Bulan · Sharing": "25000"
+    Wibuku: {
+      "1 Bulan · Sharing": "25000",
     },
 
     "Drakor ID": {
-      "1 Bulan · Sharing": "15000"
+      "1 Bulan · Sharing": "15000",
     },
 
-    "Dramabox": {
-      "1 Bulan · Sharing": "25000"
+    Dramabox: {
+      "1 Bulan · Sharing": "25000",
     },
 
-    "Iqiyl": {
+    Iqiyl: {
       "1 Bulan · Sharing": "17000",
-      "1 Tahun · Sharing": "34000"
+      "1 Tahun · Sharing": "34000",
     },
 
     "Prime Video": {
       "1 Bulan · Sharing · Semua Perangkat": "12000",
-      "1 Bulan · Pribadi · Semua Perangkat": "26000"
+      "1 Bulan · Pribadi · Semua Perangkat": "26000",
     },
 
-    "Melolo": {
-      "1 Bulan · Sharing": "16000"
+    Melolo: {
+      "1 Bulan · Sharing": "16000",
     },
 
-    "Duolingo": {
-      "1 Bulan · Premium": "14000"
+    Duolingo: {
+      "1 Bulan · Premium": "14000",
     },
 
     "Perplexity AI": {
-      "1 Bulan · Sharing": "11000"
+      "1 Bulan · Sharing": "11000",
     },
 
     "Express VPN": {
-      "1 Bulan · Pribadi": "15000"
+      "1 Bulan · Pribadi": "15000",
     },
 
     "Viu Premium": {
       "1 Bulan · Premium": "12000",
-      "1 Tahun · Premium": "120000"
+      "1 Tahun · Premium": "120000",
     },
 
-    "Spotify": {
+    Spotify: {
       "1 Bulan · Pribadi · Garansi": "37000",
       "1 Bulan · Keluarga · Garansi": "32000",
       "1 Bulan · Pelajar · Garansi": "28000",
-      "1 Bulan · Pelajar · Non Garansi": "15000"
+      "1 Bulan · Pelajar · Non Garansi": "15000",
     },
 
     "Canva Pro": {
       "1 Bulan · Member · Non Garansi": "15000",
       "1 Bulan · Member · Garansi": "25000",
-      "Lifitime · Garansi 6 Bulan": "50000"
+      "Lifitime · Garansi 6 Bulan": "50000",
     },
 
     "CapCut Pro": {
@@ -172,56 +196,50 @@ export default function OrderForm() {
       "21 Hari · Pribadi": "18000",
       "35 Hari · Pribadi": "23000",
       "21 Hari · Sharing": "12000",
-      "35 Hari · Sharing": "16000"
+      "35 Hari · Sharing": "16000",
     },
 
     "Google Gemini": {
-      "1 Tahun · Sharing": "25000"
+      "1 Tahun · Sharing": "25000",
     },
 
-    "Zoom": {
-      "14 Hari · Pribadi": "14000"
+    Zoom: {
+      "14 Hari · Pribadi": "14000",
     },
 
     "TikTok Premium": {
       "1 Bulan · Non Garansi": "15000",
-      "1 Bulan · Garansi": "20000"
+      "1 Bulan · Garansi": "20000",
     },
 
     "HBO GO": {
-      "1 Bulan · Garansi": "25000"
+      "1 Bulan · Garansi": "25000",
     },
 
     "Apple Music": {
-      "1 Bulan · Invite Member": "10000"
+      "1 Bulan · Invite Member": "10000",
     },
 
     "Alight Motion": {
       "1 Tahun · Generator · No Email": "4000",
       "1 Tahun · Email Pembeli · Garansi 6 Bulan": "8000",
-      "1 Tahun · Email Seller · Garansi 6 Bulan": "12000"
+      "1 Tahun · Email Seller · Garansi 6 Bulan": "12000",
     },
 
-    "Wink": {
-      "7 Hari · Android · Akun Pembeli": "8000"
-    },
-
-    "Meitu": {
+    Wink: {
       "7 Hari · Android · Akun Pembeli": "8000",
-      "1 Bulan · Sharing · Akun Pembeli": "17000"
     },
 
-    "PicsArt": {
+    Meitu: {
+      "7 Hari · Android · Akun Pembeli": "8000",
+      "1 Bulan · Sharing · Akun Pembeli": "17000",
+    },
+
+    PicsArt: {
       "1 Bulan · Sharing": "6000",
-      "1 Bulan · Private": "15000"
-    }
-
+      "1 Bulan · Private": "15000",
+    },
   };
-
-
-
-
-
 
   useEffect(() => {
     const tomorrow = new Date();
@@ -231,19 +249,35 @@ export default function OrderForm() {
     const dd = String(tomorrow.getDate()).padStart(2, "0");
     setMinDate(`${yyyy}-${mm}-${dd}`);
   }, []);
-// ✅ Reset durasi & harga kalau user ganti layanan utama
-useEffect(() => {
-  setDuration("");
-  setDurationPrice("");
-}, [selectedService]);
 
-// ✅ Reset durasi & harga kalau user ganti detail aplikasi
-useEffect(() => {
-  setDuration("");
-  setDurationPrice("");
-}, [selectedSubService]);
+  // ✅ Reset durasi & harga kalau user ganti layanan utama
+  useEffect(() => {
+    setDuration("");
+    setDurationPrice("");
+  }, [selectedService]);
 
-  const servicesItems = ["Desain Grafis", "Web Development", "Preset Fotografi", "Aplikasi Premium"];
+  // ✅ Reset durasi & harga kalau user ganti detail aplikasi
+  useEffect(() => {
+    setDuration("");
+    setDurationPrice("");
+  }, [selectedSubService]);
+
+  // ✅ Kalau ganti coin/network, kosongkan error kurs
+  useEffect(() => {
+    setCryptoError("");
+  }, [cryptoCoin, cryptoNetwork]);
+
+  // ✅ Reset network USDT kalau pindah coin (biar state tidak nyangkut)
+  useEffect(() => {
+    if (cryptoCoin !== "USDT") setCryptoNetwork("TRC20");
+  }, [cryptoCoin]);
+
+  const servicesItems = [
+    "Desain Grafis",
+    "Web Development",
+    "Preset Fotografi",
+    "Aplikasi Premium",
+  ];
 
   const serviceSubOptions = {
     "Desain Grafis": [
@@ -277,7 +311,7 @@ useEffect(() => {
       "Feed Carousel Instagram",
       "Desain Sampul Buku",
       "Desain Majalah",
-      "Lainnya"
+      "Lainnya",
     ],
 
     "Web Development": [
@@ -303,8 +337,9 @@ useEffect(() => {
       "Aplikasi Kalkulator Custom",
       "Sistem Layanan Jasa",
       "Website Katalog Produk",
-      "Lainnya"
+      "Lainnya",
     ],
+
     "Preset Fotografi": [
       "Editing Foto",
       "Lightroom Preset",
@@ -332,8 +367,9 @@ useEffect(() => {
       "Preset Bayi Baru Lahir",
       "Preset Matahari Terbenam",
       "Preset Flat Lay",
-      "Lainnya"
+      "Lainnya",
     ],
+
     "Aplikasi Premium": [
       "🎬 Streaming Film",
       "Bstation Premium",
@@ -379,12 +415,8 @@ useEffect(() => {
       "📚 Aplikasi Lainnya",
       "Fizzo",
       "Duolingo",
-      "Express VPN"
-    ]
-
-
-
-
+      "Express VPN",
+    ],
   };
 
   const formatRupiah = (value) => {
@@ -396,6 +428,123 @@ useEffect(() => {
     const value = e.target.value;
     const formatted = formatRupiah(value);
     setBudget(formatted);
+  };
+
+  const today = new Date();
+  const month = today.getMonth() + 1;
+  const day = today.getDate();
+
+  // Promo 40% 25 Des – 2 Jan (NOTE: ini di code kamu month===10, aku biarkan sesuai aslinya)
+  const isPromo = (month === 10 && day >= 25) || (month === 1 && day <= 2);
+
+  // ❄ Efek salju akhir tahun
+  const isSnowEvent = (month === 12 && day >= 24) || (month === 1 && day <= 2);
+
+  // ✅ Total IDR untuk konversi crypto
+  const totalIDR = useMemo(() => {
+    if (selectedService === "Aplikasi Premium") {
+      return Number(durationPrice || 0);
+    }
+    return Number((budget || "").replace(/\./g, "") || 0);
+  }, [selectedService, durationPrice, budget]);
+
+  // ✅ Estimasi crypto dihitung 1x (FIX bug toFixed null / inconsistent)
+  const estimatedCrypto = useMemo(() => {
+    if (!cryptoRate || !totalIDR) return null;
+    const amt = Number(totalIDR) / Number(cryptoRate);
+    if (!isFinite(amt)) return null;
+    return amt;
+  }, [cryptoRate, totalIDR]);
+
+  // ✅ Ambil kurs crypto → IDR (auto update) saat memilih Crypto
+  useEffect(() => {
+    if (!showCrypto) return;
+
+    const mapId = {
+      USDT: "tether",
+      BTC: "bitcoin",
+      BNB: "binancecoin",
+      ETH: "ethereum",
+    };
+
+    const coinId = mapId[cryptoCoin] || "tether";
+    let alive = true;
+
+    const fetchRate = async () => {
+      try {
+        setCryptoLoading(true);
+        setCryptoError("");
+
+        const res = await fetch(
+          `https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=idr`
+        );
+
+        const data = await res.json();
+        const rate = data?.[coinId]?.idr;
+
+        if (!alive) return;
+
+        if (!rate) {
+          throw new Error("Rate tidak ditemukan");
+        }
+
+        setCryptoRate(rate);
+      } catch (err) {
+        if (!alive) return;
+        setCryptoError("Gagal ambil kurs crypto. Coba beberapa saat lagi.");
+        setCryptoRate(null);
+      } finally {
+        if (!alive) return;
+        setCryptoLoading(false);
+      }
+    };
+
+    fetchRate();
+    const t = setInterval(fetchRate, 30000); // refresh tiap 30 detik
+
+    return () => {
+      alive = false;
+      clearInterval(t);
+    };
+  }, [showCrypto, cryptoCoin]);
+
+  const getCryptoAddress = () => {
+    if (cryptoCoin === "USDT") {
+      return CRYPTO_WALLETS?.USDT?.[cryptoNetwork] || "";
+    }
+    if (cryptoCoin === "BTC") {
+      return CRYPTO_WALLETS?.BTC?.MAINNET || "";
+    }
+    if (cryptoCoin === "ETH") {
+      return CRYPTO_WALLETS?.ETH?.MAINNET || "";
+    }
+    if (cryptoCoin === "BNB") {
+      return CRYPTO_WALLETS?.BNB?.BEP20 || "";
+    }
+    return "";
+  };
+
+  // ✅ Label network dibuat jelas (anti salah kirim)
+  const getCryptoNetworkLabel = () => {
+    if (cryptoCoin === "USDT") {
+      return cryptoNetwork === "TRC20" ? "TRC20 (TRON)" : "BEP20 (BSC)";
+    }
+    if (cryptoCoin === "BTC") return "BTC (MAINNET)";
+    if (cryptoCoin === "ETH") return "ETHEREUM (MAINNET)";
+    if (cryptoCoin === "BNB") return "BSC (BEP20)";
+    return "-";
+  };
+
+  const handlePaymentChange = (method) => {
+    setPaymentMethod(method);
+
+    setShowQris(method === "QRIS");
+    setShowGopay(method === "GoPay");
+    setShowPaypal(method === "PayPal");
+    setShowBCA(method === "BCA");
+
+    // ✅ Crypto toggle
+    setShowCrypto(method === "Crypto");
   };
 
   const handleSubmit = (e) => {
@@ -437,27 +586,55 @@ useEffect(() => {
       return setError("Pilih metode pembayaran terlebih dahulu.");
     }
 
+    // VALIDASI tambahan untuk Crypto (biar aman)
+    if (paymentMethod === "Crypto") {
+      const addr = getCryptoAddress();
+      if (!addr) {
+        return setError("Alamat wallet crypto belum diisi. Cek konfigurasi CRYPTO_WALLETS.");
+      }
+      // Optional: kalau mau memaksa kurs harus ada:
+      // if (!cryptoRate) return setError("Kurs crypto belum tersedia. Coba lagi sebentar.");
+      // Optional: kalau mau memaksa total harus > 0:
+      // if (!totalIDR) return setError("Isi budget / pilih durasi dulu sebelum bayar crypto.");
+    }
+
     // Jika semua valid:
     setError("");
     setIsSubmitting(true);
 
     const waNumber = "6287860592111";
-    const detailService =
-      selectedSubService === "Lainnya" ? customSubService : selectedSubService;
+    const detailService = selectedSubService === "Lainnya" ? customSubService : selectedSubService;
+
+    const estimated = estimatedCrypto;
+
+    const extraCryptoText =
+      paymentMethod === "Crypto"
+        ? `🪙 *Coin:* ${cryptoCoin}\n` +
+          `🌐 *Network:* ${getCryptoNetworkLabel()}\n` +
+          `🏦 *Alamat Wallet:* ${getCryptoAddress()}\n` +
+          (cryptoRate
+            ? `📈 *Kurs:* 1 ${cryptoCoin} = Rp ${Number(cryptoRate).toLocaleString("id-ID")}\n`
+            : `📈 *Kurs:* (gagal diambil / belum tersedia)\n`) +
+          (typeof estimated === "number"
+            ? `💰 *Estimasi Bayar:* ${estimated.toFixed(6)} ${cryptoCoin}\n`
+            : `💰 *Estimasi Bayar:* -\n`)
+        : "";
 
     const encodedMessage = encodeURIComponent(
       `*Hai Layanan Nusantara!* 👋✨\n\n` +
-      `Saya ingin memesan layanan berikut:\n\n` +
-      `👤 *Nama:* ${name}\n` +
-      `📞 *Nomor WhatsApp:* ${phone}\n` +
-      `🛠️ *Layanan:* ${selectedService}${detailService ? ` - ${detailService}` : ""}\n` +
-      `${selectedService === "Aplikasi Premium"
-        ? `⏳ *Durasi Langganan:* ${duration}\n💰 *Harga:* Rp ${durationPrice}\n`
-        : `💰 *Budget:* Rp ${budget}\n⏰ *Deadline:* ${deadline}\n`
-      }` +
-      `💳 *Metode Pembayaran:* ${paymentMethod}\n` +
-      `📝 *Pesan Tambahan:* ${message}\n\n` +
-      `Terima kasih!\n${name}`
+        `Saya ingin memesan layanan berikut:\n\n` +
+        `👤 *Nama:* ${name}\n` +
+        `📞 *Nomor WhatsApp:* ${phone}\n` +
+        `🛠️ *Layanan:* ${selectedService}${detailService ? ` - ${detailService}` : ""}\n` +
+        `${
+          selectedService === "Aplikasi Premium"
+            ? `⏳ *Durasi Langganan:* ${duration}\n💰 *Harga:* Rp ${Number(durationPrice || 0).toLocaleString("id-ID")}\n`
+            : `💰 *Budget:* Rp ${budget}\n⏰ *Deadline:* ${deadline}\n`
+        }` +
+        `💳 *Metode Pembayaran:* ${paymentMethod}\n` +
+        (paymentMethod === "Crypto" ? `${extraCryptoText}` : "") +
+        `📝 *Pesan Tambahan:* ${message}\n\n` +
+        `Terima kasih!\n${name}`
     );
 
     setTimeout(() => {
@@ -466,64 +643,40 @@ useEffect(() => {
     }, 1000);
   };
 
-  const handlePaymentChange = (method) => {
-    setPaymentMethod(method);
-
-    setShowQris(method === "QRIS");
-    setShowGopay(method === "GoPay");
-    setShowPaypal(method === "PayPal");
-    setShowBCA(method === "BCA");
-  };
-
-  const today = new Date();
-  const month = today.getMonth() + 1;
-  const day = today.getDate();
-
-  // Promo 40% 25 Des – 2 Jan
-  const isPromo =
-    (month === 10 && day >= 25) || (month === 1 && day <= 2);
-
-  // ❄ Efek salju akhir tahun
-  const isSnowEvent =
-    (month === 12 && day >= 24) || (month === 1 && day <= 2);
-
-
-
-
   return (
     <>
       <Head>
         <title>Pesan Layanan</title>
         <style>{`
-    .snow {
-      pointer-events: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      z-index: 9999;
-    }
+          .snow {
+            pointer-events: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 9999;
+          }
 
-    .snow span {
-      position: absolute;
-      top: -10px;
-      width: 8px;
-      height: 8px;
-      background: white;
-      border-radius: 50%;
-      animation: fall linear infinite;
-      opacity: 0.8;
-    }
+          .snow span {
+            position: absolute;
+            top: -10px;
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            animation: fall linear infinite;
+            opacity: 0.8;
+          }
 
-    @keyframes fall {
-      0% { transform: translateY(0) rotate(0deg); }
-      100% { transform: translateY(110vh) rotate(360deg); }
-    }
-  `}</style>
-
+          @keyframes fall {
+            0% { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(110vh) rotate(360deg); }
+          }
+        `}</style>
       </Head>
+
       {isSnowEvent && (
         <div className="snow">
           {Array.from({ length: 50 }).map((_, i) => (
@@ -539,8 +692,6 @@ useEffect(() => {
         </div>
       )}
 
-
-
       <div className="pt-28 pb-12 bg-white min-h-screen">
         <div className="custom-screen text-gray-600">
           <motion.div
@@ -555,10 +706,13 @@ useEffect(() => {
               transition={{ duration: 0.8, delay: 0.2 }}
               className="bg-white shadow-xl rounded-xl p-8"
             >
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4">Pesan Layanan Kami</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4">
+                Pesan Layanan Kami
+              </h1>
               <p className="mb-6 text-sm text-gray-500">
                 Kirim pesanan kamu sekarang. Kami akan menghubungi via WhatsApp.
               </p>
+
               {error && (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
@@ -569,9 +723,6 @@ useEffect(() => {
                   {error}
                 </motion.div>
               )}
-
-
-
 
               <form onSubmit={handleSubmit} className="space-y-5 text-sm">
                 <div>
@@ -584,6 +735,7 @@ useEffect(() => {
                     className="mt-2"
                   />
                 </div>
+
                 <div>
                   <label>Nomor HP (WhatsApp)</label>
                   <Input
@@ -594,6 +746,7 @@ useEffect(() => {
                     className="mt-2"
                   />
                 </div>
+
                 <div>
                   <label>Pilih Layanan</label>
                   <select
@@ -613,6 +766,7 @@ useEffect(() => {
                     ))}
                   </select>
                 </div>
+
                 {selectedService && serviceSubOptions[selectedService] && (
                   <div>
                     <label className="font-semibold text-gray-800">Detail Layanan</label>
@@ -620,16 +774,15 @@ useEffect(() => {
                       value={selectedSubService}
                       onChange={(e) => setSelectedSubService(e.target.value)}
                       className="
-    mt-2 w-full border border-gray-300 rounded-lg p-3
-    focus:outline-none focus:ring-2 focus:ring-indigo-600
-    bg-white shadow-sm text-sm
-  "
+                        mt-2 w-full border border-gray-300 rounded-lg p-3
+                        focus:outline-none focus:ring-2 focus:ring-indigo-600
+                        bg-white shadow-sm text-sm
+                      "
                     >
                       <option value="" className="text-gray-400 italic">
                         -- Pilih Detail Layanan --
                       </option>
 
-                      {/* Tambahan divider kategori */}
                       {serviceSubOptions[selectedService].map((subItem, idx) => {
                         const isCategory = [
                           "🎬 Streaming Film",
@@ -637,7 +790,7 @@ useEffect(() => {
                           "🤖 AI",
                           "🎨 Desain & Editing",
                           "▶️ Video Premium",
-                          "📚 Aplikasi Lainnya"
+                          "📚 Aplikasi Lainnya",
                         ].includes(subItem);
 
                         return (
@@ -648,15 +801,15 @@ useEffect(() => {
                             className={
                               isCategory
                                 ? `
-                text-xs uppercase tracking-wide 
-                bg-gradient-to-r from-indigo-100 to-indigo-50
-                text-indigo-700 font-bold py-2 cursor-not-allowed
-                border-t border-b border-indigo-200 mt-2
-              `
+                                  text-xs uppercase tracking-wide 
+                                  bg-gradient-to-r from-indigo-100 to-indigo-50
+                                  text-indigo-700 font-bold py-2 cursor-not-allowed
+                                  border-t border-b border-indigo-200 mt-2
+                                `
                                 : `
-                text-gray-900 pl-3
-                hover:bg-indigo-50
-              `
+                                  text-gray-900 pl-3
+                                  hover:bg-indigo-50
+                                `
                             }
                           >
                             {isCategory ? `── ${subItem} ──` : subItem}
@@ -665,8 +818,8 @@ useEffect(() => {
                       })}
                     </select>
                   </div>
-
                 )}
+
                 {selectedSubService === "Lainnya" && (
                   <div className="mt-3">
                     <label>Masukkan Detail Layanan</label>
@@ -679,6 +832,7 @@ useEffect(() => {
                     />
                   </div>
                 )}
+
                 {selectedService !== "Aplikasi Premium" && (
                   <>
                     <div>
@@ -704,44 +858,44 @@ useEffect(() => {
                     </div>
                   </>
                 )}
+
                 {selectedService === "Aplikasi Premium" && (
-                 <>
-  <div className="mt-1">
-    <label className="font-semibold text-gray-800">Pilih Durasi</label>
+                  <>
+                    <div className="mt-1">
+                      <label className="font-semibold text-gray-800">Pilih Durasi</label>
 
-    <select
-      className="
-        mt-2 w-full p-3 border border-gray-300 rounded-lg
-        bg-white shadow-sm text-sm
-        focus:outline-none focus:ring-2 focus:ring-indigo-600
-      "
-      value={duration}
-      onChange={(e) => {
-        const dur = e.target.value;
-        setDuration(dur);
+                      <select
+                        className="
+                          mt-2 w-full p-3 border border-gray-300 rounded-lg
+                          bg-white shadow-sm text-sm
+                          focus:outline-none focus:ring-2 focus:ring-indigo-600
+                        "
+                        value={duration}
+                        onChange={(e) => {
+                          const dur = e.target.value;
+                          setDuration(dur);
 
-        const raw = appPrices?.[selectedSubService]?.[dur] ?? 0;
-        const price = Number(raw) || 0;
-        const finalPrice = isPromo ? Math.round(price * 0.6) : price;
-        setDurationPrice(finalPrice);
-      }}
-      disabled={!selectedSubService || !appPrices?.[selectedSubService]}
-    >
-      <option value="">-- Pilih Durasi --</option>
+                          const raw = appPrices?.[selectedSubService]?.[dur] ?? 0;
+                          const price = Number(raw) || 0;
+                          const finalPrice = isPromo ? Math.round(price * 0.6) : price;
+                          setDurationPrice(finalPrice);
+                        }}
+                        disabled={!selectedSubService || !appPrices?.[selectedSubService]}
+                      >
+                        <option value="">-- Pilih Durasi --</option>
 
-      {selectedSubService && appPrices?.[selectedSubService] &&
-        Object.keys(appPrices[selectedSubService]).map((dur) => (
-          <option key={dur} value={dur}>{dur}</option>
-        ))
-      }
-    </select>
-  </div>
-
+                        {selectedSubService &&
+                          appPrices?.[selectedSubService] &&
+                          Object.keys(appPrices[selectedSubService]).map((dur) => (
+                            <option key={dur} value={dur}>
+                              {dur}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
 
                     {duration && (
                       <div className="relative w-full text-center space-y-2 py-3">
-
-                        {/* Label Diskon di pojok kanan atas — hanya tampil saat promo */}
                         {isPromo && (
                           <div className="absolute right-2 top-2">
                             <span className="text-red-500 text-[11px] font-semibold bg-red-50 px-2 py-0.5 rounded">
@@ -750,7 +904,6 @@ useEffect(() => {
                           </div>
                         )}
 
-                        {/* Santaklos kecil elegan */}
                         {isPromo && (
                           <div className="bg-red-100 border border-red-300 text-red-700 p-3 rounded-xl mb-3 flex items-center gap-2">
                             <span className="text-2xl">🎅</span>
@@ -763,89 +916,79 @@ useEffect(() => {
                           </div>
                         )}
 
-
-                        {/* Harga Normal */}
-                        {/* Harga Normal */}
                         <div className="mt-3 text-center">
-
-                          {/* Jika promo aktif → tampil harga coret + harga diskon */}
                           {isPromo && (
                             <>
                               <p className="text-gray-400 text-sm line-through">
-                                Rp {appPrices[selectedSubService][duration]?.toLocaleString() || "-"}
+                                Rp{" "}
+                                {Number(
+                                  appPrices?.[selectedSubService]?.[duration] || 0
+                                ).toLocaleString("id-ID")}
                               </p>
                               <p className="text-red-600 text-2xl font-bold">
-                                Rp {durationPrice?.toLocaleString() || "-"}
+                                Rp {Number(durationPrice || 0).toLocaleString("id-ID")}
                               </p>
                             </>
                           )}
 
-                          {/* Jika promo TIDAK aktif → tampil harga normal */}
-                          {!isPromo && null}  {/* <— harga tidak ditampilkan di sini */}
+                          {!isPromo && null}
                         </div>
-
                       </div>
                     )}
 
-                  {/* 💳 PRICE CARD — Clean (White/Black/Indigo) */}
-<motion.div
-  initial={{ opacity: 0, y: 10 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.35 }}
-  className="
-    mt-6 rounded-2xl bg-white
-    border border-black/10
-    shadow-[0_14px_40px_rgba(0,0,0,0.10)]
-  "
->
-  <div className="p-5 sm:p-6">
-    <div className="flex items-start justify-between gap-3">
-      <p className="text-[11px] uppercase tracking-widest text-black/60 font-semibold">
-        Total Harga
-      </p>
+                    {/* PRICE CARD */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.35 }}
+                      className="
+                        mt-6 rounded-2xl bg-white
+                        border border-black/10
+                        shadow-[0_14px_40px_rgba(0,0,0,0.10)]
+                      "
+                    >
+                      <div className="p-5 sm:p-6">
+                        <div className="flex items-start justify-between gap-3">
+                          <p className="text-[11px] uppercase tracking-widest text-black/60 font-semibold">
+                            Total Harga
+                          </p>
 
-      <span className="rounded-full border border-indigo-600 px-3 py-1 text-[11px] font-bold text-indigo-600">
-        {isPromo ? "Promo 40%" : "Harga Normal"}
-      </span>
-    </div>
+                          <span className="rounded-full border border-indigo-600 px-3 py-1 text-[11px] font-bold text-indigo-600">
+                            {isPromo ? "Promo 40%" : "Harga Normal"}
+                          </span>
+                        </div>
 
-    {/* HERO PRICE */}
-    <div className="mt-2">
-      <p className="text-4xl sm:text-5xl font-extrabold tracking-tight text-black">
-        Rp{" "}
-        {duration
-          ? Number(durationPrice || 0).toLocaleString("id-ID")
-          : "-"}
-      </p>
+                        <div className="mt-2">
+                          <p className="text-4xl sm:text-5xl font-extrabold tracking-tight text-black">
+                            Rp{" "}
+                            {duration
+                              ? Number(durationPrice || 0).toLocaleString("id-ID")
+                              : "-"}
+                          </p>
 
-      {/* promo strike */}
-      {isPromo && duration && selectedSubService && (
-        <p className="mt-1 text-sm text-black/40 line-through">
-          Rp{" "}
-          {Number(appPrices?.[selectedSubService]?.[duration] || 0).toLocaleString("id-ID")}
-        </p>
-      )}
+                          {isPromo && duration && selectedSubService && (
+                            <p className="mt-1 text-sm text-black/40 line-through">
+                              Rp{" "}
+                              {Number(
+                                appPrices?.[selectedSubService]?.[duration] || 0
+                              ).toLocaleString("id-ID")}
+                            </p>
+                          )}
 
-      <p className="mt-2 text-xs text-black/60">
-        {duration ? `Durasi: ${duration}` : "Pilih durasi untuk melihat harga"}
-      </p>
-    </div>
+                          <p className="mt-2 text-xs text-black/60">
+                            {duration ? `Durasi: ${duration}` : "Pilih durasi untuk melihat harga"}
+                          </p>
+                        </div>
 
-    {/* subtle divider */}
-    <div className="my-4 h-px w-full bg-black/10" />
+                        <div className="my-4 h-px w-full bg-black/10" />
 
-    {/* bottom info (mobile-friendly) */}
-    <div className="flex flex-col gap-2 text-xs text-black/60 sm:flex-row sm:items-center sm:justify-between">
-      <span>Harga menyesuaikan durasi yang dipilih</span>
-      {/* <span className="font-semibold text-black">Pembayaran Aman</span> */}
-    </div>
-  </div>
-</motion.div>
-
-
+                        <div className="flex flex-col gap-2 text-xs text-black/60 sm:flex-row sm:items-center sm:justify-between">
+                          <span>Harga menyesuaikan durasi yang dipilih</span>
+                        </div>
+                      </div>
+                    </motion.div>
                   </>
                 )}
-
 
                 <div>
                   <label>Pesan Tambahan</label>
@@ -856,6 +999,7 @@ useEffect(() => {
                     placeholder="Keterangan detail pesanan kamu..."
                   />
                 </div>
+
                 <div>
                   <label>Metode Pembayaran</label>
                   <select
@@ -868,24 +1012,16 @@ useEffect(() => {
                     <option value="BCA">Transfer Bank (BCA)</option>
                     <option value="GoPay">GoPay</option>
                     <option value="PayPal">PayPal</option>
-
-
+                    <option value="Crypto">Crypto (USDT/BTC/ETH/BNB)</option>
                   </select>
                 </div>
 
+                {/* QRIS */}
                 {showQris && (
-                  <div className="
-    mt-4 w-full p-6 rounded-2xl 
-    border border-gray-100 
-    shadow-sm bg-white
-  ">
+                  <div className="mt-4 w-full p-6 rounded-2xl border border-gray-100 shadow-sm bg-white">
                     <div className="flex flex-col items-center">
-
-                      {/* TITLE */}
                       <div className="flex items-center gap-2">
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          QRIS Payment
-                        </h3>
+                        <h3 className="text-lg font-semibold text-gray-900">QRIS Payment</h3>
                         <span className="px-2 py-0.5 text-[10px] rounded-md bg-gray-100 text-gray-500">
                           Secure
                         </span>
@@ -895,12 +1031,7 @@ useEffect(() => {
                         Scan untuk melanjutkan pembayaran
                       </span>
 
-                      {/* QR WRAPPER */}
-                      <div className="
-        mt-5 p-4 rounded-2xl bg-gray-50 border
-        w-48 h-48 flex items-center justify-center
-        shadow-inner
-      ">
+                      <div className="mt-5 p-4 rounded-2xl bg-gray-50 border w-48 h-48 flex items-center justify-center shadow-inner">
                         <img
                           src="/image/qiris.jpg"
                           alt="QRIS"
@@ -908,36 +1039,25 @@ useEffect(() => {
                         />
                       </div>
 
-
-
-                      {/* DOWNLOAD BUTTON */}
                       <a
                         href="/image/qiris.jpg"
                         download
-                        className="
-          mt-6 w-full text-center py-2.5 text-[15px] font-medium
-          rounded-xl bg-gray-900 text-white
-          hover:bg-black transition-all active:scale-[0.98]
-          shadow-md
-        "
+                        className="mt-6 w-full text-center py-2.5 text-[15px] font-medium rounded-xl bg-gray-900 text-white hover:bg-black transition-all active:scale-[0.98] shadow-md"
                       >
                         Download QR
                       </a>
 
-                      {/* FOOTNOTE */}
                       <p className="text-[11px] text-gray-400 mt-3">
                         Pastikan QR terlihat jelas sebelum di-scan
                       </p>
-
                     </div>
                   </div>
                 )}
 
-
+                {/* GoPay */}
                 {showGopay && (
                   <div className="mt-4 w-full p-6 rounded-2xl border border-gray-100 shadow-sm bg-white">
                     <div className="flex flex-col items-center">
-
                       <div className="flex items-center gap-2">
                         <h3 className="text-lg font-semibold text-gray-900">GoPay Payment</h3>
                         <span className="px-2 py-0.5 text-[10px] rounded-md bg-gray-100 text-gray-500">
@@ -950,11 +1070,10 @@ useEffect(() => {
                       </span>
 
                       <div className="mt-5 w-full p-4 rounded-xl bg-gray-50 border flex justify-between items-center">
-                        <span className="font-semibold text-gray-900 text-base">
-                          087860592111
-                        </span>
+                        <span className="font-semibold text-gray-900 text-base">087860592111</span>
 
                         <button
+                          type="button"
                           onClick={() => navigator.clipboard.writeText("087860592111")}
                           className="text-sm px-3 py-1.5 rounded-lg bg-gray-900 text-white hover:bg-black transition active:scale-[0.97]"
                         >
@@ -968,14 +1087,13 @@ useEffect(() => {
                     </div>
                   </div>
                 )}
+
+                {/* Paypal */}
                 {showPaypal && (
                   <div className="mt-6 w-full max-w-md mx-auto p-6 rounded-2xl border border-gray-100 shadow-sm bg-white">
                     <div className="flex flex-col items-center space-y-2">
-
                       <div className="flex items-center gap-2">
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          Paypal Payment
-                        </h3>
+                        <h3 className="text-lg font-semibold text-gray-900">Paypal Payment</h3>
                         <span className="px-2 py-0.5 text-[10px] rounded-md bg-gray-100 text-gray-500">
                           Secure
                         </span>
@@ -991,6 +1109,7 @@ useEffect(() => {
                         </span>
 
                         <button
+                          type="button"
                           onClick={() => navigator.clipboard.writeText("zizzzzdul@gmail.com")}
                           className="text-sm px-3 py-2 rounded-lg bg-gray-900 text-white hover:bg-black transition active:scale-95 whitespace-nowrap"
                         >
@@ -1005,12 +1124,10 @@ useEffect(() => {
                   </div>
                 )}
 
-
-
+                {/* BCA */}
                 {showBCA && (
                   <div className="mt-4 w-full p-6 rounded-2xl border border-gray-100 shadow-sm bg-white">
                     <div className="flex flex-col items-center">
-
                       <div className="flex items-center gap-2">
                         <h3 className="text-lg font-semibold text-gray-900">BCA Transfer</h3>
                         <span className="px-2 py-0.5 text-[10px] rounded-md bg-gray-100 text-gray-500">
@@ -1024,15 +1141,12 @@ useEffect(() => {
 
                       <div className="mt-5 w-full p-4 rounded-xl bg-gray-50 border flex justify-between items-center">
                         <div>
-                          <p className="font-semibold text-gray-900 text-base">
-                            3780905904
-                          </p>
-                          <p className="text-xs text-gray-500 -mt-0.5">
-                            a.n A***l A**z
-                          </p>
+                          <p className="font-semibold text-gray-900 text-base">3780905904</p>
+                          <p className="text-xs text-gray-500 -mt-0.5">a.n A***l A**z</p>
                         </div>
 
                         <button
+                          type="button"
                           onClick={() => navigator.clipboard.writeText("3780905904")}
                           className="text-sm px-3 py-1.5 rounded-lg bg-gray-900 text-white hover:bg-black transition active:scale-[0.97]"
                         >
@@ -1047,31 +1161,156 @@ useEffect(() => {
                   </div>
                 )}
 
+                {/* ✅ CRYPTO */}
+                {showCrypto && (
+                  <div className="mt-4 w-full p-6 rounded-2xl border border-gray-100 shadow-sm bg-white">
+                    <div className="flex flex-col items-center">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-semibold text-gray-900">Crypto Payment</h3>
+                        <span className="px-2 py-0.5 text-[10px] rounded-md bg-gray-100 text-gray-500">
+                          Auto Update
+                        </span>
+                      </div>
+
+                      <span className="text-xs text-gray-500 mt-1 text-center">
+                        Pilih coin, sistem akan menghitung estimasi jumlah crypto dari total (IDR).
+                        Kurs akan di-refresh tiap 30 detik.
+                      </span>
+
+                      {/* pilih coin */}
+                      <div className="mt-4 w-full">
+                        <label className="text-xs text-gray-600">Pilih Coin</label>
+                        <select
+                          className="mt-2 w-full border rounded-lg p-3 focus:ring-2 focus:ring-indigo-600"
+                          value={cryptoCoin}
+                          onChange={(e) => setCryptoCoin(e.target.value)}
+                        >
+                          <option value="USDT">USDT</option>
+                          <option value="BTC">BTC</option>
+                          <option value="ETH">ETH</option>
+                          <option value="BNB">BNB</option>
+                        </select>
+                      </div>
+
+                      {/* pilih network khusus USDT */}
+                      {cryptoCoin === "USDT" && (
+                        <div className="mt-4 w-full">
+                          <label className="text-xs text-gray-600">Pilih Network USDT</label>
+                          <select
+                            className="mt-2 w-full border rounded-lg p-3 focus:ring-2 focus:ring-indigo-600"
+                            value={cryptoNetwork}
+                            onChange={(e) => setCryptoNetwork(e.target.value)}
+                          >
+                            <option value="TRC20">TRC20 (TRON)</option>
+                            <option value="BEP20">BEP20 (BSC)</option>
+                          </select>
+
+                          <p className="mt-2 text-[11px] text-gray-400">
+                            Pastikan network sama saat transfer. Salah network = dana bisa hilang.
+                          </p>
+                        </div>
+                      )}
+
+                      {/* total + kurs + estimasi */}
+                      <div className="mt-4 w-full p-4 rounded-xl bg-gray-50 border space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Total (IDR)</span>
+                          <span className="font-semibold text-gray-900">
+                            Rp {Number(totalIDR || 0).toLocaleString("id-ID")}
+                          </span>
+                        </div>
+
+                        {!totalIDR && (
+                          <p className="text-[11px] text-amber-600">
+                            Isi budget / pilih durasi dulu supaya estimasi crypto muncul.
+                          </p>
+                        )}
+
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Kurs</span>
+                          <span className="font-semibold text-gray-900">
+                            {cryptoLoading
+                              ? "Loading..."
+                              : cryptoRate
+                              ? `1 ${cryptoCoin} = Rp ${Number(cryptoRate).toLocaleString("id-ID")}`
+                              : "-"}
+                          </span>
+                        </div>
+
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Estimasi Bayar</span>
+                          <span className="font-bold text-gray-900">
+                            {typeof estimatedCrypto === "number"
+                              ? `${estimatedCrypto.toFixed(6)} ${cryptoCoin}`
+                              : "-"}
+                          </span>
+                        </div>
+
+                        {cryptoError && <p className="text-xs text-red-600">{cryptoError}</p>}
+
+                        <p className="text-[11px] text-gray-400">
+                          *Estimasi bisa berubah karena kurs real-time.*
+                        </p>
+                      </div>
+
+                      {/* wallet address */}
+                      <div className="mt-4 w-full p-4 rounded-xl bg-white border">
+                        <p className="text-xs text-gray-500 mb-2">
+                          Alamat Wallet ({cryptoCoin} - {getCryptoNetworkLabel()})
+                        </p>
+
+                        <div className="flex justify-between items-center gap-3">
+                          <span className="font-semibold text-gray-900 text-sm break-all">
+                            {getCryptoAddress() || "-"}
+                          </span>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const addr = getCryptoAddress();
+                              if (addr) navigator.clipboard.writeText(addr);
+                            }}
+                            disabled={!getCryptoAddress()}
+                            className="text-sm px-3 py-2 rounded-lg bg-gray-900 text-white hover:bg-black transition active:scale-95 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            Copy
+                          </button>
+                        </div>
+
+                        <p className="text-[11px] text-gray-400 mt-2">
+                          Setelah transfer, kirim bukti & TXID/hash via WhatsApp.
+                        </p>
+
+                        <p className="text-[11px] text-gray-500 mt-2">
+                          ⚠️ QR/Alamat crypto ini tidak bisa dibayar via QRIS/DANA/GoPay/Bank.
+                          Pembayaran crypto hanya bisa dari wallet/exchange crypto.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div>
                   <Button
                     type="submit"
                     disabled={isSubmitting}
                     className="w-full mt-4 px-6 py-3 bg-indigo-600 text-white rounded-xl font-semibold
-             transition-all duration-300 ease-in-out
-             hover:bg-indigo-700 hover:shadow-lg hover:-translate-y-[2px]
-             active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
+                      transition-all duration-300 ease-in-out
+                      hover:bg-indigo-700 hover:shadow-lg hover:-translate-y-[2px]
+                      active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
                   >
-                    <span
-                      className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-500 rounded-xl"
-                    ></span>
+                    <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-500 rounded-xl"></span>
                     <span className="relative z-10">
-                      {isSubmitting ? 'Mengirim...' : 'Kirim Pesanan via WhatsApp'}
+                      {isSubmitting ? "Mengirim..." : "Kirim Pesanan via WhatsApp"}
                     </span>
                   </Button>
-
                 </div>
               </form>
             </motion.div>
           </motion.div>
-
         </div>
-        <div className="snow pointer-events-none"></div>
 
+        <div className="snow pointer-events-none"></div>
       </div>
     </>
   );
