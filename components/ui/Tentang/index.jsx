@@ -316,9 +316,8 @@ export default function Tentang() {
 
 
               <p className="mt-4 text-gray-600 leading-relaxed">
-                <span className="font-semibold text-indigo-600">Abdul Aziz</span> adalah Desainer Grafis dan Web Developer
-                dengan pengalaman lebih dari <strong>8 tahun</strong>. Berfokus membantu brand dan bisnis membangun identitas
-                visual dan website profesional melalui desain kreatif serta solusi digital modern yang berorientasi pada kualitas dan hasil.
+              <span className="font-semibold text-indigo-600">Abdul Aziz</span> adalah Desainer Grafis dengan pengalaman lebih dari <strong>8 tahun</strong>, serta Web Developer yang berpengalaman dalam membangun website profesional dan solusi digital modern. Berfokus membantu brand dan bisnis membangun identitas visual yang kuat serta menghadirkan website yang fungsional, responsif, dan berkualitas.
+
               </p>
             </div>
           </div>

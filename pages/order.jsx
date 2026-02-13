@@ -2,11 +2,12 @@
 // ✅ Versi FULL + Crypto Payment (auto update kurs) + FIX bug toFixed(null)
 // ✅ Tambahan: hitung estimasi 1x (useMemo), label network jelas, reset network saat ganti coin,
 // ✅ Copy button aman kalau address kosong, dan WA message konsisten.
+// ✅ NEW: Validasi dengan highlight merah per field + scroll ke banner error + pesan "lihat ke atas"
 
 import Head from "next/head";
 import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
 export default function OrderForm() {
@@ -33,6 +34,12 @@ export default function OrderForm() {
   const [showGopay, setShowGopay] = useState(false);
   const [showPaypal, setShowPaypal] = useState(false);
   const [showBCA, setShowBCA] = useState(false);
+
+  // ✅ NEW: field errors (biar input merah + teks kecil)
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  // ✅ NEW: ref untuk auto scroll ke banner error
+  const errorRef = useRef(null);
 
   // ✅ Tambahan untuk Crypto
   const [showCrypto, setShowCrypto] = useState(false);
@@ -250,6 +257,12 @@ export default function OrderForm() {
     setMinDate(`${yyyy}-${mm}-${dd}`);
   }, []);
 
+  // ✅ NEW: auto scroll ke banner error saat error muncul
+  useEffect(() => {
+    if (!error) return;
+    errorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [error]);
+
   // ✅ Reset durasi & harga kalau user ganti layanan utama
   useEffect(() => {
     setDuration("");
@@ -428,6 +441,9 @@ export default function OrderForm() {
     const value = e.target.value;
     const formatted = formatRupiah(value);
     setBudget(formatted);
+
+    // ✅ hapus error field budget saat user ngetik
+    setFieldErrors((prev) => ({ ...prev, budget: "" }));
   };
 
   const today = new Date();
@@ -545,65 +561,88 @@ export default function OrderForm() {
 
     // ✅ Crypto toggle
     setShowCrypto(method === "Crypto");
+
+    // ✅ hapus error paymentMethod saat user memilih
+    setFieldErrors((prev) => ({ ...prev, paymentMethod: "" }));
+  };
+
+  // ✅ NEW: helper class untuk merah + helper hapus error per field
+  const inputErrorClass =
+    "border-red-400 focus:ring-red-400 focus:border-red-400";
+  const baseSelectClass =
+    "mt-2 w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-indigo-600";
+  const baseSelectClassBig =
+    "mt-2 w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-600 bg-white shadow-sm text-sm";
+  const baseTextareaClass =
+    "w-full mt-2 h-32 px-3 py-2 border rounded-lg shadow-sm focus:border-indigo-600 focus:ring resize-none";
+  const baseDateClass = "mt-2 w-full border rounded-lg p-3";
+
+  const getClass = (base, key) =>
+    `${base} ${fieldErrors?.[key] ? inputErrorClass : ""}`;
+
+  const clearFieldError = (key) => {
+    setFieldErrors((prev) => {
+      if (!prev?.[key]) return prev;
+      return { ...prev, [key]: "" };
+    });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    const fe = {};
+
     // VALIDASI UMUM
-    if (name.trim().length < 3) {
-      return setError("Nama harus berisi setidaknya 3 karakter.");
-    }
-    if (!phone.match(/^08\d{8,}$/)) {
-      return setError("Nomor HP tidak valid (gunakan format 08xxxxxxxxxx).");
-    }
-    if (!selectedService) {
-      return setError("Silakan pilih layanan terlebih dahulu.");
-    }
+    if (name.trim().length < 3) fe.name = "Nama harus berisi setidaknya 3 karakter.";
+    if (!phone.match(/^08\d{8,}$/))
+      fe.phone = "Nomor HP tidak valid (gunakan format 08xxxxxxxxxx).";
+    if (!selectedService) fe.selectedService = "Silakan pilih layanan terlebih dahulu.";
+
     if (selectedSubService === "Lainnya" && customSubService.trim().length < 3) {
-      return setError("Masukkan detail layanan jika memilih 'Lainnya'.");
+      fe.customSubService = "Masukkan detail layanan jika memilih 'Lainnya' (min. 3 karakter).";
     }
 
     // KHUSUS "APLIKASI PREMIUM"
     if (selectedService === "Aplikasi Premium") {
-      if (!duration) {
-        return setError("Silakan pilih durasi langganan.");
-      }
+      if (!selectedSubService) fe.selectedSubService = "Silakan pilih detail aplikasi terlebih dahulu.";
+      if (!duration) fe.duration = "Silakan pilih durasi langganan.";
     } else {
-      // VALIDASI NORMAL (untuk layanan selain Aplikasi Premium)
-      if (!budget.match(/^\d{1,3}(\.\d{3})*$/)) {
-        return setError("Budget harus berupa angka dengan format yang benar, contoh: 150.000.");
-      }
-      if (!deadline || new Date(deadline) <= new Date()) {
-        return setError("Deadline harus minimal 1 hari setelah tanggal hari ini.");
-      }
+      // VALIDASI NORMAL
+      if (!budget.match(/^\d{1,3}(\.\d{3})*$/))
+        fe.budget = "Budget harus format angka benar, contoh: 150.000.";
+      if (!deadline || new Date(deadline) <= new Date())
+        fe.deadline = "Deadline harus minimal 1 hari setelah tanggal hari ini.";
     }
 
-    if (message.trim().length < 10) {
-      return setError("Pesan terlalu singkat. Tulis setidaknya 10 karakter.");
-    }
-    if (!paymentMethod) {
-      return setError("Pilih metode pembayaran terlebih dahulu.");
-    }
+    if (message.trim().length < 10)
+      fe.message = "Pesan terlalu singkat. Tulis setidaknya 10 karakter.";
+    if (!paymentMethod) fe.paymentMethod = "Pilih metode pembayaran terlebih dahulu.";
 
-    // VALIDASI tambahan untuk Crypto (biar aman)
+    // VALIDASI tambahan untuk Crypto
     if (paymentMethod === "Crypto") {
       const addr = getCryptoAddress();
       if (!addr) {
-        return setError("Alamat wallet crypto belum diisi. Cek konfigurasi CRYPTO_WALLETS.");
+        fe.crypto = "Alamat wallet crypto belum diisi. Cek konfigurasi CRYPTO_WALLETS.";
       }
-      // Optional: kalau mau memaksa kurs harus ada:
-      // if (!cryptoRate) return setError("Kurs crypto belum tersedia. Coba lagi sebentar.");
-      // Optional: kalau mau memaksa total harus > 0:
-      // if (!totalIDR) return setError("Isi budget / pilih durasi dulu sebelum bayar crypto.");
+    }
+
+    // jika ada error
+    if (Object.keys(fe).length > 0) {
+      setFieldErrors(fe);
+
+      // ✅ banner global: “lihat ke atas”
+      setError("Ada kesalahan pada pengisian form. Silakan periksa kolom yang ditandai merah.");
+      return;
     }
 
     // Jika semua valid:
     setError("");
+    setFieldErrors({});
     setIsSubmitting(true);
 
     const waNumber = "6287860592111";
-    const detailService = selectedSubService === "Lainnya" ? customSubService : selectedSubService;
+    const detailService =
+      selectedSubService === "Lainnya" ? customSubService : selectedSubService;
 
     const estimated = estimatedCrypto;
 
@@ -715,6 +754,7 @@ export default function OrderForm() {
 
               {error && (
                 <motion.div
+                  ref={errorRef}
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, ease: "easeOut" }}
@@ -730,10 +770,16 @@ export default function OrderForm() {
                   <Input
                     type="text"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(e) => {
+                      setName(e.target.value);
+                      clearFieldError("name");
+                    }}
                     placeholder="Masukkan nama Anda"
-                    className="mt-2"
+                    className={`mt-2 ${fieldErrors?.name ? inputErrorClass : ""}`}
                   />
+                  {fieldErrors?.name ? (
+                    <p className="mt-1 text-xs text-red-600">{fieldErrors.name}</p>
+                  ) : null}
                 </div>
 
                 <div>
@@ -741,10 +787,16 @@ export default function OrderForm() {
                   <Input
                     type="tel"
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                    onChange={(e) => {
+                      setPhone(e.target.value);
+                      clearFieldError("phone");
+                    }}
                     placeholder="Contoh: 08xxxxxxxxxx"
-                    className="mt-2"
+                    className={`mt-2 ${fieldErrors?.phone ? inputErrorClass : ""}`}
                   />
+                  {fieldErrors?.phone ? (
+                    <p className="mt-1 text-xs text-red-600">{fieldErrors.phone}</p>
+                  ) : null}
                 </div>
 
                 <div>
@@ -755,8 +807,12 @@ export default function OrderForm() {
                       setSelectedService(e.target.value);
                       setSelectedSubService("");
                       setCustomSubService("");
+                      clearFieldError("selectedService");
+                      clearFieldError("selectedSubService");
+                      clearFieldError("customSubService");
+                      clearFieldError("duration");
                     }}
-                    className="mt-2 w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                    className={getClass(baseSelectClass, "selectedService")}
                   >
                     <option value="">-- Pilih Layanan --</option>
                     {servicesItems.map((item, idx) => (
@@ -765,6 +821,9 @@ export default function OrderForm() {
                       </option>
                     ))}
                   </select>
+                  {fieldErrors?.selectedService ? (
+                    <p className="mt-1 text-xs text-red-600">{fieldErrors.selectedService}</p>
+                  ) : null}
                 </div>
 
                 {selectedService && serviceSubOptions[selectedService] && (
@@ -772,12 +831,20 @@ export default function OrderForm() {
                     <label className="font-semibold text-gray-800">Detail Layanan</label>
                     <select
                       value={selectedSubService}
-                      onChange={(e) => setSelectedSubService(e.target.value)}
-                      className="
+                      onChange={(e) => {
+                        setSelectedSubService(e.target.value);
+                        clearFieldError("selectedSubService");
+                        clearFieldError("customSubService");
+                        clearFieldError("duration");
+                      }}
+                      className={getClass(
+                        `
                         mt-2 w-full border border-gray-300 rounded-lg p-3
                         focus:outline-none focus:ring-2 focus:ring-indigo-600
                         bg-white shadow-sm text-sm
-                      "
+                      `,
+                        "selectedSubService"
+                      )}
                     >
                       <option value="" className="text-gray-400 italic">
                         -- Pilih Detail Layanan --
@@ -817,6 +884,10 @@ export default function OrderForm() {
                         );
                       })}
                     </select>
+
+                    {fieldErrors?.selectedSubService ? (
+                      <p className="mt-1 text-xs text-red-600">{fieldErrors.selectedSubService}</p>
+                    ) : null}
                   </div>
                 )}
 
@@ -826,10 +897,16 @@ export default function OrderForm() {
                     <Input
                       type="text"
                       value={customSubService}
-                      onChange={(e) => setCustomSubService(e.target.value)}
+                      onChange={(e) => {
+                        setCustomSubService(e.target.value);
+                        clearFieldError("customSubService");
+                      }}
                       placeholder="Contoh: Desain Feed Instagram"
-                      className="mt-2"
+                      className={`mt-2 ${fieldErrors?.customSubService ? inputErrorClass : ""}`}
                     />
+                    {fieldErrors?.customSubService ? (
+                      <p className="mt-1 text-xs text-red-600">{fieldErrors.customSubService}</p>
+                    ) : null}
                   </div>
                 )}
 
@@ -842,8 +919,11 @@ export default function OrderForm() {
                         value={budget}
                         onChange={handleBudgetChange}
                         placeholder="Contoh: 150.000"
-                        className="mt-2"
+                        className={`mt-2 ${fieldErrors?.budget ? inputErrorClass : ""}`}
                       />
+                      {fieldErrors?.budget ? (
+                        <p className="mt-1 text-xs text-red-600">{fieldErrors.budget}</p>
+                      ) : null}
                     </div>
 
                     <div>
@@ -852,9 +932,15 @@ export default function OrderForm() {
                         type="date"
                         min={minDate}
                         value={deadline}
-                        onChange={(e) => setDeadline(e.target.value)}
-                        className="mt-2 w-full border rounded-lg p-3"
+                        onChange={(e) => {
+                          setDeadline(e.target.value);
+                          clearFieldError("deadline");
+                        }}
+                        className={getClass(baseDateClass, "deadline")}
                       />
+                      {fieldErrors?.deadline ? (
+                        <p className="mt-1 text-xs text-red-600">{fieldErrors.deadline}</p>
+                      ) : null}
                     </div>
                   </>
                 )}
@@ -865,15 +951,19 @@ export default function OrderForm() {
                       <label className="font-semibold text-gray-800">Pilih Durasi</label>
 
                       <select
-                        className="
+                        className={getClass(
+                          `
                           mt-2 w-full p-3 border border-gray-300 rounded-lg
                           bg-white shadow-sm text-sm
                           focus:outline-none focus:ring-2 focus:ring-indigo-600
-                        "
+                        `,
+                          "duration"
+                        )}
                         value={duration}
                         onChange={(e) => {
                           const dur = e.target.value;
                           setDuration(dur);
+                          clearFieldError("duration");
 
                           const raw = appPrices?.[selectedSubService]?.[dur] ?? 0;
                           const price = Number(raw) || 0;
@@ -892,6 +982,10 @@ export default function OrderForm() {
                             </option>
                           ))}
                       </select>
+
+                      {fieldErrors?.duration ? (
+                        <p className="mt-1 text-xs text-red-600">{fieldErrors.duration}</p>
+                      ) : null}
                     </div>
 
                     {duration && (
@@ -993,17 +1087,26 @@ export default function OrderForm() {
                 <div>
                   <label>Pesan Tambahan</label>
                   <textarea
-                    className="w-full mt-2 h-32 px-3 py-2 border rounded-lg shadow-sm focus:border-indigo-600 focus:ring resize-none"
+                    className={getClass(baseTextareaClass, "message")}
                     value={message}
-                    onChange={(e) => setMessage(e.target.value)}
+                    onChange={(e) => {
+                      setMessage(e.target.value);
+                      clearFieldError("message");
+                    }}
                     placeholder="Keterangan detail pesanan kamu..."
                   />
+                  {fieldErrors?.message ? (
+                    <p className="mt-1 text-xs text-red-600">{fieldErrors.message}</p>
+                  ) : null}
                 </div>
 
                 <div>
                   <label>Metode Pembayaran</label>
                   <select
-                    className="mt-2 w-full border rounded-lg p-3 focus:ring-2 focus:ring-indigo-600"
+                    className={getClass(
+                      "mt-2 w-full border rounded-lg p-3 focus:ring-2 focus:ring-indigo-600",
+                      "paymentMethod"
+                    )}
                     value={paymentMethod}
                     onChange={(e) => handlePaymentChange(e.target.value)}
                   >
@@ -1014,6 +1117,9 @@ export default function OrderForm() {
                     <option value="PayPal">PayPal</option>
                     <option value="Crypto">Crypto (USDT/BTC/ETH/BNB)</option>
                   </select>
+                  {fieldErrors?.paymentMethod ? (
+                    <p className="mt-1 text-xs text-red-600">{fieldErrors.paymentMethod}</p>
+                  ) : null}
                 </div>
 
                 {/* QRIS */}
@@ -1177,13 +1283,23 @@ export default function OrderForm() {
                         Kurs akan di-refresh tiap 30 detik.
                       </span>
 
+                      {/* pesan error crypto (kalau wallet kosong) */}
+                      {fieldErrors?.crypto ? (
+                        <div className="mt-4 w-full bg-red-50 border border-red-300 text-red-700 rounded-lg p-3 text-xs">
+                          {fieldErrors.crypto}
+                        </div>
+                      ) : null}
+
                       {/* pilih coin */}
                       <div className="mt-4 w-full">
                         <label className="text-xs text-gray-600">Pilih Coin</label>
                         <select
                           className="mt-2 w-full border rounded-lg p-3 focus:ring-2 focus:ring-indigo-600"
                           value={cryptoCoin}
-                          onChange={(e) => setCryptoCoin(e.target.value)}
+                          onChange={(e) => {
+                            setCryptoCoin(e.target.value);
+                            clearFieldError("crypto");
+                          }}
                         >
                           <option value="USDT">USDT</option>
                           <option value="BTC">BTC</option>

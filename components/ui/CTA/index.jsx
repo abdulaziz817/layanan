@@ -39,13 +39,11 @@ const CTA = () => {
                             viewport={{ once: true }}
                             className="md:col-span-7 space-y-6"
                         >
-                            <div className="space-y-4 text-gray-700 text-base leading-loose" style={{ wordSpacing: '0.12em' }}>
-<p className="text-justify" style={{ textIndent: '2rem' }}>
-  <span className="font-semibold text-indigo-600">Layanan Nusantara</span> didirikan pada tahun <span className="underline decoration-indigo-500">2025</span> sebagai jasa kreatif yang menyediakan <strong>desain grafis</strong>, <strong>pembuatan website</strong>, <strong>preset fotografi</strong>, dan <strong>aplikasi premium dengan harga terbaik</strong>, dirancang untuk memenuhi kebutuhan individu maupun bisnis. Kami berkomitmen menghadirkan solusi visual yang tidak hanya menarik secara estetika, tetapi juga meningkatkan citra profesional klien. Dikelola langsung oleh <span className="font-semibold text-indigo-600">Abdul Aziz</span>, seorang desainer berpengalaman lebih dari <strong>8 tahun</strong>, Layanan Nusantara hadir sebagai mitra terpercaya dalam membangun identitas visual yang kuat dan berkesan.
-</p>
-
-
-                            </div>
+                           <div className="space-y-4 text-gray-700 text-base leading-loose" style={{ wordSpacing: '0.12em' }}>
+  <p className="text-justify" style={{ textIndent: '2rem' }}>
+    <span className="font-semibold text-indigo-600">Layanan Nusantara</span> didirikan pada tahun <span className="underline decoration-indigo-500">2025</span> sebagai jasa kreatif yang menyediakan <strong>desain grafis</strong>, <strong>pembuatan website</strong>, <strong>preset fotografi</strong>, dan <strong>aplikasi premium dengan harga terbaik</strong>. Dengan komitmen terhadap kualitas dan detail, kami menghadirkan solusi visual yang tidak hanya menarik secara estetika, tetapi juga mampu meningkatkan citra profesional dan daya saing brand di era digital.
+  </p>
+</div>
 
 
                             {/* CTA Button */}
