@@ -2,7 +2,8 @@
 const fs = require("fs");
 const path = require("path");
 
-// sama kayak send-notif: simpan ke /tmp biar ga error di Netlify
+// ⚠️ NOTE: /tmp di Netlify itu sementara (bisa reset kapan aja).
+// Tapi ini cukup untuk testing & jalanin flow end-to-end.
 const SUBS_PATH = path.join("/tmp", "_subs.json");
 
 function safeJsonParse(str, fallback) {
@@ -33,33 +34,37 @@ function writeSubs(subs) {
 }
 
 function sameSub(a, b) {
-  // uniknya subscription biasanya endpoint
   return a?.endpoint && b?.endpoint && a.endpoint === b.endpoint;
 }
 
 exports.handler = async (event) => {
   const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Admin-Token",
+    "Access-Control-Allow-Headers": "Content-Type, X-Admin-Token",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Content-Type": "application/json",
   };
 
+  // preflight
   if (event.httpMethod === "OPTIONS") {
-    return { statusCode: 200, headers: corsHeaders, body: "ok" };
+    return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ ok: true }) };
   }
 
   if (event.httpMethod !== "POST") {
-    return { statusCode: 405, headers: corsHeaders, body: "Method Not Allowed" };
+    return { statusCode: 405, headers: corsHeaders, body: JSON.stringify({ ok: false, error: "Method Not Allowed" }) };
   }
 
   const sub = safeJsonParse(event.body || "{}", null);
 
-  // validasi minimal
-  if (!sub || !sub.endpoint || !sub.keys) {
+  // validasi minimal subscription
+  if (!sub?.endpoint || !sub?.keys?.p256dh || !sub?.keys?.auth) {
     return {
       statusCode: 400,
       headers: corsHeaders,
-      body: "Bad Request: subscription tidak valid",
+      body: JSON.stringify({
+        ok: false,
+        error: "Bad Request: subscription tidak valid (butuh endpoint + keys.p256dh + keys.auth)",
+      }),
     };
   }
 
@@ -67,7 +72,7 @@ exports.handler = async (event) => {
 
   // jangan dobel
   const exists = subs.some((s) => sameSub(s, sub));
-  const next = exists ? subs : [...subs, sub];
+  const next = exists ? subs : [sub, ...subs];
 
   writeSubs(next);
 
