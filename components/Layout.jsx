@@ -14,79 +14,87 @@ const Layout = ({ children }) => {
   useEffect(() => {
     AOS.init({ duration: 1000, once: true })
 
-    // splash hanya tampil sekali per browser
     const hasShown = localStorage.getItem("splashShown")
-
     if (hasShown) {
-      setShowSplash(false) // ✅ ini yang kurang di kode kamu
+      setShowSplash(false)
     } else {
       setShowSplash(true)
       localStorage.setItem("splashShown", "true")
     }
+
+    // 🔥 register service worker
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js")
+    }
+
   }, [])
+
+  // 🔥 PUSH FUNCTION
+  async function enablePush() {
+    if (!("serviceWorker" in navigator)) {
+      alert("Browser tidak support notifikasi.")
+      return
+    }
+
+    const reg = await navigator.serviceWorker.ready
+
+    const perm = await Notification.requestPermission()
+    if (perm !== "granted") {
+      alert("Izin notifikasi ditolak.")
+      return
+    }
+
+    const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC
+
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(publicKey),
+    })
+
+    await fetch("/.netlify/functions/subscribe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(sub),
+    })
+
+    alert("Notifikasi aktif ✅")
+  }
+
+  function urlBase64ToUint8Array(base64String) {
+    const padding = "=".repeat((4 - (base64String.length % 4)) % 4)
+    const base64 = (base64String + padding)
+      .replace(/-/g, "+")
+      .replace(/_/g, "/")
+    const raw = atob(base64)
+    const out = new Uint8Array(raw.length)
+    for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i)
+    return out
+  }
 
   return (
     <>
-     <Head>
-  <title>Layanan Nusantara</title>
-
-  <meta name="description" content="Layanan Nusantara menyediakan jasa desain grafis, website profesional, preset fotografi, dan aplikasi premium dengan harga terbaik." />
-
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  {/* 🔥 PWA CONFIG */}
-  <meta name="application-name" content="Layanan Nusantara" />
-  <meta name="apple-mobile-web-app-title" content="Layanan Nusantara" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="theme-color" content="#ffffff" />
-
-  <link rel="manifest" href="/manifest.json" />
-
-  {/* Favicon */}
-  <link rel="icon" href="/favicon.ico" sizes="any" />
-  <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
-  <link rel="icon" type="image/png" sizes="96x96" href="/favicon/favicon-96x96.png" />
-  <link rel="apple-touch-icon" href="/favicon/apple-touch-icon.png" />
-
-  {/* Open Graph */}
-  <meta property="og:site_name" content="Layanan Nusantara" />
-  <meta property="og:title" content="Layanan Nusantara" />
-  <meta property="og:description" content="Solusi jasa desain grafis, website profesional, preset fotografi, dan aplikasi premium." />
-  <meta property="og:image" content="https://layanannusantara.store/cta-image.jpg" />
-  <meta property="og:url" content="https://layanannusantara.store/" />
-  <meta property="og:type" content="website" />
-</Head>
- <Head>
+      <Head>
         <title>Layanan Nusantara</title>
-        <meta
-          name="description"
-          content="Layanan Nusantara menyediakan jasa desain grafis, website profesional, preset fotografi, dan aplikasi premium dengan harga terbaik."
-        />
+        <meta name="description" content="Layanan Nusantara menyediakan jasa desain grafis, website profesional, preset fotografi, dan aplikasi premium dengan harga terbaik." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-        {/* ✅ Favicon utama (root public/favicon.ico) */}
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-
-        {/* ✅ Favicon tambahan (folder public/favicon/) */}
-        <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
-        <link rel="icon" type="image/png" sizes="96x96" href="/favicon/favicon-96x96.png" />
-        <link rel="apple-touch-icon" href="/favicon/apple-touch-icon.png" />
-        <link rel="manifest" href="/favicon/site.webmanifest" />
-
-        <meta property="og:site_name" content="Layanan Nusantara" />
-        <meta property="og:title" content="Layanan Nusantara" />
-        <meta
-          property="og:description"
-          content="Solusi jasa desain grafis, website profesional, preset fotografi, dan aplikasi premium."
-        />
-        <meta property="og:image" content="https://layanannusantara.store/cta-image.jpg" />
-        <meta property="og:url" content="https://layanannusantara.store/" />
-        <meta property="og:type" content="website" />
+        <meta name="theme-color" content="#ffffff" />
+        <link rel="manifest" href="/manifest.json" />
       </Head>
 
       {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
 
       <Navbar />
+
+      {/* 🔥 Tombol aktifkan notif */}
+      <div className="text-center py-4">
+        <button
+          onClick={enablePush}
+          className="px-4 py-2 bg-indigo-600 text-white rounded-lg"
+        >
+          Aktifkan Notifikasi Promo 🔔
+        </button>
+      </div>
+
       <main className="min-h-screen">{children}</main>
       <Footer />
     </>
