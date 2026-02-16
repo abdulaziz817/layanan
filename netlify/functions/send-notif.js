@@ -1,14 +1,20 @@
 // netlify/functions/send-notif.js
-const webpush = require("web-push");
 const { google } = require("googleapis");
+const webpush = require("web-push");
 
-function getHeader(headers, name) {
-  if (!headers) return "";
-  const target = name.toLowerCase();
-  for (const k of Object.keys(headers)) {
-    if (String(k).toLowerCase() === target) return headers[k];
-  }
-  return "";
+function cors() {
+  return {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Admin-Token",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Content-Type": "application/json",
+  };
+}
+
+function mustEnv(name) {
+  const v = process.env[name];
+  if (!v) throw new Error(`ENV ${name} belum diset di Netlify`);
+  return v;
 }
 
 function safeJsonParse(str, fallback) {
@@ -19,8 +25,13 @@ function safeJsonParse(str, fallback) {
   }
 }
 
-function getEnv(name, fallback = "") {
-  return String(process.env[name] || fallback).trim();
+function getHeader(headers, name) {
+  if (!headers) return "";
+  const target = name.toLowerCase();
+  for (const k of Object.keys(headers)) {
+    if (String(k).toLowerCase() === target) return headers[k];
+  }
+  return "";
 }
 
 function getProvidedToken(headers) {
@@ -35,240 +46,188 @@ function getProvidedToken(headers) {
 }
 
 function getGoogleAuth() {
-  const clientEmail =
-    getEnv("GOOGLE_SERVICE_ACCOUNT_EMAIL") ||
-    getEnv("GOOGLE_CLIENT_EMAIL") ||
-    "";
-
-  const privateKeyRaw = getEnv("GOOGLE_PRIVATE_KEY") || "";
-  const privateKey = privateKeyRaw.replace(/\\n/g, "\n");
-
-  if (!clientEmail || !privateKey) {
-    throw new Error("Google service account env belum lengkap.");
-  }
+  const email = mustEnv("GOOGLE_SERVICE_ACCOUNT_EMAIL");
+  const key = mustEnv("GOOGLE_PRIVATE_KEY").replace(/\\n/g, "\n");
 
   return new google.auth.JWT({
-    email: clientEmail,
-    key: privateKey,
+    email,
+    key,
     scopes: ["https://www.googleapis.com/auth/spreadsheets"],
   });
 }
 
+async function getSheetsClient() {
+  const auth = getGoogleAuth();
+  await auth.authorize();
+  return google.sheets({ version: "v4", auth });
+}
+
+function nowISO() {
+  return new Date().toISOString();
+}
+
 function getVapidPublic() {
-  return (
-    getEnv("VAPID_PUBLIC_KEY") ||
-    getEnv("NEXT_PUBLIC_VAPID_PUBLIC") ||
-    getEnv("VAPID_PUBLIC") ||
-    ""
-  );
+  return String(process.env.VAPID_PUBLIC_KEY || "").trim();
 }
 
 function getVapidPrivate() {
-  return (
-    getEnv("VAPID_PRIVATE_KEY") ||
-    getEnv("VAPID_PRIVATE") ||
-    ""
-  );
-}
-
-async function loadActiveSubs(sheets, spreadsheetId, tab) {
-  // Ambil semua data A:E
-  const res = await sheets.spreadsheets.values.get({
-    spreadsheetId,
-    range: `${tab}!A:E`,
-  });
-
-  const rows = res.data.values || [];
-  // rows[0] = header
-  const out = [];
-  for (let i = 1; i < rows.length; i++) {
-    const [endpoint, subJson, createdAt, updatedAt, status] = rows[i] || [];
-    if (!endpoint || !subJson) continue;
-    if (String(status || "").toLowerCase() === "dead") continue;
-
-    const sub = safeJsonParse(subJson, null);
-    if (!sub?.endpoint) continue;
-
-    out.push({
-      rowIndex: i + 1, // 1-based
-      endpoint,
-      sub,
-      status: status || "active",
-    });
-  }
-  return out;
-}
-
-async function markDead(sheets, spreadsheetId, tab, rowIndex) {
-  const now = new Date().toISOString();
-  // D=updated_at, E=status
-  await sheets.spreadsheets.values.update({
-    spreadsheetId,
-    range: `${tab}!D${rowIndex}:E${rowIndex}`,
-    valueInputOption: "RAW",
-    requestBody: { values: [[now, "dead"]] },
-  });
-}
-
-async function touchActive(sheets, spreadsheetId, tab, rowIndex) {
-  const now = new Date().toISOString();
-  await sheets.spreadsheets.values.update({
-    spreadsheetId,
-    range: `${tab}!D${rowIndex}:E${rowIndex}`,
-    valueInputOption: "RAW",
-    requestBody: { values: [[now, "active"]] },
-  });
+  return String(process.env.VAPID_PRIVATE_KEY || "").trim();
 }
 
 exports.handler = async (event) => {
-  const corsHeaders = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Admin-Token",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Content-Type": "application/json",
-  };
-
-  if (event.httpMethod === "OPTIONS") {
-    return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ ok: true }) };
-  }
-
-  if (event.httpMethod !== "POST") {
-    return {
-      statusCode: 405,
-      headers: corsHeaders,
-      body: JSON.stringify({ ok: false, error: "Method Not Allowed" }),
-    };
-  }
-
-  // AUTH
-  const expected = getEnv("ADMIN_TOKEN");
-  const provided = getProvidedToken(event.headers);
-
-  if (!expected) {
-    return {
-      statusCode: 500,
-      headers: corsHeaders,
-      body: JSON.stringify({ ok: false, error: "ADMIN_TOKEN belum diset di Netlify." }),
-    };
-  }
-  if (!provided || provided !== expected) {
-    return {
-      statusCode: 401,
-      headers: corsHeaders,
-      body: JSON.stringify({ ok: false, error: "Unauthorized" }),
-    };
-  }
-
-  const spreadsheetId = getEnv("GSHEET_ID");
-  const tab = getEnv("GOOGLE_SHEET_TAB", "subs");
-
-  if (!spreadsheetId) {
-    return {
-      statusCode: 500,
-      headers: corsHeaders,
-      body: JSON.stringify({ ok: false, error: "GSHEET_ID belum diset di Netlify." }),
-    };
-  }
-
-  // VAPID
-  const vapidPublic = getVapidPublic();
-  const vapidPrivate = getVapidPrivate();
-
-  if (!vapidPublic || !vapidPrivate) {
-    return {
-      statusCode: 500,
-      headers: corsHeaders,
-      body: JSON.stringify({
-        ok: false,
-        error: "VAPID belum lengkap. Set VAPID_PUBLIC_KEY dan VAPID_PRIVATE_KEY di Netlify.",
-      }),
-    };
-  }
-
-  webpush.setVapidDetails(
-    "mailto:admin@layanannusantara.store",
-    vapidPublic,
-    vapidPrivate
-  );
-
-  // Body notif
-  const bodyObj = safeJsonParse(event.body || "{}", {});
-  const {
-    title = "Layanan Nusantara",
-    body = "Ada promo terbaru!",
-    url = "/",
-    icon = "/icon-192.png",
-    badge = "/icon-192.png",
-    image = "/cta-image.jpg",
-    tag = "ln-broadcast",
-  } = bodyObj || {};
-
-  const payload = JSON.stringify({ title, body, url, icon, badge, image, tag });
+  const headers = cors();
 
   try {
-    const auth = getGoogleAuth();
-    const sheets = google.sheets({ version: "v4", auth });
+    if (event.httpMethod === "OPTIONS") {
+      return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
+    }
 
-    const subs = await loadActiveSubs(sheets, spreadsheetId, tab);
-
-    if (subs.length === 0) {
+    if (event.httpMethod !== "POST") {
       return {
-        statusCode: 200,
-        headers: corsHeaders,
+        statusCode: 405,
+        headers,
+        body: JSON.stringify({ ok: false, error: "Method Not Allowed" }),
+      };
+    }
+
+    // AUTH
+    const expected = String(process.env.ADMIN_TOKEN || "").trim();
+    const provided = getProvidedToken(event.headers);
+
+    if (!expected) {
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ ok: false, error: "ADMIN_TOKEN belum diset di Netlify" }),
+      };
+    }
+    if (!provided || provided !== expected) {
+      return {
+        statusCode: 401,
+        headers,
+        body: JSON.stringify({ ok: false, error: "Unauthorized" }),
+      };
+    }
+
+    // VAPID
+    const vapidPublic = getVapidPublic();
+    const vapidPrivate = getVapidPrivate();
+
+    if (!vapidPublic || !vapidPrivate) {
+      return {
+        statusCode: 500,
+        headers,
         body: JSON.stringify({
-          ok: true,
-          sent: 0,
-          failed: 0,
-          remaining: 0,
-          note: "Belum ada subscriber aktif di sheet subs. Pastikan user sudah klik 'Aktifkan Notifikasi'.",
+          ok: false,
+          error: "VAPID key belum lengkap. Isi VAPID_PUBLIC_KEY dan VAPID_PRIVATE_KEY di Netlify.",
         }),
       };
     }
 
-    let ok = 0;
-    let fail = 0;
-    let dead = 0;
+    webpush.setVapidDetails(
+      "mailto:admin@layanannusantara.store",
+      vapidPublic,
+      vapidPrivate
+    );
 
-    for (const item of subs) {
+    // body request
+    const bodyObj = safeJsonParse(event.body || "{}", {});
+    const title = bodyObj.title || "Layanan Nusantara";
+    const msg = bodyObj.body || "Ada promo terbaru!";
+    const url = bodyObj.url || "/";
+    const icon = bodyObj.icon || "/icon-192.png";
+    const badge = bodyObj.badge || "/icon-192.png";
+    const image = bodyObj.image || "/cta-image.jpg";
+    const tag = bodyObj.tag || "ln-broadcast";
+
+    const payload = JSON.stringify({ title, body: msg, url, icon, badge, image, tag });
+
+    // Read subs from sheet
+    const spreadsheetId = mustEnv("GSHEET_ID");
+    const tabName = mustEnv("GOOGLE_SHEET_TAB"); // subs
+
+    const sheets = await getSheetsClient();
+
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: `${tabName}!A2:E`,
+    });
+
+    const rows = res.data.values || [];
+    if (rows.length === 0) {
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({ ok: true, sent: 0, failed: 0, remaining: 0, note: "Belum ada subscriber di sheet." }),
+      };
+    }
+
+    let sent = 0;
+    let failed = 0;
+
+    // kita catat row mana yang mati, lalu update statusnya di sheet
+    const deadRowUpdates = [];
+
+    for (let idx = 0; idx < rows.length; idx++) {
+      const row = rows[idx];
+      const endpoint = row?.[0];
+      const subJson = row?.[1];
+      const status = String(row?.[4] || "").toLowerCase();
+
+      // skip yang dead
+      if (status === "dead") continue;
+      if (!endpoint || !subJson) continue;
+
+      const sub = safeJsonParse(subJson, null);
+      if (!sub?.endpoint) continue;
+
       try {
-        await webpush.sendNotification(item.sub, payload);
-        ok++;
-        await touchActive(sheets, spreadsheetId, tab, item.rowIndex);
+        await webpush.sendNotification(sub, payload);
+        sent++;
       } catch (e) {
-        fail++;
+        failed++;
         const code = e?.statusCode;
 
-        // 410/404 = subscription mati
+        // 410/404 = subscription mati → tandai dead di sheet
         if (code === 410 || code === 404) {
-          dead++;
-          await markDead(sheets, spreadsheetId, tab, item.rowIndex);
+          const rowNumber = idx + 2; // karena mulai dari A2
+          deadRowUpdates.push(rowNumber);
         }
       }
     }
 
-    // remaining = jumlah aktif setelah update
-    const subsAfter = await loadActiveSubs(sheets, spreadsheetId, tab);
+    // update dead rows (set updated_at + status=dead)
+    if (deadRowUpdates.length > 0) {
+      const t = nowISO();
+      for (const rowNumber of deadRowUpdates) {
+        // kolom D (updated_at) dan E (status)
+        await sheets.spreadsheets.values.update({
+          spreadsheetId,
+          range: `${tabName}!D${rowNumber}:E${rowNumber}`,
+          valueInputOption: "RAW",
+          requestBody: { values: [[t, "dead"]] },
+        });
+      }
+    }
+
+    // hitung remaining (aktif)
+    const afterRes = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: `${tabName}!E2:E`,
+    });
+    const statuses = afterRes.data.values || [];
+    const remaining = statuses.filter((s) => String(s?.[0] || "").toLowerCase() !== "dead").length;
 
     return {
       statusCode: 200,
-      headers: corsHeaders,
-      body: JSON.stringify({
-        ok: true,
-        sent: ok,
-        failed: fail,
-        dead,
-        remaining: subsAfter.length,
-      }),
+      headers,
+      body: JSON.stringify({ ok: true, sent, failed, remaining }),
     };
   } catch (err) {
     return {
       statusCode: 500,
-      headers: corsHeaders,
-      body: JSON.stringify({
-        ok: false,
-        error: "Gagal kirim notif",
-        detail: String(err?.message || err),
-      }),
+      headers,
+      body: JSON.stringify({ ok: false, error: String(err?.message || err) }),
     };
   }
 };

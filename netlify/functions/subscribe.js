@@ -1,13 +1,19 @@
 // netlify/functions/subscribe.js
 const { google } = require("googleapis");
 
-function getHeader(headers, name) {
-  if (!headers) return "";
-  const target = name.toLowerCase();
-  for (const k of Object.keys(headers)) {
-    if (String(k).toLowerCase() === target) return headers[k];
-  }
-  return "";
+function cors() {
+  return {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Admin-Token",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Content-Type": "application/json",
+  };
+}
+
+function mustEnv(name) {
+  const v = process.env[name];
+  if (!v) throw new Error(`ENV ${name} belum diset di Netlify`);
+  return v;
 }
 
 function safeJsonParse(str, fallback) {
@@ -18,191 +24,147 @@ function safeJsonParse(str, fallback) {
   }
 }
 
-function getEnv(name, fallback = "") {
-  return String(process.env[name] || fallback).trim();
-}
-
 function getGoogleAuth() {
-  const clientEmail =
-    getEnv("GOOGLE_SERVICE_ACCOUNT_EMAIL") ||
-    getEnv("GOOGLE_CLIENT_EMAIL") ||
-    getEnv("GOOGLE_SERVICE_ACCOUNT") ||
-    "";
-
-  const privateKeyRaw =
-    getEnv("GOOGLE_PRIVATE_KEY") ||
-    getEnv("GOOGLE_PRIVATEKEY") ||
-    "";
-
-  // penting: Netlify biasanya simpan newline sebagai \n
-  const privateKey = privateKeyRaw.replace(/\\n/g, "\n");
-
-  if (!clientEmail || !privateKey) {
-    throw new Error("Google service account env belum lengkap.");
-  }
+  const email = mustEnv("GOOGLE_SERVICE_ACCOUNT_EMAIL");
+  const key = mustEnv("GOOGLE_PRIVATE_KEY").replace(/\\n/g, "\n");
 
   return new google.auth.JWT({
-    email: clientEmail,
-    key: privateKey,
+    email,
+    key,
     scopes: ["https://www.googleapis.com/auth/spreadsheets"],
   });
 }
 
-async function ensureHeaderRow(sheets, spreadsheetId, tab) {
-  // Pastikan header ada (kalau sheet masih kosong)
-  const res = await sheets.spreadsheets.values.get({
-    spreadsheetId,
-    range: `${tab}!A1:E1`,
-  });
-
-  const row = res.data.values?.[0] || [];
-  const want = ["endpoint", "subscription_json", "created_at", "updated_at", "status"];
-
-  const same =
-    row.length >= want.length && want.every((h, i) => String(row[i] || "").trim() === h);
-
-  if (!same) {
-    await sheets.spreadsheets.values.update({
-      spreadsheetId,
-      range: `${tab}!A1:E1`,
-      valueInputOption: "RAW",
-      requestBody: { values: [want] },
-    });
-  }
+async function getSheetsClient() {
+  const auth = getGoogleAuth();
+  await auth.authorize();
+  return google.sheets({ version: "v4", auth });
 }
 
-async function findRowByEndpoint(sheets, spreadsheetId, tab, endpoint) {
-  // ambil semua endpoint kolom A
+function nowISO() {
+  return new Date().toISOString();
+}
+
+async function findRowByEndpoint(sheets, spreadsheetId, tabName, endpoint) {
+  // baca kolom A (endpoint)
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId,
-    range: `${tab}!A:A`,
+    range: `${tabName}!A:A`,
   });
 
   const values = res.data.values || [];
-  // values[0] adalah header
+  // values[0] biasanya header. data mulai dari index 1.
   for (let i = 1; i < values.length; i++) {
-    if (values[i]?.[0] === endpoint) {
-      // row index di sheet (1-based)
-      return i + 1;
+    const cell = values[i]?.[0];
+    if (cell === endpoint) {
+      return i + 1; // karena sheet row dimulai dari 1
     }
   }
   return null;
 }
 
 exports.handler = async (event) => {
-  const corsHeaders = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Admin-Token",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Content-Type": "application/json",
-  };
-
-  if (event.httpMethod === "OPTIONS") {
-    return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ ok: true }) };
-  }
-
-  if (event.httpMethod !== "POST") {
-    return {
-      statusCode: 405,
-      headers: corsHeaders,
-      body: JSON.stringify({ ok: false, error: "Method Not Allowed" }),
-    };
-  }
-
-  const spreadsheetId = getEnv("GSHEET_ID");
-  const tab = getEnv("GOOGLE_SHEET_TAB", "subs");
-
-  if (!spreadsheetId) {
-    return {
-      statusCode: 500,
-      headers: corsHeaders,
-      body: JSON.stringify({ ok: false, error: "GSHEET_ID belum diset di Netlify." }),
-    };
-  }
-
-  const sub = safeJsonParse(event.body || "{}", null);
-
-  // validasi minimal
-  if (!sub?.endpoint || !sub?.keys?.p256dh || !sub?.keys?.auth) {
-    return {
-      statusCode: 400,
-      headers: corsHeaders,
-      body: JSON.stringify({
-        ok: false,
-        error: "Subscription tidak valid (butuh endpoint + keys.p256dh + keys.auth).",
-      }),
-    };
-  }
+  const headers = cors();
 
   try {
-    const auth = getGoogleAuth();
-    const sheets = google.sheets({ version: "v4", auth });
+    if (event.httpMethod === "OPTIONS") {
+      return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
+    }
 
-    await ensureHeaderRow(sheets, spreadsheetId, tab);
+    if (event.httpMethod !== "POST") {
+      return {
+        statusCode: 405,
+        headers,
+        body: JSON.stringify({ ok: false, error: "Method Not Allowed" }),
+      };
+    }
 
-    const endpoint = sub.endpoint;
-    const now = new Date().toISOString();
-    const subJson = JSON.stringify(sub);
+    const sub = safeJsonParse(event.body || "{}", null);
 
-    const foundRow = await findRowByEndpoint(sheets, spreadsheetId, tab, endpoint);
+    // validasi minimal push subscription
+    if (!sub?.endpoint || !sub?.keys?.p256dh || !sub?.keys?.auth) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({
+          ok: false,
+          error: "Subscription tidak valid (butuh endpoint + keys.p256dh + keys.auth)",
+        }),
+      };
+    }
 
-    if (foundRow) {
-      // update existing
+    const spreadsheetId = mustEnv("GSHEET_ID");
+    const tabName = mustEnv("GOOGLE_SHEET_TAB"); // "subs"
+
+    const sheets = await getSheetsClient();
+
+    // Pastikan header ada (kalau sheet masih kosong)
+    // Header: endpoint | subscription_json | created_at | updated_at | status
+    const headerCheck = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: `${tabName}!A1:E1`,
+    });
+
+    const headerRow = (headerCheck.data.values && headerCheck.data.values[0]) || [];
+    if (headerRow.length === 0) {
       await sheets.spreadsheets.values.update({
         spreadsheetId,
-        range: `${tab}!B${foundRow}:E${foundRow}`,
+        range: `${tabName}!A1:E1`,
         valueInputOption: "RAW",
         requestBody: {
-          values: [[subJson, "", now, "active"]], // B=subjson, C=created_at (biarin kosong), D=updated_at, E=status
+          values: [["endpoint", "subscription_json", "created_at", "updated_at", "status"]],
+        },
+      });
+    }
+
+    const endpoint = sub.endpoint;
+    const subJson = JSON.stringify(sub);
+    const timeNow = nowISO();
+
+    const existingRow = await findRowByEndpoint(sheets, spreadsheetId, tabName, endpoint);
+
+    if (existingRow) {
+      // update row
+      await sheets.spreadsheets.values.update({
+        spreadsheetId,
+        range: `${tabName}!A${existingRow}:E${existingRow}`,
+        valueInputOption: "RAW",
+        requestBody: {
+          values: [[endpoint, subJson, "", timeNow, "active"]],
         },
       });
 
-      // kalau created_at kosong, isi sekali
-      const createdRes = await sheets.spreadsheets.values.get({
-        spreadsheetId,
-        range: `${tab}!C${foundRow}:C${foundRow}`,
-      });
-      const createdVal = createdRes.data.values?.[0]?.[0] || "";
-      if (!createdVal) {
-        await sheets.spreadsheets.values.update({
-          spreadsheetId,
-          range: `${tab}!C${foundRow}:C${foundRow}`,
-          valueInputOption: "RAW",
-          requestBody: { values: [[now]] },
-        });
-      }
-
+      // kalau created_at kosong, biarin. (opsional: kamu bisa baca row dulu kalau mau rapih)
       return {
         statusCode: 200,
-        headers: corsHeaders,
+        headers,
         body: JSON.stringify({ ok: true, added: false, updated: true }),
       };
     }
 
-    // insert new (append)
+    // append baru
     await sheets.spreadsheets.values.append({
       spreadsheetId,
-      range: `${tab}!A:E`,
+      range: `${tabName}!A:E`,
       valueInputOption: "RAW",
       insertDataOption: "INSERT_ROWS",
       requestBody: {
-        values: [[endpoint, subJson, now, now, "active"]],
+        values: [[endpoint, subJson, timeNow, timeNow, "active"]],
       },
     });
 
     return {
       statusCode: 200,
-      headers: corsHeaders,
+      headers,
       body: JSON.stringify({ ok: true, added: true, updated: false }),
     };
   } catch (err) {
     return {
       statusCode: 500,
-      headers: corsHeaders,
+      headers,
       body: JSON.stringify({
         ok: false,
-        error: "Gagal simpan subscribe ke Google Sheet",
-        detail: String(err?.message || err),
+        error: String(err?.message || err),
       }),
     };
   }
