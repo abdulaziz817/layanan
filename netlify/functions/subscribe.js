@@ -1,10 +1,10 @@
 // netlify/functions/subscribe.js
-const fs = require("fs");
-const path = require("path");
+// ✅ Simpan subscription ke Google Sheet (tab: subs)
+// ✅ Anti dobel (cek endpoint)
+// ✅ CORS aman
+// ✅ Format GOOGLE_PRIVATE_KEY auto handle \n
 
-// ⚠️ NOTE: /tmp di Netlify itu sementara (bisa reset kapan aja).
-// Tapi ini cukup untuk testing & jalanin flow end-to-end.
-const SUBS_PATH = path.join("/tmp", "_subs.json");
+const { google } = require("googleapis");
 
 function safeJsonParse(str, fallback) {
   try {
@@ -14,49 +14,85 @@ function safeJsonParse(str, fallback) {
   }
 }
 
-function readSubs() {
-  try {
-    if (!fs.existsSync(SUBS_PATH)) return [];
-    const raw = fs.readFileSync(SUBS_PATH, "utf8");
-    const data = safeJsonParse(raw, []);
-    return Array.isArray(data) ? data : [];
-  } catch {
-    return [];
-  }
+function getEnv(name, fallback = "") {
+  return process.env[name] || fallback;
 }
 
-function writeSubs(subs) {
-  try {
-    fs.writeFileSync(SUBS_PATH, JSON.stringify(subs, null, 2), "utf8");
-  } catch {
-    // jangan crash
-  }
+function getPrivateKey() {
+  const raw = getEnv("GOOGLE_PRIVATE_KEY", "");
+  // Netlify biasanya nyimpan newline sebagai \n
+  return raw.includes("\\n") ? raw.replace(/\\n/g, "\n") : raw;
 }
 
-function sameSub(a, b) {
-  return a?.endpoint && b?.endpoint && a.endpoint === b.endpoint;
+async function getSheetsClient() {
+  const clientEmail =
+    getEnv("GOOGLE_SERVICE_ACCOUNT_EMAIL") || getEnv("GOOGLE_CLIENT_EMAIL"); // jaga-jaga nama env beda
+  const privateKey = getPrivateKey();
+
+  if (!clientEmail || !privateKey) {
+    throw new Error("ENV Google Service Account belum lengkap (email/private key).");
+  }
+
+  const auth = new google.auth.GoogleAuth({
+    credentials: { client_email: clientEmail, private_key: privateKey },
+    scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+  });
+
+  return google.sheets({ version: "v4", auth });
+}
+
+async function readAllSubs(sheets, spreadsheetId, tabName) {
+  // Ambil kolom A:B -> [endpoint, subscription_json]
+  const res = await sheets.spreadsheets.values.get({
+    spreadsheetId,
+    range: `${tabName}!A:B`,
+  });
+
+  const rows = res.data.values || [];
+  // skip header kalau ada
+  const data = rows.filter((r, idx) => {
+    if (idx === 0 && (r?.[0] || "").toLowerCase() === "endpoint") return false;
+    return true;
+  });
+
+  return data; // array of [endpoint, jsonString]
+}
+
+async function appendSub(sheets, spreadsheetId, tabName, endpoint, subJson) {
+  await sheets.spreadsheets.values.append({
+    spreadsheetId,
+    range: `${tabName}!A:B`,
+    valueInputOption: "RAW",
+    requestBody: {
+      values: [[endpoint, subJson]],
+    },
+  });
 }
 
 exports.handler = async (event) => {
   const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "Content-Type, X-Admin-Token",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Admin-Token",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Content-Type": "application/json",
   };
 
-  // preflight
+  // Preflight
   if (event.httpMethod === "OPTIONS") {
     return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ ok: true }) };
   }
 
   if (event.httpMethod !== "POST") {
-    return { statusCode: 405, headers: corsHeaders, body: JSON.stringify({ ok: false, error: "Method Not Allowed" }) };
+    return {
+      statusCode: 405,
+      headers: corsHeaders,
+      body: JSON.stringify({ ok: false, error: "Method Not Allowed" }),
+    };
   }
 
   const sub = safeJsonParse(event.body || "{}", null);
 
-  // validasi minimal subscription
+  // Validasi minimal subscription Web Push
   if (!sub?.endpoint || !sub?.keys?.p256dh || !sub?.keys?.auth) {
     return {
       statusCode: 400,
@@ -68,17 +104,48 @@ exports.handler = async (event) => {
     };
   }
 
-  const subs = readSubs();
+  const SPREADSHEET_ID = getEnv("GSHEET_ID"); // kamu sudah punya ini
+  const TAB_NAME = getEnv("GOOGLE_SHEET_TAB", "subs"); // default subs
 
-  // jangan dobel
-  const exists = subs.some((s) => sameSub(s, sub));
-  const next = exists ? subs : [sub, ...subs];
+  if (!SPREADSHEET_ID) {
+    return {
+      statusCode: 500,
+      headers: corsHeaders,
+      body: JSON.stringify({ ok: false, error: "ENV GSHEET_ID belum diisi." }),
+    };
+  }
 
-  writeSubs(next);
+  try {
+    const sheets = await getSheetsClient();
 
-  return {
-    statusCode: 200,
-    headers: corsHeaders,
-    body: JSON.stringify({ ok: true, total: next.length, added: !exists }),
-  };
+    // cek sudah ada belum (anti dobel)
+    const rows = await readAllSubs(sheets, SPREADSHEET_ID, TAB_NAME);
+    const exists = rows.some((r) => r?.[0] === sub.endpoint);
+
+    if (exists) {
+      return {
+        statusCode: 200,
+        headers: corsHeaders,
+        body: JSON.stringify({ ok: true, added: false, note: "Sudah subscribe (endpoint sudah ada)." }),
+      };
+    }
+
+    await appendSub(sheets, SPREADSHEET_ID, TAB_NAME, sub.endpoint, JSON.stringify(sub));
+
+    return {
+      statusCode: 200,
+      headers: corsHeaders,
+      body: JSON.stringify({ ok: true, added: true }),
+    };
+  } catch (err) {
+    return {
+      statusCode: 500,
+      headers: corsHeaders,
+      body: JSON.stringify({
+        ok: false,
+        error: "Gagal simpan subscriber ke Google Sheet",
+        detail: String(err?.message || err),
+      }),
+    };
+  }
 };
