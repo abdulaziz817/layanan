@@ -5,8 +5,7 @@ function labelType(t) {
   if (t === "premium_app") return "Aplikasi Premium";
   if (t === "design") return "Desain";
   if (t === "web_dev") return "Web Developer";
-  if (!t) return "Semua";
-  return t;
+  return t || "-";
 }
 
 export default function Promo() {
@@ -14,7 +13,7 @@ export default function Promo() {
   const [me, setMe] = useState(null);
 
   const [judul, setJudul] = useState("Promo Ramadhan");
-  const [kategori, setKategori] = useState(""); // kosong = semua
+  const [kategori, setKategori] = useState("");
   const [text, setText] = useState("");
   const [count, setCount] = useState(0);
 
@@ -26,23 +25,21 @@ export default function Promo() {
     [me]
   );
 
-  async function loadMe() {
-    const rMe = await fetch("/api/auth/me");
-    const jMe = await rMe.json();
-    if (!jMe.loggedIn) return router.replace("/admin/login");
-    setMe(jMe);
-
-    // kalau bukan admin, kategori otomatis sesuai role
-    const st = jMe.user?.supplier_type;
-    if (String(st).toUpperCase() !== "ALL") {
-      setKategori(st);
-    }
-  }
-
   useEffect(() => {
-    loadMe();
-    // eslint-disable-next-line
-  }, []);
+    async function init() {
+      const r = await fetch("/api/auth/me");
+      const j = await r.json();
+      if (!j.loggedIn) return router.replace("/admin/login");
+
+      setMe(j);
+
+      const st = j.user?.supplier_type;
+      if (String(st).toUpperCase() !== "ALL") {
+        setKategori(st);
+      }
+    }
+    init();
+  }, [router]);
 
   async function generate() {
     setErr("");
@@ -50,12 +47,11 @@ export default function Promo() {
     try {
       const qs = new URLSearchParams();
       if (judul) qs.set("title", judul);
-      // kategori hanya dipakai admin (atau role spesifik sudah fixed)
       if (kategori) qs.set("type", kategori);
 
       const r = await fetch(`/api/promo?${qs.toString()}`);
       const j = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error(j.error || "Gagal generate promo");
+      if (!r.ok) throw new Error(j.error || "Gagal generate");
 
       setText(j.text || "");
       setCount(j.count || 0);
@@ -67,12 +63,8 @@ export default function Promo() {
   }
 
   async function copy() {
-    try {
-      await navigator.clipboard.writeText(text);
-      alert("Berhasil di-copy!");
-    } catch {
-      alert("Gagal copy (browser tidak support).");
-    }
+    await navigator.clipboard.writeText(text || "");
+    alert("Berhasil di-copy!");
   }
 
   function downloadTxt() {
@@ -80,168 +72,243 @@ export default function Promo() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${(judul || "promo").replaceAll(" ", "_")}.txt`;
+    a.download = `${judul.replaceAll(" ", "_")}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   }
 
   return (
-    <div style={{ maxWidth: 1100, margin: "24px auto", padding: "0 12px", fontFamily: "system-ui, Arial" }}>
+    <div className="page">
       {/* Header */}
-      <div style={{
-        display: "flex", justifyContent: "space-between", alignItems: "center",
-        padding: "12px 0", borderBottom: "1px solid #eee"
-      }}>
+      <div className="header">
         <div>
-          <div style={{ fontSize: 22, fontWeight: 700 }}>Generator Promo</div>
-          <div style={{ opacity: 0.7, fontSize: 13 }}>
-            Buat teks promo otomatis dari Google Sheets • Total produk terpilih: <b>{count}</b>
+          <div className="title">Generator Promo</div>
+          <div className="sub">
+            Buat teks promo otomatis dari Google Sheets • Total produk: <b>{count}</b>
           </div>
         </div>
-        <button onClick={() => router.push("/admin/products")} style={btnOutline()}>
+
+        <button className="btnOutline" onClick={() => router.push("/admin/products")}>
           Kembali
         </button>
       </div>
 
-      {/* Error */}
-      {err && (
-        <div style={{
-          marginTop: 12, padding: 12, borderRadius: 10,
-          background: "#fff4f4", border: "1px solid #ffd0d0", color: "#8a1f1f"
-        }}>
-          {err}
-        </div>
-      )}
+      {err && <div className="errorBox">{err}</div>}
 
-      {/* Controls */}
-      <div style={{
-        marginTop: 16, background: "white", border: "1px solid #eee",
-        borderRadius: 14, padding: 16, boxShadow: "0 1px 8px rgba(0,0,0,0.04)"
-      }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 260px", gap: 12 }}>
+      {/* Card */}
+      <div className="card">
+        <div className="grid2">
           <div>
-            <div style={label()}>Judul Promo</div>
+            <div className="label">Judul Promo</div>
             <input
               value={judul}
               onChange={(e) => setJudul(e.target.value)}
+              className="input"
               placeholder="Contoh: Promo Ramadhan"
-              style={input()}
             />
           </div>
 
           <div>
-            <div style={label()}>Kategori</div>
+            <div className="label">Kategori</div>
             <select
               value={kategori}
               onChange={(e) => setKategori(e.target.value)}
               disabled={!isAdmin}
-              style={input()}
+              className="input"
             >
               <option value="">{isAdmin ? "Semua Kategori" : labelType(kategori)}</option>
               <option value="premium_app">Aplikasi Premium</option>
               <option value="design">Desain</option>
               <option value="web_dev">Web Developer</option>
             </select>
+
             {!isAdmin && (
-              <div style={{ fontSize: 12, opacity: 0.65, marginTop: 6 }}>
+              <div className="note">
                 *Kategori dikunci sesuai role kamu.
               </div>
             )}
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: 10, marginTop: 14, flexWrap: "wrap" }}>
-          <button onClick={generate} disabled={loading} style={btnPrimary()}>
+        <div className="btnRow">
+          <button className="btnPrimary" onClick={generate} disabled={loading}>
             {loading ? "Memproses..." : "Generate Promo"}
           </button>
-          <button onClick={copy} disabled={!text} style={btn()}>
+          <button className="btn" onClick={copy} disabled={!text}>
             Copy
           </button>
-          <button onClick={downloadTxt} disabled={!text} style={btn()}>
+          <button className="btn" onClick={downloadTxt} disabled={!text}>
             Download .txt
           </button>
         </div>
       </div>
 
-      {/* Text area */}
-      <div style={{
-        marginTop: 14, background: "white", border: "1px solid #eee",
-        borderRadius: 14, overflow: "hidden"
-      }}>
-        <div style={{
-          padding: "10px 12px", borderBottom: "1px solid #eee",
-          background: "#fafafa", display: "flex", justifyContent: "space-between", alignItems: "center"
-        }}>
-          <div style={{ fontWeight: 700 }}>Hasil Promo</div>
-          <div style={{ fontSize: 12, opacity: 0.75 }}>
-            Tips: klik Generate dulu, lalu Copy
-          </div>
+      {/* Result */}
+      <div className="card">
+        <div className="resultHead">
+          <div className="labelBig">Hasil Promo</div>
+          <div className="muted">Tips: klik Generate dulu, lalu Copy</div>
         </div>
 
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Klik tombol 'Generate Promo' untuk membuat teks..."
-          rows={22}
-          style={{
-            width: "100%",
-            padding: 14,
-            border: "none",
-            outline: "none",
-            fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-            fontSize: 13,
-            lineHeight: 1.5,
-            resize: "vertical",
-          }}
+          className="textarea"
+          rows={18}
+          placeholder="Klik Generate Promo..."
         />
       </div>
 
-      <div style={{ height: 30 }} />
+      <style jsx>{`
+        .page {
+          max-width: 1000px;
+          margin: 24px auto;
+          padding: 0 14px;
+          font-family: system-ui, Arial;
+        }
+
+        .header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 12px;
+          flex-wrap: wrap;
+          border-bottom: 1px solid #eee;
+          padding-bottom: 12px;
+        }
+
+        .title {
+          font-size: 22px;
+          font-weight: 800;
+        }
+
+        .sub {
+          font-size: 13px;
+          opacity: 0.75;
+          margin-top: 4px;
+        }
+
+        .card {
+          margin-top: 16px;
+          background: white;
+          border: 1px solid #eee;
+          border-radius: 14px;
+          padding: 16px;
+          box-shadow: 0 1px 8px rgba(0,0,0,0.04);
+        }
+
+        .grid2 {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 14px;
+        }
+
+        .label {
+          font-size: 12px;
+          font-weight: 800;
+          margin-bottom: 6px;
+        }
+
+        .labelBig {
+          font-size: 15px;
+          font-weight: 800;
+        }
+
+        .input {
+          width: 100%;
+          padding: 10px 12px;
+          border: 1px solid #e6e6e6;
+          border-radius: 10px;
+          font-size: 14px;
+        }
+
+        .textarea {
+          width: 100%;
+          margin-top: 12px;
+          padding: 12px;
+          border-radius: 10px;
+          border: 1px solid #e6e6e6;
+          font-family: monospace;
+          resize: vertical;
+        }
+
+        .btnRow {
+          display: flex;
+          gap: 10px;
+          flex-wrap: wrap;
+          margin-top: 16px;
+        }
+
+        .btn {
+          padding: 10px 14px;
+          border-radius: 10px;
+          border: 1px solid #e6e6e6;
+          background: white;
+          cursor: pointer;
+          font-weight: 600;
+        }
+
+        .btnOutline {
+          padding: 10px 14px;
+          border-radius: 10px;
+          border: 1px solid #e6e6e6;
+          background: white;
+          cursor: pointer;
+        }
+
+        .btnPrimary {
+          padding: 10px 14px;
+          border-radius: 10px;
+          border: none;
+          background: #111;
+          color: white;
+          cursor: pointer;
+          font-weight: 700;
+        }
+
+        .resultHead {
+          display: flex;
+          justify-content: space-between;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+
+        .note {
+          font-size: 12px;
+          opacity: 0.6;
+          margin-top: 6px;
+        }
+
+        .muted {
+          font-size: 12px;
+          opacity: 0.7;
+        }
+
+        .errorBox {
+          margin-top: 12px;
+          padding: 12px;
+          border-radius: 10px;
+          background: #fff4f4;
+          border: 1px solid #ffd0d0;
+          color: #8a1f1f;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+          .grid2 {
+            grid-template-columns: 1fr;
+          }
+
+          .btnRow button {
+            width: 100%;
+          }
+
+          .header {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+        }
+      `}</style>
     </div>
   );
-}
-
-/* styles */
-function label() {
-  return { fontSize: 12, fontWeight: 700, marginBottom: 6, opacity: 0.8 };
-}
-function input() {
-  return {
-    width: "100%",
-    padding: "10px 12px",
-    border: "1px solid #e6e6e6",
-    borderRadius: 10,
-    outline: "none",
-  };
-}
-function btnPrimary() {
-  return {
-    padding: "11px 14px",
-    borderRadius: 10,
-    border: "none",
-    background: "#111",
-    color: "white",
-    cursor: "pointer",
-    fontWeight: 700,
-  };
-}
-function btn() {
-  return {
-    padding: "11px 14px",
-    borderRadius: 10,
-    border: "1px solid #e6e6e6",
-    background: "white",
-    cursor: "pointer",
-    fontWeight: 600,
-  };
-}
-function btnOutline() {
-  return {
-    padding: "10px 12px",
-    borderRadius: 10,
-    border: "1px solid #e6e6e6",
-    background: "white",
-    cursor: "pointer",
-    fontWeight: 600,
-  };
 }

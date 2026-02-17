@@ -17,6 +17,32 @@ const empty = {
   active: true,
 };
 
+/* =======================
+   Rupiah helpers
+======================= */
+function digitsOnly(s) {
+  return String(s || "").replace(/[^\d]/g, "");
+}
+
+function formatRupiahFromDigits(digits) {
+  const n = digitsOnly(digits);
+  if (!n) return "";
+  return "Rp " + Number(n).toLocaleString("id-ID");
+}
+
+function toNumberFromRupiah(textOrDigits) {
+  const n = digitsOnly(textOrDigits);
+  return n ? Number(n) : 0;
+}
+
+function rupiahFromNumber(n) {
+  const num = Number(n || 0);
+  return "Rp " + num.toLocaleString("id-ID");
+}
+
+/* =======================
+   Labels / bool
+======================= */
 function labelType(t) {
   if (t === "premium_app") return "Aplikasi Premium";
   if (t === "design") return "Desain";
@@ -66,6 +92,7 @@ export default function Products() {
       setLoading(false);
       return;
     }
+
     setData(j.data || []);
     setLoading(false);
   }
@@ -74,6 +101,20 @@ export default function Products() {
     load();
     // eslint-disable-next-line
   }, []);
+
+  // ✅ auto edit dari query: /admin/products?edit=prd-xxx
+  useEffect(() => {
+    const id = router.query?.edit;
+    if (!id) return;
+    if (!data?.length) return;
+
+    const p = data.find((x) => x.id === id);
+    if (p) editRow(p);
+
+    // bersihin query biar ga kebuka terus
+    router.replace("/admin/products", undefined, { shallow: true });
+    // eslint-disable-next-line
+  }, [router.query?.edit, data]);
 
   function set(k, v) {
     setForm((f) => ({ ...f, [k]: v }));
@@ -85,7 +126,7 @@ export default function Products() {
       supplier_type:
         String(me?.user?.supplier_type || "").toUpperCase() === "ALL"
           ? "premium_app"
-          : (me?.user?.supplier_type || "premium_app"),
+          : me?.user?.supplier_type || "premium_app",
     }));
     setMode("create");
   }
@@ -105,16 +146,24 @@ export default function Products() {
       supplier_id: form.supplier_id || "",
       supplier_type: form.supplier_type,
       title: form.title.trim(),
-      price_normal: Number(form.price_normal || 0),
-      price_promo: form.price_promo === "" ? "" : Number(form.price_promo),
+
+      // ✅ kirim angka murni
+      price_normal: toNumberFromRupiah(form.price_normal),
+      price_promo: form.price_promo === "" ? "" : toNumberFromRupiah(form.price_promo),
+
       promo_active: !!form.promo_active,
-      stock_available: Number(form.stock_available || 0),
-      stock_sold: Number(form.stock_sold || 0),
+      stock_available: Math.max(0, Number(form.stock_available || 0)),
+      stock_sold: Math.max(0, Number(form.stock_sold || 0)),
       code: form.code.trim(),
       desc: form.desc.trim(),
       best_seller: !!form.best_seller,
       active: !!form.active,
     };
+
+    // validasi harga biar ga 0 semua
+    if (payload.price_normal <= 0) {
+      return setErr("Harga normal wajib lebih dari 0.");
+    }
 
     try {
       setLoading(true);
@@ -158,13 +207,36 @@ export default function Products() {
     }
   }
 
-  async function remove(id) {
-    if (!confirm("Yakin hapus produk ini? (Produk akan disembunyikan)")) return;
-    const r = await fetch(`/api/products/${id}`, { method: "DELETE" });
-    const j = await r.json().catch(() => ({}));
-    if (!r.ok) return alert(j.error || "Gagal hapus");
-    load();
+async function remove(id) {
+  if (!confirm("Yakin hapus produk ini? (Produk akan disembunyikan)")) return;
+
+  try {
+    const r = await fetch(`/api/products/${encodeURIComponent(id)}`, {
+      method: "DELETE",
+      credentials: "include", // ✅ penting biar cookie login ikut
+    });
+
+    const text = await r.text(); // ✅ baca mentah dulu
+    let j = {};
+    try { j = JSON.parse(text); } catch {}
+
+    if (!r.ok) {
+      alert(
+        `Gagal hapus!\n\nStatus: ${r.status}\nResponse: ${
+          j?.error || text || "(kosong)"
+        }`
+      );
+      return;
+    }
+
+    alert("Berhasil hapus (disembunyikan).");
+    await load();
+  } catch (e) {
+    alert("Error client: " + e.message);
   }
+}
+
+
 
   function editRow(p) {
     setMode("edit");
@@ -173,8 +245,11 @@ export default function Products() {
       supplier_id: p.supplier_id || "",
       supplier_type: p.supplier_type || "premium_app",
       title: p.title || "",
-      price_normal: String(p.price_normal ?? ""),
-      price_promo: p.price_promo === "" ? "" : String(p.price_promo ?? ""),
+
+      // ✅ simpan digit saja
+      price_normal: digitsOnly(String(p.price_normal ?? "")),
+      price_promo: p.price_promo === "" ? "" : digitsOnly(String(p.price_promo ?? "")),
+
       promo_active: toBool(p.promo_active),
       stock_available: String(p.stock_available ?? ""),
       stock_sold: String(p.stock_sold ?? ""),
@@ -231,12 +306,12 @@ export default function Products() {
               {mode === "create" ? "Tambah Produk" : "Edit Produk"}
             </div>
             <div className="cardHint">
-              Isi seperlunya. Angka tanpa titik/koma (contoh: 14000).
+              Ketik angka aja (contoh: 3000) nanti otomatis jadi Rp 3.000
             </div>
           </div>
 
           {mode === "edit" && (
-            <button className="btnOutline" onClick={resetForm}>
+            <button className="btnOutline" onClick={resetForm} type="button">
               Batal Edit
             </button>
           )}
@@ -300,9 +375,7 @@ export default function Products() {
               </select>
 
               {!isAdmin && (
-                <div className="note">
-                  *Kategori otomatis sesuai role kamu.
-                </div>
+                <div className="note">*Kategori otomatis sesuai role kamu.</div>
               )}
             </Field>
 
@@ -310,10 +383,10 @@ export default function Products() {
               <Field label="Harga Normal">
                 <input
                   inputMode="numeric"
-                  type="number"
-                  value={form.price_normal}
-                  onChange={(e) => set("price_normal", e.target.value)}
-                  placeholder="Contoh: 19000"
+                  type="text"
+                  value={formatRupiahFromDigits(form.price_normal)}
+                  onChange={(e) => set("price_normal", digitsOnly(e.target.value))}
+                  placeholder="Rp 19.000"
                   className="input"
                 />
               </Field>
@@ -321,10 +394,12 @@ export default function Products() {
               <Field label="Harga Promo (opsional)">
                 <input
                   inputMode="numeric"
-                  type="number"
-                  value={form.price_promo}
-                  onChange={(e) => set("price_promo", e.target.value)}
-                  placeholder="Contoh: 14000"
+                  type="text"
+                  value={
+                    form.price_promo === "" ? "" : formatRupiahFromDigits(form.price_promo)
+                  }
+                  onChange={(e) => set("price_promo", digitsOnly(e.target.value))}
+                  placeholder="Rp 14.000"
                   className="input"
                 />
               </Field>
@@ -333,6 +408,7 @@ export default function Products() {
             <div className="grid2">
               <Field label="Stok Tersedia">
                 <input
+                  min={0}
                   inputMode="numeric"
                   type="number"
                   value={form.stock_available}
@@ -344,6 +420,7 @@ export default function Products() {
 
               <Field label="Stok Terjual">
                 <input
+                  min={0}
                   inputMode="numeric"
                   type="number"
                   value={form.stock_sold}
@@ -412,7 +489,8 @@ export default function Products() {
             </thead>
             <tbody>
               {filtered.map((p, idx) => {
-                const total = Number(p.stock_available || 0) + Number(p.stock_sold || 0);
+                const total =
+                  Number(p.stock_available || 0) + Number(p.stock_sold || 0);
                 return (
                   <tr key={p.id} className={idx % 2 === 0 ? "row" : "row alt"}>
                     <td>
@@ -420,8 +498,10 @@ export default function Products() {
                       <div className="pDesc">{p.desc || "-"}</div>
                     </td>
                     <td>{labelType(p.supplier_type)}</td>
-                    <td>{p.price_normal}</td>
-                    <td>{p.price_promo === "" ? "-" : p.price_promo}</td>
+                    <td>{rupiahFromNumber(p.price_normal)}</td>
+                    <td>
+                      {p.price_promo === "" ? "-" : rupiahFromNumber(p.price_promo)}
+                    </td>
                     <td>{toBool(p.promo_active) ? "Ya" : "Tidak"}</td>
                     <td>
                       <div>Tersedia: {p.stock_available}</div>
@@ -433,7 +513,11 @@ export default function Products() {
                     </td>
                     <td>
                       <div className="rowActions">
-                        <button className="btnSmall" onClick={() => editRow(p)} type="button">
+                        <button
+                          className="btnSmall"
+                          onClick={() => editRow(p)}
+                          type="button"
+                        >
                           Edit
                         </button>
                         <button
@@ -478,11 +562,13 @@ export default function Products() {
               <div className="pGrid">
                 <div className="kv">
                   <div className="k">Harga Normal</div>
-                  <div className="v">{p.price_normal}</div>
+                  <div className="v">{rupiahFromNumber(p.price_normal)}</div>
                 </div>
                 <div className="kv">
                   <div className="k">Harga Promo</div>
-                  <div className="v">{p.price_promo === "" ? "-" : p.price_promo}</div>
+                  <div className="v">
+                    {p.price_promo === "" ? "-" : rupiahFromNumber(p.price_promo)}
+                  </div>
                 </div>
                 <div className="kv">
                   <div className="k">Promo Aktif</div>
@@ -497,7 +583,8 @@ export default function Products() {
                 <div className="kv">
                   <div className="k">Stok</div>
                   <div className="v">
-                    Tersedia: {p.stock_available} • Terjual: {p.stock_sold} • <span className="muted">Total: {total}</span>
+                    Tersedia: {p.stock_available} • Terjual: {p.stock_sold} •{" "}
+                    <span className="muted">Total: {total}</span>
                   </div>
                 </div>
               </div>
@@ -506,7 +593,11 @@ export default function Products() {
                 <button className="btnSmall" onClick={() => editRow(p)} type="button">
                   Edit
                 </button>
-                <button className="btnSmallDanger" onClick={() => remove(p.id)} type="button">
+                <button
+                  className="btnSmallDanger"
+                  onClick={() => remove(p.id)}
+                  type="button"
+                >
                   Hapus
                 </button>
               </div>
@@ -514,9 +605,7 @@ export default function Products() {
           );
         })}
 
-        {filtered.length === 0 && (
-          <div className="emptyCard">Tidak ada data.</div>
-        )}
+        {filtered.length === 0 && <div className="emptyCard">Tidak ada data.</div>}
       </div>
 
       <div style={{ height: 30 }} />
@@ -567,7 +656,7 @@ export default function Products() {
           border: 1px solid #eee;
           border-radius: 14px;
           padding: 16px;
-          box-shadow: 0 1px 8px rgba(0,0,0,0.04);
+          box-shadow: 0 1px 8px rgba(0, 0, 0, 0.04);
         }
         .cardHead {
           display: flex;
@@ -767,7 +856,7 @@ export default function Products() {
           border: 1px solid #eee;
           border-radius: 14px;
           padding: 14px;
-          box-shadow: 0 1px 8px rgba(0,0,0,0.04);
+          box-shadow: 0 1px 8px rgba(0, 0, 0, 0.04);
         }
         .pCardTop {
           display: flex;
@@ -835,10 +924,10 @@ export default function Products() {
           }
 
           .formGrid {
-            grid-template-columns: 1fr; /* ✅ jadi 1 kolom */
+            grid-template-columns: 1fr;
           }
           .grid2 {
-            grid-template-columns: 1fr; /* ✅ input 2 kolom jadi stack */
+            grid-template-columns: 1fr;
           }
           .search {
             max-width: 100%;
@@ -846,10 +935,10 @@ export default function Products() {
           }
 
           .desktopOnly {
-            display: none; /* ✅ tabel disembunyikan */
+            display: none;
           }
           .mobileOnly {
-            display: block; /* ✅ card ditampilkan */
+            display: block;
           }
         }
 
@@ -857,7 +946,8 @@ export default function Products() {
           .page {
             padding: 0 10px;
           }
-          .btn, .btnOutline {
+          .btn,
+          .btnOutline {
             width: 100%;
           }
         }
@@ -887,8 +977,14 @@ function Field({ label, children }) {
 
 function Checkbox({ checked, onChange, label }) {
   return (
-    <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
-      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+    <label
+      style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}
+    >
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+      />
       <span style={{ fontSize: 13 }}>{label}</span>
     </label>
   );

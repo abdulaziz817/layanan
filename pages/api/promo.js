@@ -1,78 +1,68 @@
 import { readRange } from "../../lib/googleSheets";
 import { requireAuth } from "../../lib/auth";
 
-function rupiah(n) {
-  const x = Number(n || 0);
-  return "Rp. " + x.toLocaleString("id-ID");
+function toBool(v) {
+  return String(v).toUpperCase() === "TRUE";
 }
 
-function mapRow(r) {
-  return {
-    id: r[0],
-    supplier_id: r[1],
-    supplier_type: r[2],
-    title: r[3],
-    price_normal: r[4],
-    price_promo: r[5],
-    promo_active: r[6],
-    stock_available: r[7],
-    stock_sold: r[8],
-    code: r[9],
-    desc: r[10],
-    best_seller: r[11],
-    active: r[12],
-  };
+function rupiah(num) {
+  const n = Number(num || 0);
+  return "Rp. " + n.toLocaleString("id-ID");
 }
 
 export default async function handler(req, res) {
-  const user = requireAuth(req);
-  if (!user) return res.status(401).json({ error: "Unauthorized" });
+  const user = requireAuth(req, res);
+  if (!user) return;
 
-  const { type, title } = req.query;
+  const title = String(req.query.title || "Promo");
+  let type = String(req.query.type || "");
 
-  const rows = await readRange("products!A2:N");
-  let data = rows.map(mapRow).filter(p => String(p.active).toUpperCase() !== "FALSE");
-
-  // role filter
+  // kalau bukan admin, kunci type
   if (String(user.supplier_type).toUpperCase() !== "ALL") {
-    data = data.filter(p => p.supplier_type === user.supplier_type);
+    type = user.supplier_type;
   }
 
-  // optional type filter (admin)
-  if (type) data = data.filter(p => p.supplier_type === type);
+  const values = await readRange("products!A1:N");
+  const rows = values.slice(1).map((r) => ({
+    id: r[0] ?? "",
+    supplier_id: r[1] ?? "",
+    supplier_type: r[2] ?? "",
+    title: r[3] ?? "",
+    price_normal: r[4] ?? 0,
+    price_promo: r[5] ?? "",
+    promo_active: r[6] ?? "FALSE",
+    stock_available: r[7] ?? 0,
+    stock_sold: r[8] ?? 0,
+    code: r[9] ?? "",
+    desc: r[10] ?? "",
+    best_seller: r[11] ?? "FALSE",
+    active: r[12] ?? "TRUE",
+  }));
 
-  const header = title ? String(title) : "Promo Ramadhan";
+  const list = rows.filter((p) => {
+    if (!toBool(p.active)) return false;
+    if (!toBool(p.promo_active)) return false;
+    if (type && p.supplier_type !== type) return false;
+    return true;
+  });
 
-  const text = [
-    header,
-    "",
-    ...data.map((p) => {
-      const best = String(p.best_seller).toUpperCase() === "TRUE";
-      const total = Number(p.stock_available || 0) + Number(p.stock_sold || 0);
+  const blocks = list.map((p) => {
+    const total = Number(p.stock_available || 0) + Number(p.stock_sold || 0);
+    const best = toBool(p.best_seller) ? " `BEST SELLER`🔥" : "";
 
-      const promoOn = String(p.promo_active).toUpperCase() === "TRUE";
-      const promoPrice = p.price_promo ? Number(p.price_promo) : null;
-      const normalPrice = Number(p.price_normal || 0);
+    return (
+`*╭────〔 ${p.title}${best} 〕─*
+*┊・Harga Promo:* ${rupiah(p.price_promo === "" ? p.price_normal : p.price_promo)}
+*┊・Harga Normal:* ${rupiah(p.price_normal)}
+*┊・Stok Tersedia:* ${p.stock_available}
+*┊・Stok Terjual:* ${p.stock_sold}
+*┊・Total Stok:* ${total}
+*┊・Kode:* ${p.code}
+*┊・Desk:* ${p.desc}
+*╰┈┈┈┈┈┈┈┈*`
+    );
+  });
 
-      const lines = [];
-      lines.push(`*╭────〔 ${p.title}${best ? " `BEST SELLER`🔥" : ""} 〕─*`);
-
-      if (promoOn && promoPrice != null && promoPrice > 0) {
-        lines.push(`*┊・Harga Promo:* ${rupiah(promoPrice)}`);
-        lines.push(`*┊・Harga Normal:* ${rupiah(normalPrice)}`);
-      } else {
-        lines.push(`*┊・Harga:* ${rupiah(normalPrice)}`);
-      }
-
-      lines.push(`*┊・Stok Tersedia:* ${p.stock_available ?? 0}`);
-      lines.push(`*┊・Stok Terjual:* ${p.stock_sold ?? 0}`);
-      lines.push(`*┊・Total Stok:* ${total}`);
-      lines.push(`*┊・Kode:* ${p.code || "-"}`);
-      lines.push(`*┊・Desk:* ${p.desc || "-"}`);
-      lines.push(`*╰┈┈┈┈┈┈┈┈*`);
-      return lines.join("\n");
-    }),
-  ].join("\n");
-
-  res.json({ ok: true, count: data.length, text });
+  const text = `${title}\n\n${blocks.join("\n")}`;
+  res.json({ ok: true, count: list.length, text });
 }
