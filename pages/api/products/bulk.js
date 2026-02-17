@@ -6,8 +6,8 @@ const empty = {
   supplier_id: "",
   supplier_type: "premium_app",
   title: "",
-  price_normal: "",
-  price_promo: "",
+  price_normal: "", // simpan DIGIT saja: "3000"
+  price_promo: "",  // simpan DIGIT saja: "2500" atau "" (kosong)
   promo_active: false,
   stock_available: "",
   stock_sold: "",
@@ -23,21 +23,90 @@ const empty = {
 function digitsOnly(s) {
   return String(s || "").replace(/[^\d]/g, "");
 }
-
 function formatRupiahFromDigits(digits) {
   const n = digitsOnly(digits);
   if (!n) return "";
   return "Rp " + Number(n).toLocaleString("id-ID");
 }
-
 function toNumberFromRupiah(textOrDigits) {
   const n = digitsOnly(textOrDigits);
   return n ? Number(n) : 0;
 }
-
 function rupiahFromNumber(n) {
   const num = Number(n || 0);
   return "Rp " + num.toLocaleString("id-ID");
+}
+
+/* =======================
+   Parse WA text -> products
+   Support format yang kamu kirim:
+   ╭────〔 TITLE 〕─
+   ┊・Harga: Rp. 14,000
+   ┊・Stok Tersedia: 0
+   ┊・Stok Terjual: 20
+   ┊・Total Stok: 20
+   ┊・Kode: net2u1b
+   ┊・Desk: ....
+   ╰┈┈┈┈┈┈┈┈
+======================= */
+function parseWhatsAppTextToProducts(rawText) {
+  const text = String(rawText || "").replace(/\r/g, "");
+  if (!text.trim()) return [];
+
+  // pisah blok pakai garis penutup yang biasanya ada: "╰"
+  // kalau tidak ada "╰", fallback split double newline
+  const blocks = text.includes("╰")
+    ? text.split(/╰[^\n]*\n?/g).map((s) => s.trim()).filter(Boolean)
+    : text.split(/\n\s*\n/g).map((s) => s.trim()).filter(Boolean);
+
+  const items = [];
+
+  for (const block of blocks) {
+    // title: ambil isi dalam 〔 ... 〕
+    const mTitle = block.match(/〔\s*([^\]]+?)\s*〕/);
+    const title = (mTitle?.[1] || "").trim();
+
+    // kode
+    const mCode = block.match(/Kode\s*:\s*([A-Za-z0-9_-]+)/i);
+    const code = (mCode?.[1] || "").trim();
+
+    // harga (bisa "Rp. 14,000" atau "Rp 14.000" atau "14000")
+    const mHarga = block.match(/Harga\s*:\s*([^\n]+)/i);
+    const priceDigits = digitsOnly(mHarga?.[1] || "");
+
+    // stok tersedia
+    const mAvail = block.match(/Stok\s*Tersedia\s*:\s*([^\n]+)/i);
+    const stockAvail = digitsOnly(mAvail?.[1] || "");
+
+    // stok terjual
+    const mSold = block.match(/Stok\s*Terjual\s*:\s*([^\n]+)/i);
+    const stockSold = digitsOnly(mSold?.[1] || "");
+
+    // deskripsi
+    const mDesc = block.match(/Desk\s*:\s*([^\n]+)/i);
+    const desc = (mDesc?.[1] || "").trim();
+
+    // best seller: cek kata "BEST SELLER"
+    const bestSeller = /best\s*seller/i.test(block);
+
+    // minimal harus ada title + code + harga biar dianggap produk
+    if (!title || !code || !priceDigits) continue;
+
+    items.push({
+      title,
+      code,
+      price_normal: priceDigits,
+      // promo kosong default, nanti bisa kamu set belakangan
+      price_promo: "",
+      promo_active: false,
+      stock_available: stockAvail ? String(Number(stockAvail)) : "0",
+      stock_sold: stockSold ? String(Number(stockSold)) : "0",
+      desc,
+      best_seller: !!bestSeller,
+    });
+  }
+
+  return items;
 }
 
 /* =======================
@@ -50,186 +119,9 @@ function labelType(t) {
   if (String(t).toUpperCase() === "ALL") return "Semua";
   return t || "-";
 }
-
 function toBool(v) {
   return String(v).toUpperCase() === "TRUE";
 }
-
-/* =======================
-   PARSER: Paste WA → products[]
-   Format yang didukung:
-   - Title: { NAMA PRODUK ... }
-   - Harga: "Harga: Rp. 14,000" / "Harga: Rp 14.000"
-   - Stok Tersedia: 3
-   - Stok Terjual: 14
-   - Kode: cc7h
-   - Desk: ...
-   - Best seller: kalau ada "BEST SELLER"
-======================= */
-function parseWaTextToProducts(text, defaultSupplierType) {
-  const raw = String(text || "").replace(/\r/g, "");
-  if (!raw.trim()) return [];
-
-  // pecah per baris, jangan buang "garis" dulu (buat deteksi)
-  const lines = raw.split("\n").map((l) => l.trim());
-
-  const products = [];
-  let cur = null;
-
-  function cleanTitle(s) {
-    return String(s || "")
-      .replace(/BEST\s*SELLER/gi, "")
-      .replace(/[🔥]/g, "")
-      .replace(/^[-–—\s]+|[-–—\s]+$/g, "")
-      .trim();
-  }
-
-  function stripPrefix(line) {
-    // buang prefix aneh: ┊・  •  |  :  *  dll
-    return String(line || "").replace(/^[┊│┃•·\-\|\:\*` ]+/g, "").trim();
-  }
-
-  function pushCur() {
-    if (!cur) return;
-
-    // kalau harga normal kosong tapi ada "Harga:" → masih aman
-    if (!cur.price_normal && cur.price_promo) {
-      cur.price_normal = cur.price_promo;
-      cur.price_promo = "";
-      cur.promo_active = false;
-    }
-
-    // syarat minimal biar dianggap produk valid
-    if (cur.title && cur.code) products.push(cur);
-    cur = null;
-  }
-
-  function startNewProduct(titleRaw) {
-    pushCur();
-    cur = {
-      supplier_id: "",
-      supplier_type: defaultSupplierType || "premium_app",
-      title: cleanTitle(titleRaw),
-      price_normal: 0,
-      price_promo: "",
-      promo_active: false,
-      stock_available: 0,
-      stock_sold: 0,
-      code: "",
-      desc: "",
-      best_seller: /BEST\s*SELLER/i.test(titleRaw),
-      active: true,
-    };
-  }
-
-  for (let i = 0; i < lines.length; i++) {
-    const original = lines[i];
-    const line = stripPrefix(original);
-
-    if (!line) continue;
-
-    // =========================
-    // ✅ DETEKSI JUDUL (3 format)
-    // =========================
-
-    // 1) Format: ╭────〔 TITLE 〕─  (punya kamu)
-    // Tangkap isi di antara 〔 dan 〕
-    let m = original.match(/〔\s*(.+?)\s*〕/);
-    if (m && m[1]) {
-      startNewProduct(m[1]);
-      continue;
-    }
-
-    // 2) Format: { TITLE }
-    m = original.match(/\{\s*(.+?)\s*\}/);
-    if (m && m[1]) {
-      startNewProduct(m[1]);
-      continue;
-    }
-
-    // 3) Format: [ TITLE ]
-    m = original.match(/\[\s*(.+?)\s*\]/);
-    if (m && m[1]) {
-      startNewProduct(m[1]);
-      continue;
-    }
-
-    // kalau belum ada produk yang sedang diparse, skip
-    if (!cur) continue;
-
-    // =========================
-    // ✅ FIELD PARSER
-    // =========================
-
-    // Harga Promo
-    m = line.match(/Harga\s*Promo\s*:\s*(.+)$/i);
-    if (m) {
-      const val = toNumberFromRupiah(m[1]);
-      cur.price_promo = val;
-      cur.promo_active = true;
-      continue;
-    }
-
-    // Harga Normal
-    m = line.match(/Harga\s*Normal\s*:\s*(.+)$/i);
-    if (m) {
-      cur.price_normal = toNumberFromRupiah(m[1]);
-      continue;
-    }
-
-    // Harga: (umum)
-    m = line.match(/Harga\s*:\s*(.+)$/i);
-    if (m) {
-      cur.price_normal = toNumberFromRupiah(m[1]);
-      continue;
-    }
-
-    // Stok Tersedia
-    m = line.match(/Stok\s*Tersedia\s*:\s*([0-9]+)/i);
-    if (m) {
-      cur.stock_available = Number(m[1] || 0);
-      continue;
-    }
-
-    // Stok Terjual
-    m = line.match(/Stok\s*Terjual\s*:\s*([0-9]+)/i);
-    if (m) {
-      cur.stock_sold = Number(m[1] || 0);
-      continue;
-    }
-
-    // Total Stok: (kalau kamu mau pakai ini untuk isi stock_available saat kosong)
-    m = line.match(/Total\s*Stok\s*:\s*([0-9]+)/i);
-    if (m) {
-      // optional: jika stock_available belum ada, bisa dihitung:
-      // total = tersedia + terjual → tersedia = total - terjual
-      const total = Number(m[1] || 0);
-      if (!cur.stock_available && cur.stock_sold) {
-        cur.stock_available = Math.max(0, total - cur.stock_sold);
-      }
-      continue;
-    }
-
-    // Kode
-    m = line.match(/Kode\s*:\s*([a-z0-9_-]+)/i);
-    if (m) {
-      cur.code = String(m[1] || "").trim();
-      continue;
-    }
-
-    // Desk / Desc
-    m = line.match(/Des(k|c)\s*:\s*(.+)$/i);
-    if (m) {
-      cur.desc = String(m[2] || "").trim();
-      continue;
-    }
-  }
-
-  pushCur();
-  return products;
-}
-
-
 
 export default function Products() {
   const router = useRouter();
@@ -241,9 +133,10 @@ export default function Products() {
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // textarea paste WA
+  // WA import states
   const [waText, setWaText] = useState("");
-  const [waParsed, setWaParsed] = useState([]);
+  const [detected, setDetected] = useState([]);
+  const [detectedInfo, setDetectedInfo] = useState("");
 
   const isAdmin = useMemo(
     () => String(me?.user?.supplier_type || "").toUpperCase() === "ALL",
@@ -254,7 +147,7 @@ export default function Products() {
     setErr("");
     setLoading(true);
 
-    const rMe = await fetch("/api/auth/me", { credentials: "include" });
+    const rMe = await fetch("/api/auth/me");
     const jMe = await rMe.json();
     if (!jMe.loggedIn) return router.replace("/admin/login");
     setMe(jMe);
@@ -265,7 +158,7 @@ export default function Products() {
       setForm((f) => ({ ...f, supplier_type: st }));
     }
 
-    const r = await fetch("/api/products", { credentials: "include" });
+    const r = await fetch("/api/products");
     const j = await r.json();
     if (!r.ok) {
       setErr(j.error || "Gagal memuat produk");
@@ -311,7 +204,7 @@ export default function Products() {
   }
 
   async function logout() {
-    await fetch("/api/auth/logout", { credentials: "include" });
+    await fetch("/api/auth/logout");
     router.replace("/admin/login");
   }
 
@@ -320,15 +213,16 @@ export default function Products() {
     setErr("");
 
     if (!form.title.trim()) return setErr("Nama produk wajib diisi.");
-    if (!form.code.trim()) return setErr("Kode produk wajib diisi.");
 
     const payload = {
       supplier_id: form.supplier_id || "",
       supplier_type: form.supplier_type,
       title: form.title.trim(),
 
+      // ✅ kirim angka murni
       price_normal: toNumberFromRupiah(form.price_normal),
-      price_promo: form.price_promo === "" ? "" : toNumberFromRupiah(form.price_promo),
+      price_promo:
+        form.price_promo === "" ? "" : toNumberFromRupiah(form.price_promo),
 
       promo_active: !!form.promo_active,
       stock_available: Math.max(0, Number(form.stock_available || 0)),
@@ -339,8 +233,8 @@ export default function Products() {
       active: !!form.active,
     };
 
-    if (payload.price_normal <= 0 && payload.price_promo === "") {
-      return setErr("Minimal isi Harga Normal atau Harga Promo.");
+    if (payload.price_normal <= 0) {
+      return setErr("Harga normal wajib lebih dari 0.");
     }
 
     try {
@@ -350,8 +244,8 @@ export default function Products() {
         const r = await fetch("/api/products", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
           credentials: "include",
+          body: JSON.stringify(payload),
         });
         const j = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(j.error || "Gagal tambah produk");
@@ -359,6 +253,7 @@ export default function Products() {
         const r = await fetch(`/api/products/${encodeURIComponent(form.id)}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({
             supplier_id: payload.supplier_id,
             supplier_type: payload.supplier_type,
@@ -373,7 +268,6 @@ export default function Products() {
             best_seller: payload.best_seller ? "TRUE" : "FALSE",
             active: payload.active ? "TRUE" : "FALSE",
           }),
-          credentials: "include",
         });
         const j = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(j.error || "Gagal edit produk");
@@ -387,7 +281,6 @@ export default function Products() {
     }
   }
 
-  // ✅ HAPUS = soft delete (active FALSE) — aman, tidak akan hapus semua
   async function remove(id) {
     if (!confirm("Yakin hapus produk ini? (Produk akan disembunyikan)")) return;
 
@@ -404,12 +297,16 @@ export default function Products() {
       } catch {}
 
       if (!r.ok) {
-        alert(`Gagal hapus!\nStatus: ${r.status}\n${j?.error || text || "(kosong)"}`);
+        alert(
+          `Gagal hapus!\n\nStatus: ${r.status}\nResponse: ${
+            j?.error || text || "(kosong)"
+          }`
+        );
         return;
       }
 
-      await load();
       alert("Berhasil hapus (disembunyikan).");
+      await load();
     } catch (e) {
       alert("Error client: " + e.message);
     }
@@ -423,9 +320,10 @@ export default function Products() {
       supplier_type: p.supplier_type || "premium_app",
       title: p.title || "",
 
-      // simpan digit saja
+      // ✅ simpan digit saja
       price_normal: digitsOnly(String(p.price_normal ?? "")),
-      price_promo: p.price_promo === "" ? "" : digitsOnly(String(p.price_promo ?? "")),
+      price_promo:
+        p.price_promo === "" ? "" : digitsOnly(String(p.price_promo ?? "")),
 
       promo_active: toBool(p.promo_active),
       stock_available: String(p.stock_available ?? ""),
@@ -450,80 +348,125 @@ export default function Products() {
     });
   }, [data, search]);
 
-  // ====== FITUR WA ======
-  function handleParseWA() {
-    const defaultType =
+  /* =======================
+     WA Import actions
+  ======================= */
+  function detectFromText() {
+    const items = parseWhatsAppTextToProducts(waText);
+
+    // auto isi supplier_type sesuai role
+    const st =
       String(me?.user?.supplier_type || "").toUpperCase() === "ALL"
-        ? form.supplier_type
+        ? form.supplier_type || "premium_app"
         : me?.user?.supplier_type || "premium_app";
 
-    const items = parseWaTextToProducts(waText, defaultType);
-    setWaParsed(items);
+    const withType = items.map((x) => ({
+      supplier_id: form.supplier_id || "",
+      supplier_type: st,
+      title: x.title,
+      price_normal: x.price_normal, // digits
+      price_promo: x.price_promo || "",
+      promo_active: false,
+      stock_available: x.stock_available || "0",
+      stock_sold: x.stock_sold || "0",
+      code: x.code,
+      desc: x.desc || "",
+      best_seller: !!x.best_seller,
+      active: true,
+    }));
 
-    if (!items.length) {
+    setDetected(withType);
+    setDetectedInfo(
+      withType.length
+        ? `Terdeteksi: ${withType.length} produk`
+        : "Tidak ada produk yang terdeteksi dari teks."
+    );
+
+    if (!withType.length) {
       alert("Tidak ada produk yang terdeteksi dari teks.");
-      return;
     }
-    alert(`Terdeteksi ${items.length} produk dari teks.`);
   }
 
-  function handleAutoFillFirst() {
-    if (!waParsed.length) return alert("Parse dulu ya (klik 'Deteksi Produk').");
-    const p = waParsed[0];
+  function autoFillFirst() {
+    if (!detected.length) return alert("Deteksi dulu ya.");
+    const p = detected[0];
 
     setMode("create");
     setForm((f) => ({
       ...f,
+      title: p.title,
+      code: p.code,
+      desc: p.desc,
+      supplier_id: p.supplier_id || "",
       supplier_type: p.supplier_type || f.supplier_type,
-      title: p.title || "",
-      code: p.code || "",
-      desc: p.desc || "",
-      stock_available: String(p.stock_available ?? 0),
-      stock_sold: String(p.stock_sold ?? 0),
+
+      price_normal: digitsOnly(p.price_normal),
+      price_promo: p.price_promo ? digitsOnly(p.price_promo) : "",
+
+      stock_available: String(p.stock_available ?? ""),
+      stock_sold: String(p.stock_sold ?? ""),
+      promo_active: !!p.promo_active,
       best_seller: !!p.best_seller,
       active: true,
-
-      // harga: kalau ada promo → isi promo, kalau gak → isi normal
-      price_normal: p.price_normal ? digitsOnly(p.price_normal) : f.price_normal,
-      price_promo: p.price_promo === "" ? "" : digitsOnly(String(p.price_promo)),
-      promo_active: !!p.promo_active,
     }));
 
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  async function handleImportAll() {
-    if (!waParsed.length) return alert("Parse dulu ya (klik 'Deteksi Produk').");
-
-    if (!confirm(`Import ${waParsed.length} produk ke Google Sheet? (kode sama = update)`)) return;
+  async function importAll() {
+    if (!detected.length) return alert("Deteksi dulu ya.");
 
     try {
       setLoading(true);
+
+      // kirim angka murni ke API bulk
+      const items = detected.map((p) => ({
+        supplier_id: p.supplier_id || "",
+        supplier_type: p.supplier_type,
+        title: p.title,
+        price_normal: toNumberFromRupiah(p.price_normal),
+        price_promo: p.price_promo === "" ? "" : toNumberFromRupiah(p.price_promo),
+        promo_active: !!p.promo_active,
+        stock_available: Math.max(0, Number(p.stock_available || 0)),
+        stock_sold: Math.max(0, Number(p.stock_sold || 0)),
+        code: p.code,
+        desc: p.desc,
+        best_seller: !!p.best_seller,
+        active: true,
+      }));
+
       const r = await fetch("/api/products/bulk", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ items: waParsed }),
+        body: JSON.stringify({ items }),
       });
 
-      const j = await r.json().catch(() => ({}));
+      const text = await r.text();
+      let j = {};
+      try {
+        j = JSON.parse(text);
+      } catch {}
+
       if (!r.ok) {
-        alert(j.error || "Gagal import bulk");
+        alert(
+          `Gagal import bulk!\n\nStatus: ${r.status}\nResponse: ${
+            j?.error || text || "(kosong)"
+          }`
+        );
         setLoading(false);
         return;
       }
 
-      alert(
-        `SUKSES!\nInserted: ${j.inserted}\nUpdated: ${j.updated}\nSkipped: ${j.skipped}`
-      );
-
+      alert(`SUKSES! Berhasil import ${items.length} produk.`);
       setWaText("");
-      setWaParsed([]);
+      setDetected([]);
+      setDetectedInfo("");
       await load();
       setLoading(false);
     } catch (e) {
       setLoading(false);
-      alert("Error: " + e.message);
+      alert("Error client: " + e.message);
     }
   }
 
@@ -540,36 +483,40 @@ export default function Products() {
         </div>
 
         <div className="headerActions">
-          <button className="btn" onClick={() => router.push("/admin/promo")} type="button">
+          <button className="btn" onClick={() => router.push("/admin/promo")}>
             Buat Promo
           </button>
-          <button className="btnOutline" onClick={logout} type="button">
+          <button className="btnOutline" onClick={logout}>
             Keluar
           </button>
         </div>
       </div>
 
+      {/* Error */}
       {err && <div className="errorBox">{err}</div>}
 
-      {/* ===== Paste WA Card ===== */}
+      {/* =======================
+          WA IMPORT CARD
+      ======================= */}
       <div className="card">
         <div className="cardHead">
           <div>
             <div className="cardTitle">Paste Pesan WhatsApp (Opsional)</div>
             <div className="cardHint">
-              Paste teks panjang dari WA → klik <b>Deteksi Produk</b> → bisa <b>Auto isi</b> atau <b>Import semua</b>.
+              Paste teks panjang dari WA → klik <b>Deteksi Produk</b> → bisa{" "}
+              <b>Auto isi</b> atau <b>Import Semua</b>.
             </div>
           </div>
 
-          <div className="waActions">
-            <button className="btn" onClick={handleParseWA} type="button">
+          <div className="headerActions">
+            <button className="btnOutline" type="button" onClick={detectFromText}>
               Deteksi Produk
             </button>
-            <button className="btnOutline" onClick={handleAutoFillFirst} type="button">
+            <button className="btn" type="button" onClick={autoFillFirst}>
               Auto isi (1)
             </button>
-            <button className="btnPrimarySmall" onClick={handleImportAll} type="button" disabled={loading}>
-              {loading ? "Mengimport..." : "Import Semua"}
+            <button className="btnPrimarySmall" type="button" onClick={importAll} disabled={loading}>
+              {loading ? "Menyimpan..." : "Import Semua"}
             </button>
           </div>
         </div>
@@ -582,12 +529,35 @@ export default function Products() {
           placeholder="Paste pesan WA di sini..."
         />
 
-        <div className="waInfo">
-          Terdeteksi: <b>{waParsed.length}</b> produk
-        </div>
+        <div className="detInfo">{detectedInfo || "Terdeteksi: 0 produk"}</div>
+
+        {detected.length > 0 && (
+          <div className="previewWrap">
+            <div className="previewTitle">Preview (3 pertama)</div>
+            <div className="previewGrid">
+              {detected.slice(0, 3).map((p, i) => (
+                <div key={i} className="previewCard">
+                  <div className="pTitle">{p.title}</div>
+                  <div className="pDesc">{p.desc || "-"}</div>
+                  <div className="previewRow">
+                    <span className="muted">Kode:</span> <code className="code">{p.code}</code>
+                  </div>
+                  <div className="previewRow">
+                    <span className="muted">Harga:</span>{" "}
+                    <b>{formatRupiahFromDigits(p.price_normal)}</b>
+                  </div>
+                  <div className="previewRow">
+                    <span className="muted">Stok:</span>{" "}
+                    {p.stock_available} / {p.stock_sold}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* ===== Form ===== */}
+      {/* Form */}
       <div className="card">
         <div className="cardHead">
           <div>
@@ -607,6 +577,7 @@ export default function Products() {
         </div>
 
         <form className="formGrid" onSubmit={submit}>
+          {/* Kolom kiri */}
           <div className="formCol">
             <Field label="Nama Produk">
               <input
@@ -648,6 +619,7 @@ export default function Products() {
             </div>
           </div>
 
+          {/* Kolom kanan */}
           <div className="formCol">
             <Field label="Kategori Supplier">
               <select
@@ -661,7 +633,9 @@ export default function Products() {
                 <option value="web_dev">Web Developer</option>
               </select>
 
-              {!isAdmin && <div className="note">*Kategori otomatis sesuai role kamu.</div>}
+              {!isAdmin && (
+                <div className="note">*Kategori otomatis sesuai role kamu.</div>
+              )}
             </Field>
 
             <div className="grid2">
@@ -670,7 +644,9 @@ export default function Products() {
                   inputMode="numeric"
                   type="text"
                   value={formatRupiahFromDigits(form.price_normal)}
-                  onChange={(e) => set("price_normal", digitsOnly(e.target.value))}
+                  onChange={(e) =>
+                    set("price_normal", digitsOnly(e.target.value))
+                  }
                   placeholder="Rp 19.000"
                   className="input"
                 />
@@ -680,8 +656,14 @@ export default function Products() {
                 <input
                   inputMode="numeric"
                   type="text"
-                  value={form.price_promo === "" ? "" : formatRupiahFromDigits(form.price_promo)}
-                  onChange={(e) => set("price_promo", digitsOnly(e.target.value))}
+                  value={
+                    form.price_promo === ""
+                      ? ""
+                      : formatRupiahFromDigits(form.price_promo)
+                  }
+                  onChange={(e) =>
+                    set("price_promo", digitsOnly(e.target.value))
+                  }
                   placeholder="Rp 14.000"
                   className="input"
                 />
@@ -733,7 +715,11 @@ export default function Products() {
             </div>
 
             <button className="btnPrimary" disabled={loading} type="submit">
-              {loading ? "Menyimpan..." : mode === "create" ? "Simpan Produk" : "Simpan Perubahan"}
+              {loading
+                ? "Menyimpan..."
+                : mode === "create"
+                ? "Simpan Produk"
+                : "Simpan Perubahan"}
             </button>
           </div>
         </form>
@@ -768,7 +754,8 @@ export default function Products() {
             </thead>
             <tbody>
               {filtered.map((p, idx) => {
-                const total = Number(p.stock_available || 0) + Number(p.stock_sold || 0);
+                const total =
+                  Number(p.stock_available || 0) + Number(p.stock_sold || 0);
                 return (
                   <tr key={p.id} className={idx % 2 === 0 ? "row" : "row alt"}>
                     <td>
@@ -777,7 +764,11 @@ export default function Products() {
                     </td>
                     <td>{labelType(p.supplier_type)}</td>
                     <td>{rupiahFromNumber(p.price_normal)}</td>
-                    <td>{p.price_promo === "" ? "-" : rupiahFromNumber(p.price_promo)}</td>
+                    <td>
+                      {p.price_promo === ""
+                        ? "-"
+                        : rupiahFromNumber(p.price_promo)}
+                    </td>
                     <td>{toBool(p.promo_active) ? "Ya" : "Tidak"}</td>
                     <td>
                       <div>Tersedia: {p.stock_available}</div>
@@ -789,10 +780,18 @@ export default function Products() {
                     </td>
                     <td>
                       <div className="rowActions">
-                        <button className="btnSmall" onClick={() => editRow(p)} type="button">
+                        <button
+                          className="btnSmall"
+                          onClick={() => editRow(p)}
+                          type="button"
+                        >
                           Edit
                         </button>
-                        <button className="btnSmallDanger" onClick={() => remove(p.id)} type="button">
+                        <button
+                          className="btnSmallDanger"
+                          onClick={() => remove(p.id)}
+                          type="button"
+                        >
                           Hapus
                         </button>
                       </div>
@@ -816,7 +815,8 @@ export default function Products() {
       {/* Mobile cards */}
       <div className="mobileOnly">
         {filtered.map((p) => {
-          const total = Number(p.stock_available || 0) + Number(p.stock_sold || 0);
+          const total =
+            Number(p.stock_available || 0) + Number(p.stock_sold || 0);
           return (
             <div key={p.id} className="pCard">
               <div className="pCardTop">
@@ -832,24 +832,22 @@ export default function Products() {
                   <div className="k">Harga Normal</div>
                   <div className="v">{rupiahFromNumber(p.price_normal)}</div>
                 </div>
-
                 <div className="kv">
                   <div className="k">Harga Promo</div>
-                  <div className="v">{p.price_promo === "" ? "-" : rupiahFromNumber(p.price_promo)}</div>
+                  <div className="v">
+                    {p.price_promo === "" ? "-" : rupiahFromNumber(p.price_promo)}
+                  </div>
                 </div>
-
                 <div className="kv">
                   <div className="k">Promo Aktif</div>
                   <div className="v">{toBool(p.promo_active) ? "Ya" : "Tidak"}</div>
                 </div>
-
                 <div className="kv">
                   <div className="k">Kode</div>
                   <div className="v">
                     <code className="code">{p.code || "-"}</code>
                   </div>
                 </div>
-
                 <div className="kv">
                   <div className="k">Stok</div>
                   <div className="v">
@@ -860,10 +858,18 @@ export default function Products() {
               </div>
 
               <div className="pCardActions">
-                <button className="btnSmall" onClick={() => editRow(p)} type="button">
+                <button
+                  className="btnSmall"
+                  onClick={() => editRow(p)}
+                  type="button"
+                >
                   Edit
                 </button>
-                <button className="btnSmallDanger" onClick={() => remove(p.id)} type="button">
+                <button
+                  className="btnSmallDanger"
+                  onClick={() => remove(p.id)}
+                  type="button"
+                >
                   Hapus
                 </button>
               </div>
@@ -871,7 +877,9 @@ export default function Products() {
           );
         })}
 
-        {filtered.length === 0 && <div className="emptyCard">Tidak ada data.</div>}
+        {filtered.length === 0 && (
+          <div className="emptyCard">Tidak ada data.</div>
+        )}
       </div>
 
       <div style={{ height: 30 }} />
@@ -905,6 +913,7 @@ export default function Products() {
           display: flex;
           gap: 10px;
           flex-wrap: wrap;
+          align-items: center;
         }
 
         .errorBox {
@@ -930,7 +939,7 @@ export default function Products() {
           align-items: center;
           gap: 12px;
           flex-wrap: wrap;
-          margin-bottom: 10px;
+          margin-bottom: 12px;
         }
         .cardTitle {
           font-size: 16px;
@@ -940,17 +949,6 @@ export default function Products() {
           font-size: 13px;
           opacity: 0.7;
           margin-top: 4px;
-        }
-
-        .waActions {
-          display: flex;
-          gap: 10px;
-          flex-wrap: wrap;
-        }
-        .waInfo {
-          margin-top: 8px;
-          font-size: 13px;
-          opacity: 0.8;
         }
 
         .formGrid {
@@ -1129,6 +1127,38 @@ export default function Products() {
           opacity: 0.7;
         }
 
+        /* WA preview */
+        .detInfo {
+          margin-top: 10px;
+          font-size: 13px;
+          opacity: 0.8;
+        }
+        .previewWrap {
+          margin-top: 12px;
+          border-top: 1px dashed #eee;
+          padding-top: 12px;
+        }
+        .previewTitle {
+          font-size: 13px;
+          font-weight: 800;
+          margin-bottom: 10px;
+        }
+        .previewGrid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 10px;
+        }
+        .previewCard {
+          border: 1px solid #eee;
+          border-radius: 12px;
+          padding: 12px;
+          background: #fff;
+        }
+        .previewRow {
+          margin-top: 8px;
+          font-size: 13px;
+        }
+
         /* Mobile cards */
         .pCard {
           margin-top: 10px;
@@ -1190,6 +1220,7 @@ export default function Products() {
           display: none;
         }
 
+        /* ✅ Responsive breakpoints */
         @media (max-width: 900px) {
           .header {
             flex-direction: column;
@@ -1213,15 +1244,15 @@ export default function Products() {
             width: 100%;
           }
 
+          .previewGrid {
+            grid-template-columns: 1fr;
+          }
+
           .desktopOnly {
             display: none;
           }
           .mobileOnly {
             display: block;
-          }
-
-          .waActions button {
-            flex: 1;
           }
         }
 
@@ -1241,7 +1272,6 @@ export default function Products() {
 }
 
 /* ---------- UI helpers ---------- */
-
 function Field({ label, children }) {
   return (
     <div>
@@ -1261,8 +1291,14 @@ function Field({ label, children }) {
 
 function Checkbox({ checked, onChange, label }) {
   return (
-    <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
-      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+    <label
+      style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}
+    >
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+      />
       <span style={{ fontSize: 13 }}>{label}</span>
     </label>
   );
