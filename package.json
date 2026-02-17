@@ -16,6 +16,7 @@
     "canvas-confetti": "^1.9.3",
     "chart.js": "^4.5.1",
     "clsx": "^2.1.1",
+    "cookie": "^1.1.1",
     "date-fns": "^4.1.0",
     "eslint": "8.30.0",
     "eslint-config-next": "13.1.1",
@@ -40,6 +41,7 @@
     "react-toastify": "^11.0.5",
     "react-typed": "^2.0.12",
     "swiper": "^11.2.8",
+    "uuid": "^13.0.0",
     "web-push": "^3.6.7"
   },
   "devDependencies": {
