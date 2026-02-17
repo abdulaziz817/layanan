@@ -21,6 +21,7 @@ function labelType(t) {
   if (t === "premium_app") return "Aplikasi Premium";
   if (t === "design") return "Desain";
   if (t === "web_dev") return "Web Developer";
+  if (String(t).toUpperCase() === "ALL") return "Semua";
   return t || "-";
 }
 
@@ -79,7 +80,7 @@ export default function Products() {
   }
 
   function resetForm() {
-    setForm((f) => ({
+    setForm(() => ({
       ...empty,
       supplier_type:
         String(me?.user?.supplier_type || "").toUpperCase() === "ALL"
@@ -131,7 +132,6 @@ export default function Products() {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            // untuk PUT, kita kirim format sheet-friendly
             supplier_id: payload.supplier_id,
             supplier_type: payload.supplier_type,
             title: payload.title,
@@ -199,68 +199,58 @@ export default function Products() {
   }, [data, search]);
 
   return (
-    <div style={{ maxWidth: 1100, margin: "24px auto", padding: "0 12px", fontFamily: "system-ui, Arial" }}>
+    <div className="page">
       {/* Header */}
-      <div style={{
-        display: "flex", justifyContent: "space-between", alignItems: "center",
-        padding: "12px 0", borderBottom: "1px solid #eee"
-      }}>
-        <div>
-          <div style={{ fontSize: 22, fontWeight: 700 }}>Dashboard Produk</div>
-          <div style={{ opacity: 0.7, fontSize: 13 }}>
-            Login sebagai: <b>{me?.user?.role || "-"}</b> • Tipe: <b>{labelType(me?.user?.supplier_type)}</b>
+      <div className="header">
+        <div className="headerLeft">
+          <div className="title">Dashboard Produk</div>
+          <div className="sub">
+            Login sebagai: <b>{me?.user?.role || "-"}</b> • Tipe:{" "}
+            <b>{labelType(me?.user?.supplier_type)}</b>
           </div>
         </div>
-        <div style={{ display: "flex", gap: 10 }}>
-          <button onClick={() => router.push("/admin/promo")} style={btn()}>
+
+        <div className="headerActions">
+          <button className="btn" onClick={() => router.push("/admin/promo")}>
             Buat Promo
           </button>
-          <button onClick={logout} style={btnOutline()}>
+          <button className="btnOutline" onClick={logout}>
             Keluar
           </button>
         </div>
       </div>
 
       {/* Error */}
-      {err && (
-        <div style={{
-          marginTop: 12, padding: 12, borderRadius: 10,
-          background: "#fff4f4", border: "1px solid #ffd0d0", color: "#8a1f1f"
-        }}>
-          {err}
-        </div>
-      )}
+      {err && <div className="errorBox">{err}</div>}
 
-      {/* Form Card */}
-      <div style={{
-        marginTop: 16, background: "white", border: "1px solid #eee",
-        borderRadius: 14, padding: 16, boxShadow: "0 1px 8px rgba(0,0,0,0.04)"
-      }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+      {/* Form */}
+      <div className="card">
+        <div className="cardHead">
           <div>
-            <div style={{ fontSize: 16, fontWeight: 700 }}>
+            <div className="cardTitle">
               {mode === "create" ? "Tambah Produk" : "Edit Produk"}
             </div>
-            <div style={{ fontSize: 13, opacity: 0.7 }}>
+            <div className="cardHint">
               Isi seperlunya. Angka tanpa titik/koma (contoh: 14000).
             </div>
           </div>
+
           {mode === "edit" && (
-            <button onClick={resetForm} style={btnOutline()}>
+            <button className="btnOutline" onClick={resetForm}>
               Batal Edit
             </button>
           )}
         </div>
 
-        <form onSubmit={submit} style={{ marginTop: 14, display: "grid", gridTemplateColumns: "1.2fr 0.8fr", gap: 14 }}>
-          {/* kiri */}
-          <div style={{ display: "grid", gap: 10 }}>
+        <form className="formGrid" onSubmit={submit}>
+          {/* Kolom kiri */}
+          <div className="formCol">
             <Field label="Nama Produk">
               <input
                 value={form.title}
                 onChange={(e) => set("title", e.target.value)}
                 placeholder="Contoh: NETFLIX SHARING 1 BULAN 2U"
-                style={input()}
+                className="input"
               />
             </Field>
 
@@ -270,17 +260,17 @@ export default function Products() {
                 onChange={(e) => set("desc", e.target.value)}
                 placeholder="Contoh: GARANSI JIKA MENGIKUTI SNK"
                 rows={3}
-                style={textarea()}
+                className="textarea"
               />
             </Field>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            <div className="grid2">
               <Field label="Kode Produk">
                 <input
                   value={form.code}
                   onChange={(e) => set("code", e.target.value)}
                   placeholder="Contoh: net2u1b"
-                  style={input()}
+                  className="input"
                 />
               </Field>
 
@@ -289,152 +279,179 @@ export default function Products() {
                   value={form.supplier_id}
                   onChange={(e) => set("supplier_id", e.target.value)}
                   placeholder="Contoh: sup-001"
-                  style={input()}
+                  className="input"
                 />
               </Field>
             </div>
           </div>
 
-          {/* kanan */}
-          <div style={{ display: "grid", gap: 10 }}>
+          {/* Kolom kanan */}
+          <div className="formCol">
             <Field label="Kategori Supplier">
               <select
                 value={form.supplier_type}
                 onChange={(e) => set("supplier_type", e.target.value)}
                 disabled={!isAdmin}
-                style={input()}
+                className="input"
               >
                 <option value="premium_app">Aplikasi Premium</option>
                 <option value="design">Desain</option>
                 <option value="web_dev">Web Developer</option>
               </select>
+
               {!isAdmin && (
-                <div style={{ fontSize: 12, opacity: 0.65, marginTop: 6 }}>
+                <div className="note">
                   *Kategori otomatis sesuai role kamu.
                 </div>
               )}
             </Field>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            <div className="grid2">
               <Field label="Harga Normal">
                 <input
+                  inputMode="numeric"
                   type="number"
                   value={form.price_normal}
                   onChange={(e) => set("price_normal", e.target.value)}
                   placeholder="Contoh: 19000"
-                  style={input()}
+                  className="input"
                 />
               </Field>
 
               <Field label="Harga Promo (opsional)">
                 <input
+                  inputMode="numeric"
                   type="number"
                   value={form.price_promo}
                   onChange={(e) => set("price_promo", e.target.value)}
                   placeholder="Contoh: 14000"
-                  style={input()}
+                  className="input"
                 />
               </Field>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            <div className="grid2">
               <Field label="Stok Tersedia">
                 <input
+                  inputMode="numeric"
                   type="number"
                   value={form.stock_available}
                   onChange={(e) => set("stock_available", e.target.value)}
                   placeholder="Contoh: 3"
-                  style={input()}
+                  className="input"
                 />
               </Field>
+
               <Field label="Stok Terjual">
                 <input
+                  inputMode="numeric"
                   type="number"
                   value={form.stock_sold}
                   onChange={(e) => set("stock_sold", e.target.value)}
                   placeholder="Contoh: 10"
-                  style={input()}
+                  className="input"
                 />
               </Field>
             </div>
 
-            <div style={{ display: "grid", gap: 8, marginTop: 6 }}>
-              <Checkbox checked={form.promo_active} onChange={(v) => set("promo_active", v)} label="Promo aktif (pakai harga promo)" />
-              <Checkbox checked={form.best_seller} onChange={(v) => set("best_seller", v)} label="Best seller" />
-              <Checkbox checked={form.active} onChange={(v) => set("active", v)} label="Aktif (tampil di promo)" />
+            <div className="checkWrap">
+              <Checkbox
+                checked={form.promo_active}
+                onChange={(v) => set("promo_active", v)}
+                label="Promo aktif (pakai harga promo)"
+              />
+              <Checkbox
+                checked={form.best_seller}
+                onChange={(v) => set("best_seller", v)}
+                label="Best seller"
+              />
+              <Checkbox
+                checked={form.active}
+                onChange={(v) => set("active", v)}
+                label="Aktif (tampil di promo)"
+              />
             </div>
 
-            <button disabled={loading} type="submit" style={btnPrimary()}>
-              {loading ? "Menyimpan..." : mode === "create" ? "Simpan Produk" : "Simpan Perubahan"}
+            <button className="btnPrimary" disabled={loading} type="submit">
+              {loading
+                ? "Menyimpan..."
+                : mode === "create"
+                ? "Simpan Produk"
+                : "Simpan Perubahan"}
             </button>
           </div>
         </form>
       </div>
 
       {/* List */}
-      <div style={{ marginTop: 18, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-        <div style={{ fontSize: 16, fontWeight: 700 }}>Daftar Produk</div>
+      <div className="listHead">
+        <div className="listTitle">Daftar Produk</div>
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Cari nama/kode/deskripsi..."
-          style={{ ...input(), maxWidth: 320 }}
+          className="input search"
         />
       </div>
 
-      <div style={{
-        marginTop: 10, background: "white", border: "1px solid #eee",
-        borderRadius: 14, overflow: "hidden"
-      }}>
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+      {/* Desktop table */}
+      <div className="tableWrap desktopOnly">
+        <div className="scrollX">
+          <table className="table">
             <thead>
-              <tr style={{ background: "#fafafa", borderBottom: "1px solid #eee" }}>
-                <Th>Nama</Th>
-                <Th>Kategori</Th>
-                <Th>Normal</Th>
-                <Th>Promo</Th>
-                <Th>Promo Aktif</Th>
-                <Th>Stok</Th>
-                <Th>Kode</Th>
-                <Th>Aksi</Th>
+              <tr>
+                <th>Nama</th>
+                <th>Kategori</th>
+                <th>Normal</th>
+                <th>Promo</th>
+                <th>Promo Aktif</th>
+                <th>Stok</th>
+                <th>Kode</th>
+                <th>Aksi</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((p, idx) => {
                 const total = Number(p.stock_available || 0) + Number(p.stock_sold || 0);
-                const rowBg = idx % 2 === 0 ? "white" : "#fcfcfc";
                 return (
-                  <tr key={p.id} style={{ background: rowBg, borderBottom: "1px solid #f0f0f0" }}>
-                    <Td>
-                      <div style={{ fontWeight: 700 }}>{p.title}</div>
-                      <div style={{ opacity: 0.7, fontSize: 12, marginTop: 2 }}>
-                        {p.desc || "-"}
-                      </div>
-                    </Td>
-                    <Td>{labelType(p.supplier_type)}</Td>
-                    <Td>{p.price_normal}</Td>
-                    <Td>{p.price_promo === "" ? "-" : p.price_promo}</Td>
-                    <Td>{toBool(p.promo_active) ? "Ya" : "Tidak"}</Td>
-                    <Td>
+                  <tr key={p.id} className={idx % 2 === 0 ? "row" : "row alt"}>
+                    <td>
+                      <div className="pTitle">{p.title}</div>
+                      <div className="pDesc">{p.desc || "-"}</div>
+                    </td>
+                    <td>{labelType(p.supplier_type)}</td>
+                    <td>{p.price_normal}</td>
+                    <td>{p.price_promo === "" ? "-" : p.price_promo}</td>
+                    <td>{toBool(p.promo_active) ? "Ya" : "Tidak"}</td>
+                    <td>
                       <div>Tersedia: {p.stock_available}</div>
                       <div>Terjual: {p.stock_sold}</div>
-                      <div style={{ opacity: 0.7 }}>Total: {total}</div>
-                    </Td>
-                    <Td><code style={{ background:"#f6f6f6", padding:"2px 6px", borderRadius:6 }}>{p.code || "-"}</code></Td>
-                    <Td>
-                      <div style={{ display: "flex", gap: 8 }}>
-                        <button onClick={() => editRow(p)} style={btnSmall()}>Edit</button>
-                        <button onClick={() => remove(p.id)} style={btnSmallDanger()}>Hapus</button>
+                      <div className="muted">Total: {total}</div>
+                    </td>
+                    <td>
+                      <code className="code">{p.code || "-"}</code>
+                    </td>
+                    <td>
+                      <div className="rowActions">
+                        <button className="btnSmall" onClick={() => editRow(p)} type="button">
+                          Edit
+                        </button>
+                        <button
+                          className="btnSmallDanger"
+                          onClick={() => remove(p.id)}
+                          type="button"
+                        >
+                          Hapus
+                        </button>
                       </div>
-                    </Td>
+                    </td>
                   </tr>
                 );
               })}
 
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={8} style={{ padding: 16, textAlign: "center", opacity: 0.7 }}>
+                  <td colSpan={8} className="empty">
                     Tidak ada data.
                   </td>
                 </tr>
@@ -444,7 +461,407 @@ export default function Products() {
         </div>
       </div>
 
+      {/* Mobile cards */}
+      <div className="mobileOnly">
+        {filtered.map((p) => {
+          const total = Number(p.stock_available || 0) + Number(p.stock_sold || 0);
+          return (
+            <div key={p.id} className="pCard">
+              <div className="pCardTop">
+                <div>
+                  <div className="pTitle">{p.title}</div>
+                  <div className="pDesc">{p.desc || "-"}</div>
+                </div>
+                <div className="badge">{labelType(p.supplier_type)}</div>
+              </div>
+
+              <div className="pGrid">
+                <div className="kv">
+                  <div className="k">Harga Normal</div>
+                  <div className="v">{p.price_normal}</div>
+                </div>
+                <div className="kv">
+                  <div className="k">Harga Promo</div>
+                  <div className="v">{p.price_promo === "" ? "-" : p.price_promo}</div>
+                </div>
+                <div className="kv">
+                  <div className="k">Promo Aktif</div>
+                  <div className="v">{toBool(p.promo_active) ? "Ya" : "Tidak"}</div>
+                </div>
+                <div className="kv">
+                  <div className="k">Kode</div>
+                  <div className="v">
+                    <code className="code">{p.code || "-"}</code>
+                  </div>
+                </div>
+                <div className="kv">
+                  <div className="k">Stok</div>
+                  <div className="v">
+                    Tersedia: {p.stock_available} • Terjual: {p.stock_sold} • <span className="muted">Total: {total}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pCardActions">
+                <button className="btnSmall" onClick={() => editRow(p)} type="button">
+                  Edit
+                </button>
+                <button className="btnSmallDanger" onClick={() => remove(p.id)} type="button">
+                  Hapus
+                </button>
+              </div>
+            </div>
+          );
+        })}
+
+        {filtered.length === 0 && (
+          <div className="emptyCard">Tidak ada data.</div>
+        )}
+      </div>
+
       <div style={{ height: 30 }} />
+
+      <style jsx>{`
+        .page {
+          max-width: 1100px;
+          margin: 24px auto;
+          padding: 0 12px;
+          font-family: system-ui, Arial;
+        }
+
+        .header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 12px;
+          padding: 12px 0;
+          border-bottom: 1px solid #eee;
+        }
+        .title {
+          font-size: 22px;
+          font-weight: 800;
+        }
+        .sub {
+          opacity: 0.75;
+          font-size: 13px;
+          margin-top: 4px;
+        }
+        .headerActions {
+          display: flex;
+          gap: 10px;
+          flex-wrap: wrap;
+        }
+
+        .errorBox {
+          margin-top: 12px;
+          padding: 12px;
+          border-radius: 10px;
+          background: #fff4f4;
+          border: 1px solid #ffd0d0;
+          color: #8a1f1f;
+        }
+
+        .card {
+          margin-top: 16px;
+          background: white;
+          border: 1px solid #eee;
+          border-radius: 14px;
+          padding: 16px;
+          box-shadow: 0 1px 8px rgba(0,0,0,0.04);
+        }
+        .cardHead {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+        .cardTitle {
+          font-size: 16px;
+          font-weight: 800;
+        }
+        .cardHint {
+          font-size: 13px;
+          opacity: 0.7;
+          margin-top: 4px;
+        }
+
+        .formGrid {
+          margin-top: 14px;
+          display: grid;
+          grid-template-columns: 1.2fr 0.8fr;
+          gap: 14px;
+        }
+        .formCol {
+          display: grid;
+          gap: 10px;
+        }
+        .grid2 {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+        }
+
+        .label {
+          font-size: 12px;
+          font-weight: 800;
+          margin-bottom: 6px;
+          opacity: 0.85;
+        }
+
+        .input {
+          width: 100%;
+          padding: 10px 12px;
+          border: 1px solid #e6e6e6;
+          border-radius: 10px;
+          outline: none;
+          font-size: 14px;
+          background: #fff;
+        }
+        .textarea {
+          width: 100%;
+          padding: 10px 12px;
+          border: 1px solid #e6e6e6;
+          border-radius: 10px;
+          outline: none;
+          font-size: 14px;
+          resize: vertical;
+        }
+        .note {
+          font-size: 12px;
+          opacity: 0.65;
+          margin-top: 6px;
+        }
+
+        .checkWrap {
+          display: grid;
+          gap: 8px;
+          margin-top: 4px;
+        }
+
+        .btn {
+          padding: 10px 12px;
+          border-radius: 10px;
+          border: 1px solid #e6e6e6;
+          background: white;
+          cursor: pointer;
+          font-weight: 700;
+        }
+        .btnOutline {
+          padding: 10px 12px;
+          border-radius: 10px;
+          border: 1px solid #e6e6e6;
+          background: white;
+          cursor: pointer;
+          font-weight: 700;
+        }
+        .btnPrimary {
+          padding: 11px 12px;
+          border-radius: 10px;
+          border: none;
+          background: #111;
+          color: white;
+          cursor: pointer;
+          font-weight: 800;
+          margin-top: 6px;
+          width: 100%;
+        }
+
+        .listHead {
+          margin-top: 18px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+        .listTitle {
+          font-size: 16px;
+          font-weight: 800;
+        }
+        .search {
+          max-width: 320px;
+        }
+
+        .tableWrap {
+          margin-top: 10px;
+          background: white;
+          border: 1px solid #eee;
+          border-radius: 14px;
+          overflow: hidden;
+        }
+        .scrollX {
+          overflow-x: auto;
+        }
+        .table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 13px;
+          min-width: 900px;
+        }
+        th {
+          text-align: left;
+          padding: 10px 12px;
+          font-size: 12px;
+          opacity: 0.75;
+          background: #fafafa;
+          border-bottom: 1px solid #eee;
+        }
+        td {
+          padding: 10px 12px;
+          vertical-align: top;
+          border-bottom: 1px solid #f0f0f0;
+        }
+        .row.alt {
+          background: #fcfcfc;
+        }
+        .pTitle {
+          font-weight: 800;
+        }
+        .pDesc {
+          opacity: 0.75;
+          font-size: 12px;
+          margin-top: 2px;
+        }
+        .muted {
+          opacity: 0.7;
+        }
+        .code {
+          background: #f6f6f6;
+          padding: 2px 6px;
+          border-radius: 6px;
+        }
+        .rowActions {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+        .btnSmall {
+          padding: 8px 10px;
+          border-radius: 10px;
+          border: 1px solid #e6e6e6;
+          background: white;
+          cursor: pointer;
+          font-size: 12px;
+          font-weight: 700;
+        }
+        .btnSmallDanger {
+          padding: 8px 10px;
+          border-radius: 10px;
+          border: 1px solid #ffd0d0;
+          background: #fff4f4;
+          cursor: pointer;
+          font-size: 12px;
+          font-weight: 700;
+        }
+        .empty {
+          padding: 16px;
+          text-align: center;
+          opacity: 0.7;
+        }
+
+        /* Mobile cards */
+        .pCard {
+          margin-top: 10px;
+          background: white;
+          border: 1px solid #eee;
+          border-radius: 14px;
+          padding: 14px;
+          box-shadow: 0 1px 8px rgba(0,0,0,0.04);
+        }
+        .pCardTop {
+          display: flex;
+          justify-content: space-between;
+          gap: 10px;
+          align-items: flex-start;
+        }
+        .badge {
+          font-size: 12px;
+          font-weight: 800;
+          padding: 6px 10px;
+          border-radius: 999px;
+          background: #f6f6f6;
+          border: 1px solid #eee;
+          white-space: nowrap;
+        }
+        .pGrid {
+          display: grid;
+          gap: 10px;
+          margin-top: 12px;
+        }
+        .kv .k {
+          font-size: 12px;
+          font-weight: 800;
+          opacity: 0.8;
+        }
+        .kv .v {
+          font-size: 13px;
+          margin-top: 3px;
+        }
+        .pCardActions {
+          display: flex;
+          gap: 10px;
+          margin-top: 12px;
+          flex-wrap: wrap;
+        }
+        .emptyCard {
+          margin-top: 10px;
+          padding: 14px;
+          border-radius: 14px;
+          border: 1px solid #eee;
+          background: white;
+          text-align: center;
+          opacity: 0.75;
+        }
+
+        .desktopOnly {
+          display: block;
+        }
+        .mobileOnly {
+          display: none;
+        }
+
+        /* ✅ Responsive breakpoints */
+        @media (max-width: 900px) {
+          .header {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+          .headerActions {
+            width: 100%;
+          }
+          .headerActions button {
+            flex: 1;
+          }
+
+          .formGrid {
+            grid-template-columns: 1fr; /* ✅ jadi 1 kolom */
+          }
+          .grid2 {
+            grid-template-columns: 1fr; /* ✅ input 2 kolom jadi stack */
+          }
+          .search {
+            max-width: 100%;
+            width: 100%;
+          }
+
+          .desktopOnly {
+            display: none; /* ✅ tabel disembunyikan */
+          }
+          .mobileOnly {
+            display: block; /* ✅ card ditampilkan */
+          }
+        }
+
+        @media (max-width: 420px) {
+          .page {
+            padding: 0 10px;
+          }
+          .btn, .btnOutline {
+            width: 100%;
+          }
+        }
+      `}</style>
     </div>
   );
 }
@@ -454,8 +871,16 @@ export default function Products() {
 function Field({ label, children }) {
   return (
     <div>
-      <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 6, opacity: 0.8 }}>{label}</div>
+      <div className="label">{label}</div>
       {children}
+      <style jsx>{`
+        .label {
+          font-size: 12px;
+          font-weight: 800;
+          margin-bottom: 6px;
+          opacity: 0.85;
+        }
+      `}</style>
     </div>
   );
 }
@@ -467,82 +892,4 @@ function Checkbox({ checked, onChange, label }) {
       <span style={{ fontSize: 13 }}>{label}</span>
     </label>
   );
-}
-
-function Th({ children }) {
-  return <th style={{ textAlign: "left", padding: "10px 12px", fontSize: 12, opacity: 0.75 }}>{children}</th>;
-}
-function Td({ children }) {
-  return <td style={{ padding: "10px 12px", verticalAlign: "top" }}>{children}</td>;
-}
-
-function input() {
-  return {
-    width: "100%",
-    padding: "10px 12px",
-    border: "1px solid #e6e6e6",
-    borderRadius: 10,
-    outline: "none",
-  };
-}
-function textarea() {
-  return {
-    width: "100%",
-    padding: "10px 12px",
-    border: "1px solid #e6e6e6",
-    borderRadius: 10,
-    outline: "none",
-    resize: "vertical",
-  };
-}
-
-function btn() {
-  return {
-    padding: "10px 12px",
-    borderRadius: 10,
-    border: "1px solid #e6e6e6",
-    background: "white",
-    cursor: "pointer",
-  };
-}
-function btnOutline() {
-  return {
-    padding: "10px 12px",
-    borderRadius: 10,
-    border: "1px solid #e6e6e6",
-    background: "white",
-    cursor: "pointer",
-  };
-}
-function btnPrimary() {
-  return {
-    padding: "11px 12px",
-    borderRadius: 10,
-    border: "none",
-    background: "#111",
-    color: "white",
-    cursor: "pointer",
-    fontWeight: 700,
-    marginTop: 6,
-  };
-}
-function btnSmall() {
-  return {
-    padding: "8px 10px",
-    borderRadius: 10,
-    border: "1px solid #e6e6e6",
-    background: "white",
-    cursor: "pointer",
-    fontSize: 12,
-  };
-}
-function btnSmallDanger() {
-  return {
-    padding: "8px 10px",
-    borderRadius: 10,
-    border: "1px solid #ffd0d0",
-    background: "#fff4f4",
-    cursor: "pointer",
-    fontSize: 12,
-  };
 }
