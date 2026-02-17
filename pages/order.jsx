@@ -126,6 +126,7 @@ export default function OrderForm() {
     "Viu Anlim": {
       "1 Bulan · Pribadi": "4000",
       "1 Tahun · Pribadi": "6000",
+      "Lifetime · Pribadi": "8000",
     },
 
     HBO: {
