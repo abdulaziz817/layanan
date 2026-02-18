@@ -12,6 +12,8 @@
     "@heroicons/react": "^2.2.0",
     "@next/font": "13.0.7",
     "@supabase/supabase-js": "^2.90.1",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.36.2",
     "aos": "^2.3.4",
     "canvas-confetti": "^1.9.3",
     "chart.js": "^4.5.1",
@@ -22,6 +24,7 @@
     "eslint-config-next": "13.1.1",
     "framer-motion": "^12.24.10",
     "googleapis": "^168.0.0",
+    "helmet": "^8.1.0",
     "html-to-image": "^1.11.13",
     "html2canvas": "^1.4.1",
     "html2pdf.js": "^0.10.3",
@@ -32,6 +35,7 @@
     "next-pwa": "^5.6.0",
     "qrcode": "^1.5.4",
     "qrcode.react": "^4.2.0",
+    "rate-limiter-flexible": "^9.1.1",
     "react": "^19.2.3",
     "react-chartjs-2": "^5.3.1",
     "react-datepicker": "^8.4.0",
@@ -42,7 +46,8 @@
     "react-typed": "^2.0.12",
     "swiper": "^11.2.8",
     "uuid": "^13.0.0",
-    "web-push": "^3.6.7"
+    "web-push": "^3.6.7",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.3",
