@@ -12,14 +12,35 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [pwa, setPwa] = useState(false)
 
+  // ✅ PROMO: Diskon aktif hanya di tanggal ini
+  const [isDiskonEvent, setIsDiskonEvent] = useState(false)
+
   useEffect(() => {
     setPwa(isPWA())
+  }, [])
+
+  // ✅ auto update status promo (biar ga perlu refresh)
+  useEffect(() => {
+    const check = () => {
+      const now = new Date() // waktu lokal user
+      const start = new Date('2026-02-19T00:00:00')
+      const end = new Date('2026-02-22T23:59:59')
+      setIsDiskonEvent(now >= start && now <= end)
+    }
+
+    check()
+    const t = setInterval(check, 30_000)
+    return () => clearInterval(t)
   }, [])
 
   const navigation = [
     { title: 'Tentang', path: '/#cta' },
     { title: 'Software', path: '/#toolkit' },
     { title: 'Testimoni', path: '/#testimonials' },
+
+    // ✅ Diskon hanya tampil kalau PWA + event diskon aktif
+    ...(pwa && isDiskonEvent ? [{ title: 'Diskon', path: '/order/diskon' }] : []),
+
     ...(pwa
       ? [
           { title: 'Blog', path: '/blog' },
@@ -40,25 +61,21 @@ export default function Navbar() {
   const handleNavClick = (path) => {
     setMenuOpen(false)
 
-    // ✅ kalau anchor, selalu push dengan hash-nya
     if (path.startsWith('/#')) {
-      router.push(path) // <-- penting: jangan push('/')
+      router.push(path)
       return
     }
 
     if (pathname !== path) router.push(path)
   }
 
-  // ✅ setiap route berubah, kalau ada hash -> scroll
   useEffect(() => {
     const hash = window.location.hash
     if (!hash) return
 
     const id = hash.replace('#', '')
 
-    // tunggu DOM section di halaman home kebentuk dulu
     requestAnimationFrame(() => {
-      // kadang butuh 2 frame kalau home render agak berat
       requestAnimationFrame(() => scrollToAnchor(id))
     })
   }, [pathname])
@@ -70,6 +87,7 @@ export default function Navbar() {
           Layanan Nusantara
         </h1>
 
+        {/* DESKTOP */}
         <nav className="hidden md:flex items-center space-x-4">
           {navigation.map((item, idx) => (
             <button
@@ -89,6 +107,7 @@ export default function Navbar() {
           </Link>
         </nav>
 
+        {/* MOBILE BUTTON */}
         <button
           onClick={() => setMenuOpen(true)}
           aria-label="Toggle menu"
@@ -100,6 +119,7 @@ export default function Navbar() {
         </button>
       </div>
 
+      {/* MOBILE DRAWER */}
       <div
         className={`fixed inset-0 z-40 md:hidden transition ${
           menuOpen ? 'pointer-events-auto' : 'pointer-events-none'

@@ -1,4 +1,5 @@
 import Head from "next/head";
+import { isPWA } from "../../utils/isPWA";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import { motion } from "framer-motion";
@@ -6,6 +7,9 @@ import Link from "next/link";
 
 export default function OrderDiskonPage() {
   const router = useRouter();
+
+  // ✅ gate allow render
+  const [allow, setAllow] = useState(false);
 
   // user profile
   const [checking, setChecking] = useState(true);
@@ -40,99 +44,142 @@ export default function OrderDiskonPage() {
   const [cryptoLoading, setCryptoLoading] = useState(false);
   const [cryptoError, setCryptoError] = useState("");
 
+  const isDiskonEvent = useMemo(() => {
+    const now = new Date();
+    const start = new Date("2026-02-19T00:00:00");
+    const end = new Date("2026-02-22T23:59:59");
+    return now >= start && now <= end;
+  }, []);
 
-const isDiskonEvent = useMemo(() => {
-  const now = new Date();
-  // pakai waktu lokal browser user
-  const start = new Date("2026-02-19T00:00:00");
-  const end = new Date("2026-02-22T23:59:59");
-  return now >= start && now <= end;
-}, []);
   const discountMultiplier = 0.53; // 47% off
   const discountLabel = "47% OFF";
+
   const RamadanDecor = () => {
-  const stars = Array.from({ length: 10 });
+    const stars = Array.from({ length: 10 });
 
-  return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden">
-      {/* Glow halus */}
-      <div className="absolute -top-24 -right-24 h-56 w-56 rounded-full bg-indigo-100/40 blur-3xl" />
-      <div className="absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-emerald-100/30 blur-3xl" />
+    return (
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -top-24 -right-24 h-56 w-56 rounded-full bg-indigo-100/40 blur-3xl" />
+        <div className="absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-emerald-100/30 blur-3xl" />
 
-      {/* Bulan sabit (SVG biar pasti kelihatan di background putih) */}
-      <motion.div
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="absolute -top-6 right-6"
-      >
-        <div className="relative">
-          <svg width="84" height="84" viewBox="0 0 84 84" fill="none">
-            {/* Lingkaran luar */}
-            <circle cx="42" cy="42" r="28" stroke="rgba(17,24,39,0.18)" strokeWidth="2" />
-            {/* “Potongan” untuk efek sabit */}
-            <circle cx="52" cy="36" r="28" fill="white" />
-            {/* Outline tipis untuk potongan (biar sabit makin jelas) */}
-            <circle cx="52" cy="36" r="28" stroke="rgba(17,24,39,0.06)" strokeWidth="2" />
-          </svg>
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="absolute -top-6 right-6"
+        >
+          <div className="relative">
+            <svg width="84" height="84" viewBox="0 0 84 84" fill="none">
+              <circle cx="42" cy="42" r="28" stroke="rgba(17,24,39,0.18)" strokeWidth="2" />
+              <circle cx="52" cy="36" r="28" fill="white" />
+              <circle cx="52" cy="36" r="28" stroke="rgba(17,24,39,0.06)" strokeWidth="2" />
+            </svg>
 
-          {/* Lentera mini */}
-          <motion.div
-            animate={{ y: [0, 4, 0] }}
-            transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -left-12 top-10"
-          >
-            <div className="h-10 w-7 rounded-xl border border-gray-200 bg-white shadow-sm flex items-center justify-center">
-              <div className="h-2 w-2 rounded-full bg-indigo-200" />
-            </div>
-            <div className="mx-auto mt-1 h-6 w-px bg-gray-200" />
-          </motion.div>
-        </div>
-      </motion.div>
+            <motion.div
+              animate={{ y: [0, 4, 0] }}
+              transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute -left-12 top-10"
+            >
+              <div className="h-10 w-7 rounded-xl border border-gray-200 bg-white shadow-sm flex items-center justify-center">
+                <div className="h-2 w-2 rounded-full bg-indigo-200" />
+              </div>
+              <div className="mx-auto mt-1 h-6 w-px bg-gray-200" />
+            </motion.div>
+          </div>
+        </motion.div>
 
-      {/* Sparkle kecil */}
-      {stars.map((_, i) => (
-        <motion.span
-          key={i}
-          className="absolute inline-block h-1.5 w-1.5 rounded-full bg-gray-400"
-          style={{
-            left: `${10 + i * 8}%`,
-            top: `${8 + (i % 4) * 10}%`,
-            opacity: 0.2,
-          }}
-          animate={{ opacity: [0.12, 0.35, 0.12], scale: [1, 1.4, 1] }}
-          transition={{
-            duration: 2 + (i % 3) * 0.6,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: i * 0.08,
-          }}
-        />
-      ))}
-    </div>
-  );
-};
+        {stars.map((_, i) => (
+          <motion.span
+            key={i}
+            className="absolute inline-block h-1.5 w-1.5 rounded-full bg-gray-400"
+            style={{
+              left: `${10 + i * 8}%`,
+              top: `${8 + (i % 4) * 10}%`,
+              opacity: 0.2,
+            }}
+            animate={{ opacity: [0.12, 0.35, 0.12], scale: [1, 1.4, 1] }}
+            transition={{
+              duration: 2 + (i % 3) * 0.6,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: i * 0.08,
+            }}
+          />
+        ))}
+      </div>
+    );
+  };
 
-const RamadanBadge = ({ active, label }) => {
-  return (
-    <div className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs shadow-sm">
-      <span className={`h-2 w-2 rounded-full ${active ? "bg-green-500" : "bg-gray-400"}`} />
-      <span className="text-gray-700 font-semibold">
-        {active ? `Promo Ramadan Aktif · ${label}` : `Promo Ramadan Tidak Aktif`}
-      </span>
-    </div>
-  );
-};
+  // ✅ GATE PALING AWAL: PWA + event
+  useEffect(() => {
+    // wajib PWA
+    if (!isPWA()) {
+      router.replace("/");
+      return;
+    }
 
-  const [me, setMe] = useState(null);
+    // wajib event diskon aktif
+    if (!isDiskonEvent) {
+      router.replace("/");
+      return;
+    }
 
-useEffect(() => {
-  (async () => {
-    const r = await fetch("/api/user/auth/me");
-    const j = await r.json();
-    if (j?.ok) setMe(j.user);
-  })();
-}, []);
+    setAllow(true);
+  }, [router, isDiskonEvent]);
+
+  // gate: wajib login + profil lengkap (jalan hanya kalau allow true)
+  useEffect(() => {
+    if (!allow) return;
+
+    const run = async () => {
+      try {
+        const res = await fetch("/api/user/auth/me");
+        const data = await res.json();
+
+        if (!data?.ok) {
+          router.replace(`/login?returnTo=${encodeURIComponent("/order/diskon")}`);
+          return;
+        }
+
+        if (!data?.user?.profile_completed) {
+          router.replace(`/profil?returnTo=${encodeURIComponent("/order/diskon")}`);
+          return;
+        }
+
+        setUser(data.user);
+        setName(data.user?.name || "");
+        setPhone(data.user?.phone || "");
+      } catch (e) {
+        router.replace(`/login?returnTo=${encodeURIComponent("/order/diskon")}`);
+      } finally {
+        setChecking(false);
+      }
+    };
+
+    run();
+  }, [allow, router]);
+
+  // auto scroll error banner
+  useEffect(() => {
+    if (!error) return;
+    errorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [error]);
+
+  // reset durasi & harga ketika ganti aplikasi
+  useEffect(() => {
+    setDuration("");
+    setDurationPrice("");
+  }, [selectedSubService]);
+
+  // reset error crypto saat ganti coin/network
+  useEffect(() => {
+    setCryptoError("");
+  }, [cryptoCoin, cryptoNetwork]);
+
+  // reset network USDT default
+  useEffect(() => {
+    if (cryptoCoin !== "USDT") setCryptoNetwork("TRC20");
+  }, [cryptoCoin]);
 
   // daftar harga aplikasi (normal)
   const appPrices = {
@@ -270,59 +317,6 @@ useEffect(() => {
     return "-";
   };
 
-  // gate: wajib login + profil lengkap
-  useEffect(() => {
-    const run = async () => {
-      try {
-        const res = await fetch("/api/user/auth/me");
-        const data = await res.json();
-
-        if (!data?.ok) {
-          router.replace(`/login?returnTo=${encodeURIComponent("/order/diskon")}`);
-          return;
-        }
-
-        if (!data?.user?.profile_completed) {
-          router.replace(`/profil?returnTo=${encodeURIComponent("/order/diskon")}`);
-          return;
-        }
-
-        setUser(data.user);
-        setName(data.user?.name || "");
-        setPhone(data.user?.phone || "");
-      } catch (e) {
-        router.replace(`/login?returnTo=${encodeURIComponent("/order/diskon")}`);
-      } finally {
-        setChecking(false);
-      }
-    };
-
-    run();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // auto scroll error banner
-  useEffect(() => {
-    if (!error) return;
-    errorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [error]);
-
-  // reset durasi & harga ketika ganti aplikasi
-  useEffect(() => {
-    setDuration("");
-    setDurationPrice("");
-  }, [selectedSubService]);
-
-  // reset error crypto saat ganti coin/network
-  useEffect(() => {
-    setCryptoError("");
-  }, [cryptoCoin, cryptoNetwork]);
-
-  // reset network USDT default
-  useEffect(() => {
-    if (cryptoCoin !== "USDT") setCryptoNetwork("TRC20");
-  }, [cryptoCoin]);
-
   // total untuk crypto
   const totalIDR = useMemo(() => Number(durationPrice || 0), [durationPrice]);
 
@@ -402,7 +396,7 @@ useEffect(() => {
   const computePrice = (sub, dur) => {
     const raw = appPrices?.[sub]?.[dur] ?? 0;
     const base = Number(raw) || 0;
-if (!isDiskonEvent) return base;
+    if (!isDiskonEvent) return base;
     return Math.round(base * discountMultiplier);
   };
 
@@ -421,10 +415,9 @@ if (!isDiskonEvent) return base;
       if (!addr) fe.crypto = "Alamat wallet crypto belum diisi.";
     }
 
-    // promo harus dalam range
     if (!isDiskonEvent) {
-  fe.diskon = "Diskon belum aktif / sudah berakhir. Halaman ini hanya untuk event diskon.";
-}
+      fe.diskon = "Diskon belum aktif / sudah berakhir. Halaman ini hanya untuk event diskon.";
+    }
 
     if (Object.keys(fe).length > 0) {
       setFieldErrors(fe);
@@ -454,30 +447,37 @@ if (!isDiskonEvent) return base;
             : `💰 *Estimasi Bayar:* -\n`)
         : "";
 
-    // biar admin bisa bedain order promo vs normal:
-    // - ada tag [PROMO-RAMADAN-47]
-    // - ada path sumber: /order/diskon
-    // - ada harga normal & harga promo
-const encodedMessage = encodeURIComponent(
-  `*Hai Layanan Nusantara!* 👋✨\n\n` +
-    `*[DISKON-47]*\n` +
-    `*Sumber:* /order/diskon\n\n` +
-    `👤 *Nama:* ${name}\n` +
-    `📞 *Nomor WhatsApp:* ${phone}\n` +
-    `📦 *Aplikasi:* ${selectedSubService}\n` +
-    `⏳ *Durasi:* ${duration}\n` +
-    `💸 *Harga Normal:* Rp ${normalPrice.toLocaleString("id-ID")}\n` +
-    `🔥 *Harga Diskon (${discountLabel}):* Rp ${diskonPrice.toLocaleString("id-ID")}\n` +
-    `💳 *Metode Pembayaran:* ${paymentMethod}\n` +
-    (paymentMethod === "Crypto" ? `${extraCryptoText}` : "") +
-    `📝 *Catatan:* ${message}\n\n` +
-    `Terima kasih!\n${name}`
-);
+    // ⚠️ FIX BUG: kamu tulis diskonPrice tapi variabelnya gak ada → pakai promoPrice
+    const encodedMessage = encodeURIComponent(
+      `*Hai Layanan Nusantara!* 👋✨\n\n` +
+        `*[DISKON-47]*\n` +
+        `*Sumber:* /order/diskon\n\n` +
+        `👤 *Nama:* ${name}\n` +
+        `📞 *Nomor WhatsApp:* ${phone}\n` +
+        `📦 *Aplikasi:* ${selectedSubService}\n` +
+        `⏳ *Durasi:* ${duration}\n` +
+        `💸 *Harga Normal:* Rp ${normalPrice.toLocaleString("id-ID")}\n` +
+        `🔥 *Harga Diskon (${discountLabel}):* Rp ${promoPrice.toLocaleString("id-ID")}\n` +
+        `💳 *Metode Pembayaran:* ${paymentMethod}\n` +
+        (paymentMethod === "Crypto" ? `${extraCryptoText}` : "") +
+        `📝 *Catatan:* ${message}\n\n` +
+        `Terima kasih!\n${name}`
+    );
+
     setTimeout(() => {
       window.open(`https://wa.me/${waNumber}?text=${encodedMessage}`, "_blank");
       setIsSubmitting(false);
     }, 700);
   };
+
+  // ✅ RETURN: jangan bikin hook kondisional, lock UI di sini
+  if (!allow) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-600">Mengalihkan...</p>
+      </div>
+    );
+  }
 
   if (checking) {
     return (
@@ -493,8 +493,8 @@ const encodedMessage = encodeURIComponent(
         <title>Diskon Spesial - Layanan Nusantara</title>
       </Head>
 
-    <div className="pt-28 pb-12 bg-white min-h-screen relative">
-  <RamadanDecor />
+      <div className="pt-28 pb-12 bg-white min-h-screen relative">
+        <RamadanDecor />
         <div className="max-w-xl mx-auto px-4 text-gray-700">
           <motion.div
             initial={{ opacity: 0, y: 18 }}
@@ -502,32 +502,32 @@ const encodedMessage = encodeURIComponent(
             transition={{ duration: 0.5 }}
             className="border border-gray-200 rounded-2xl shadow-sm p-6 bg-white relative overflow-hidden"
           >
-          <div className="flex items-start justify-between gap-3">
-  <div className="min-w-0">
-    <h1 className="text-2xl font-bold text-gray-900">Diskon Ramadhan</h1>
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <h1 className="text-2xl font-bold text-gray-900">Diskon Ramadhan</h1>
 
-<p className="text-sm text-gray-500 mt-1">
-  Diskon <b>{discountLabel}</b> aktif <b>19–22 Feb 2026</b>.
-</p>
-  </div>
+                <p className="text-sm text-gray-500 mt-1">
+                  Diskon <b>{discountLabel}</b> aktif <b>19–22 Feb 2026</b>.
+                </p>
+              </div>
 
-  <Link
-    href="/profil?returnTo=/order/diskon"
-    className="text-sm font-semibold text-indigo-700 hover:underline whitespace-nowrap"
-  >
-    Edit Profil
-  </Link>
-</div>
+              <Link
+                href="/profil?returnTo=/order/diskon"
+                className="text-sm font-semibold text-indigo-700 hover:underline whitespace-nowrap"
+              >
+                Edit Profil
+              </Link>
+            </div>
 
-         {!isDiskonEvent ? (
-  <div className="mt-4 bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm p-3 rounded-lg">
-    Diskon sedang tidak aktif. Halaman ini hanya bisa checkout saat event diskon.
-  </div>
-) : (
-  <div className="mt-4 bg-green-50 border border-green-200 text-green-800 text-sm p-3 rounded-lg">
-    Diskon aktif! Potongan otomatis diterapkan ke harga.
-  </div>
-)}
+            {!isDiskonEvent ? (
+              <div className="mt-4 bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm p-3 rounded-lg">
+                Diskon sedang tidak aktif. Halaman ini hanya bisa checkout saat event diskon.
+              </div>
+            ) : (
+              <div className="mt-4 bg-green-50 border border-green-200 text-green-800 text-sm p-3 rounded-lg">
+                Diskon aktif! Potongan otomatis diterapkan ke harga.
+              </div>
+            )}
 
             {error ? (
               <div
@@ -535,34 +535,30 @@ const encodedMessage = encodeURIComponent(
                 className="mt-4 bg-red-50 border border-red-200 text-red-700 text-sm p-3 rounded-lg"
               >
                 {error}
-            {fieldErrors?.diskon ? (
-  <div className="mt-2 text-xs">{fieldErrors.diskon}</div>
-) : null}
+                {fieldErrors?.diskon ? <div className="mt-2 text-xs">{fieldErrors.diskon}</div> : null}
               </div>
             ) : null}
-<form onSubmit={handleSubmit} className="mt-6 space-y-4 text-sm">
 
-  {/* 👇 BAGIAN USER INFO + AVATAR */}
-  <div className="flex items-center gap-3">
-    <div className="w-12 h-12 rounded-full border overflow-hidden bg-gray-50 flex items-center justify-center">
-      {user?.avatar_url ? (
-        <img
-          src={user.avatar_url}
-          alt="avatar"
-          className="w-full h-full object-cover"
-          referrerPolicy="no-referrer"
-        />
-      ) : (
-        <span className="text-gray-400 text-xs">No Avatar</span>
-      )}
-    </div>
+            <form onSubmit={handleSubmit} className="mt-6 space-y-4 text-sm">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full border overflow-hidden bg-gray-50 flex items-center justify-center">
+                  {user?.avatar_url ? (
+                    <img
+                      src={user.avatar_url}
+                      alt="avatar"
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <span className="text-gray-400 text-xs">No Avatar</span>
+                  )}
+                </div>
 
-    <div>
-      <p className="font-semibold text-gray-900">{user?.name || "-"}</p>
-      <p className="text-xs text-gray-500">{user?.phone || "-"}</p>
-    </div>
-  </div>
-
+                <div>
+                  <p className="font-semibold text-gray-900">{user?.name || "-"}</p>
+                  <p className="text-xs text-gray-500">{user?.phone || "-"}</p>
+                </div>
+              </div>
 
               <div>
                 <label className="text-sm text-gray-700">Pilih Aplikasi</label>
@@ -573,7 +569,10 @@ const encodedMessage = encodeURIComponent(
                     clearFieldError("selectedSubService");
                     clearFieldError("duration");
                   }}
-                  className={getClass("mt-2 w-full border rounded-lg p-3 focus:ring-2 focus:ring-indigo-600", "selectedSubService")}
+                  className={getClass(
+                    "mt-2 w-full border rounded-lg p-3 focus:ring-2 focus:ring-indigo-600",
+                    "selectedSubService"
+                  )}
                 >
                   <option value="">-- Pilih Aplikasi --</option>
                   {Object.keys(appPrices).map((k) => (
@@ -600,7 +599,10 @@ const encodedMessage = encodeURIComponent(
                     setDurationPrice(final);
                   }}
                   disabled={!selectedSubService}
-                  className={getClass("mt-2 w-full border rounded-lg p-3 focus:ring-2 focus:ring-indigo-600 disabled:opacity-50", "duration")}
+                  className={getClass(
+                    "mt-2 w-full border rounded-lg p-3 focus:ring-2 focus:ring-indigo-600 disabled:opacity-50",
+                    "duration"
+                  )}
                 >
                   <option value="">-- Pilih Durasi --</option>
                   {selectedSubService &&
@@ -624,25 +626,28 @@ const encodedMessage = encodeURIComponent(
                 </div>
 
                 {isDiskonEvent && duration && selectedSubService ? (
-  <div className="mt-2 text-xs text-gray-600">
-    <div className="flex justify-between">
-      <span>Normal</span>
-      <span className="line-through">
-        Rp {Number(appPrices[selectedSubService][duration] || 0).toLocaleString("id-ID")}
-      </span>
-    </div>
-    <div className="flex justify-between font-semibold text-green-700">
-      <span>Diskon ({discountLabel})</span>
-      <span>Rp {Number(durationPrice || 0).toLocaleString("id-ID")}</span>
-    </div>
-  </div>
-) : null}
+                  <div className="mt-2 text-xs text-gray-600">
+                    <div className="flex justify-between">
+                      <span>Normal</span>
+                      <span className="line-through">
+                        Rp {Number(appPrices[selectedSubService][duration] || 0).toLocaleString("id-ID")}
+                      </span>
+                    </div>
+                    <div className="flex justify-between font-semibold text-green-700">
+                      <span>Diskon ({discountLabel})</span>
+                      <span>Rp {Number(durationPrice || 0).toLocaleString("id-ID")}</span>
+                    </div>
+                  </div>
+                ) : null}
               </div>
 
               <div>
                 <label className="text-sm text-gray-700">Pesan Tambahan</label>
                 <textarea
-                  className={getClass("mt-2 w-full h-28 border rounded-lg p-3 focus:ring-2 focus:ring-indigo-600", "message")}
+                  className={getClass(
+                    "mt-2 w-full h-28 border rounded-lg p-3 focus:ring-2 focus:ring-indigo-600",
+                    "message"
+                  )}
                   value={message}
                   onChange={(e) => {
                     setMessage(e.target.value);
@@ -658,7 +663,10 @@ const encodedMessage = encodeURIComponent(
               <div>
                 <label className="text-sm text-gray-700">Metode Pembayaran</label>
                 <select
-                  className={getClass("mt-2 w-full border rounded-lg p-3 focus:ring-2 focus:ring-indigo-600", "paymentMethod")}
+                  className={getClass(
+                    "mt-2 w-full border rounded-lg p-3 focus:ring-2 focus:ring-indigo-600",
+                    "paymentMethod"
+                  )}
                   value={paymentMethod}
                   onChange={(e) => handlePaymentChange(e.target.value)}
                 >
@@ -674,44 +682,34 @@ const encodedMessage = encodeURIComponent(
                 ) : null}
               </div>
 
-           {/* QRIS */}
-                {showQris && (
-                  <div className="mt-4 w-full p-6 rounded-2xl border border-gray-100 shadow-sm bg-white">
-                    <div className="flex flex-col items-center">
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-lg font-semibold text-gray-900">QRIS Payment</h3>
-                        <span className="px-2 py-0.5 text-[10px] rounded-md bg-gray-100 text-gray-500">
-                          Secure
-                        </span>
-                      </div>
-
-                      <span className="text-xs text-gray-500 mt-1">
-                        Scan untuk melanjutkan pembayaran
+              {showQris && (
+                <div className="mt-4 w-full p-6 rounded-2xl border border-gray-100 shadow-sm bg-white">
+                  <div className="flex flex-col items-center">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-lg font-semibold text-gray-900">QRIS Payment</h3>
+                      <span className="px-2 py-0.5 text-[10px] rounded-md bg-gray-100 text-gray-500">
+                        Secure
                       </span>
-
-                      <div className="mt-5 p-4 rounded-2xl bg-gray-50 border w-48 h-48 flex items-center justify-center shadow-inner">
-                        <img
-                          src="/image/qiris.jpg"
-                          alt="QRIS"
-                          className="w-full h-full object-contain rounded-xl"
-                        />
-                      </div>
-
-                      <a
-                        href="/image/qiris.jpg"
-                        download
-                        className="mt-6 w-full text-center py-2.5 text-[15px] font-medium rounded-xl bg-gray-900 text-white hover:bg-black transition-all active:scale-[0.98] shadow-md"
-                      >
-                        Download QR
-                      </a>
-
-                      <p className="text-[11px] text-gray-400 mt-3">
-                        Pastikan QR terlihat jelas sebelum di-scan
-                      </p>
                     </div>
-                  </div>
-                )}
 
+                    <span className="text-xs text-gray-500 mt-1">Scan untuk melanjutkan pembayaran</span>
+
+                    <div className="mt-5 p-4 rounded-2xl bg-gray-50 border w-48 h-48 flex items-center justify-center shadow-inner">
+                      <img src="/image/qiris.jpg" alt="QRIS" className="w-full h-full object-contain rounded-xl" />
+                    </div>
+
+                    <a
+                      href="/image/qiris.jpg"
+                      download
+                      className="mt-6 w-full text-center py-2.5 text-[15px] font-medium rounded-xl bg-gray-900 text-white hover:bg-black transition-all active:scale-[0.98] shadow-md"
+                    >
+                      Download QR
+                    </a>
+
+                    <p className="text-[11px] text-gray-400 mt-3">Pastikan QR terlihat jelas sebelum di-scan</p>
+                  </div>
+                </div>
+              )}
 
               {showGopay && (
                 <div className="border rounded-2xl p-4">
@@ -859,13 +857,11 @@ const encodedMessage = encodeURIComponent(
 
               <button
                 type="submit"
-              disabled={isSubmitting || !isDiskonEvent}
+                disabled={isSubmitting || !isDiskonEvent}
                 className="w-full mt-2 bg-indigo-600 text-white rounded-xl py-3 font-semibold hover:bg-indigo-700 disabled:opacity-50"
               >
-               {isSubmitting ? "Mengirim..." : "Kirim Pesanan Diskon via WhatsApp"}
+                {isSubmitting ? "Mengirim..." : "Kirim Pesanan Diskon via WhatsApp"}
               </button>
-
-           
             </form>
           </motion.div>
         </div>
