@@ -3,6 +3,12 @@
 // ✅ Tambahan: hitung estimasi 1x (useMemo), label network jelas, reset network saat ganti coin,
 // ✅ Copy button aman kalau address kosong, dan WA message konsisten.
 // ✅ NEW: Validasi dengan highlight merah per field + scroll ke banner error + pesan "lihat ke atas"
+// ✅ ADD: Domain checker khusus Web Development (cek domain tersedia / sudah dipakai)
+// ✅ ADD: Biaya layanan Nusantara Rp 1.500 (masuk total)
+// ✅ ADD: Minimal budget Web Development Rp 150.000
+// ✅ ADD: Domain pricing "wajar" + pilihan kategori TLD + durasi 1/2/3 tahun + total domain tampil otomatis
+// ✅ ADD: Domain gratis: netlify.app & vercel.app (subdomain)
+// ✅ NOTE: Untuk domain checker butuh API route: /pages/api/domain-check.js (aku tulis lengkap di bawah)
 
 import Head from "next/head";
 import Input from "../../components/ui/Input";
@@ -12,10 +18,31 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
 export default function OrderForm() {
+  // ✅ Konstanta
+  const NUSANTARA_FEE = 1500;
+  const MIN_WEBDEV_BUDGET = 150000;
+
   const formatIDR = (n) => {
     const num = Number(n || 0);
     return num.toLocaleString("id-ID");
   };
+
+  // ✅ Domain (khusus Web Development)
+  const [domainMode, setDomainMode] = useState("");
+  // "custom" (domain berbayar) | "subdomain" (netlify/vercel)
+
+  const [domainBase, setDomainBase] = useState(""); // contoh: tokokamu (tanpa .com)
+  const [domainTld, setDomainTld] = useState(".site"); // default
+  const [domainYears, setDomainYears] = useState("1"); // "1" | "2" | "3"
+  const [domainStatus, setDomainStatus] = useState("");
+  // "" | "checking" | "available" | "taken" | "unknown"
+
+  const [domainAiSuggestion, setDomainAiSuggestion] = useState("");
+
+  const [subdomainProvider, setSubdomainProvider] = useState("");
+  // "netlify" | "vercel"
+  const [subdomainLabel, setSubdomainLabel] = useState("");
+  // contoh: tokokamu.netlify.app
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -36,7 +63,7 @@ export default function OrderForm() {
   const [showPaypal, setShowPaypal] = useState(false);
   const [showBCA, setShowBCA] = useState(false);
 
-  // ✅ NEW: field errors (biar input merah + teks kecil)
+  // ✅ NEW: field errors
   const [fieldErrors, setFieldErrors] = useState({});
 
   // ✅ NEW: ref untuk auto scroll ke banner error
@@ -45,8 +72,8 @@ export default function OrderForm() {
   // ✅ Tambahan untuk Crypto
   const [showCrypto, setShowCrypto] = useState(false);
   const [cryptoCoin, setCryptoCoin] = useState("USDT");
-  const [cryptoNetwork, setCryptoNetwork] = useState("TRC20"); // khusus USDT
-  const [cryptoRate, setCryptoRate] = useState(null); // IDR per 1 coin
+  const [cryptoNetwork, setCryptoNetwork] = useState("TRC20");
+  const [cryptoRate, setCryptoRate] = useState(null);
   const [cryptoLoading, setCryptoLoading] = useState(false);
   const [cryptoError, setCryptoError] = useState("");
 
@@ -66,6 +93,76 @@ export default function OrderForm() {
       BEP20: "0x10ba26d331F7D9BdaC445E0F3bF8eb4669E598Af",
     },
   };
+
+  // ✅ Domain gratis (subdomain)
+  const FREE_DOMAINS = ["netlify.app", "vercel.app"];
+
+  // ✅ Harga domain "wajar" per tahun (estimasi)
+  const DOMAIN_BUSINESS = {
+    ".store": 180000,
+    ".shop": 160000,
+    ".business": 210000,
+    ".company": 200000,
+    ".market": 230000,
+    ".services": 260000,
+    ".agency": 190000,
+    ".solutions": 280000,
+    ".enterprise": 320000,
+    ".group": 170000,
+  };
+
+  const DOMAIN_TECH = {
+    ".tech": 170000,
+    ".dev": 190000,
+    ".ai": 950000,
+    ".io": 650000,
+    ".cloud": 240000,
+    ".app": 200000,
+    ".digital": 180000,
+    ".systems": 250000,
+    ".network": 210000,
+    ".software": 260000,
+  };
+
+  const DOMAIN_CREATIVE = {
+    ".design": 280000,
+    ".studio": 190000,
+    ".art": 150000,
+    ".media": 210000,
+    ".graphics": 230000,
+    ".creative": 260000,
+    ".agency": 190000,
+    ".digital": 180000,
+    ".gallery": 170000,
+    ".works": 160000,
+  };
+
+  const DOMAIN_PORTFOLIO = {
+    ".portfolio": 220000,
+    ".site": 140000,
+    ".website": 180000,
+    ".online": 150000,
+    ".space": 160000,
+    ".page": 130000,
+    ".me": 170000,
+    ".bio": 190000,
+    ".name": 120000,
+    ".pro": 210000,
+  };
+
+  const DOMAIN_PRICES = {
+    ...DOMAIN_BUSINESS,
+    ...DOMAIN_TECH,
+    ...DOMAIN_CREATIVE,
+    ...DOMAIN_PORTFOLIO,
+  };
+
+  const DOMAIN_GROUPS = [
+    { label: "Bisnis", options: Object.keys(DOMAIN_BUSINESS) },
+    { label: "Teknologi", options: Object.keys(DOMAIN_TECH) },
+    { label: "Kreatif & Desain", options: Object.keys(DOMAIN_CREATIVE) },
+    { label: "Portofolio", options: Object.keys(DOMAIN_PORTFOLIO) },
+  ];
 
   const appPrices = {
     ChatGPT: {
@@ -259,7 +356,7 @@ export default function OrderForm() {
     setMinDate(`${yyyy}-${mm}-${dd}`);
   }, []);
 
-  // ✅ NEW: auto scroll ke banner error saat error muncul
+  // ✅ auto scroll ke banner error saat error muncul
   useEffect(() => {
     if (!error) return;
     errorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -269,6 +366,27 @@ export default function OrderForm() {
   useEffect(() => {
     setDuration("");
     setDurationPrice("");
+
+    // ✅ reset domain kalau ganti layanan
+    setDomainMode("");
+    setDomainBase("");
+    setDomainTld(".site");
+    setDomainYears("1");
+    setDomainStatus("");
+    setDomainAiSuggestion("");
+    setSubdomainProvider("");
+    setSubdomainLabel("");
+
+    setFieldErrors((prev) => ({
+      ...prev,
+      domainMode: "",
+      domainBase: "",
+      domainTld: "",
+      domainYears: "",
+      domainStatus: "",
+      subdomainProvider: "",
+      subdomainLabel: "",
+    }));
   }, [selectedService]);
 
   // ✅ Reset durasi & harga kalau user ganti detail aplikasi
@@ -282,7 +400,7 @@ export default function OrderForm() {
     setCryptoError("");
   }, [cryptoCoin, cryptoNetwork]);
 
-  // ✅ Reset network USDT kalau pindah coin (biar state tidak nyangkut)
+  // ✅ Reset network USDT kalau pindah coin
   useEffect(() => {
     if (cryptoCoin !== "USDT") setCryptoNetwork("TRC20");
   }, [cryptoCoin]);
@@ -443,8 +561,6 @@ export default function OrderForm() {
     const value = e.target.value;
     const formatted = formatRupiah(value);
     setBudget(formatted);
-
-    // ✅ hapus error field budget saat user ngetik
     setFieldErrors((prev) => ({ ...prev, budget: "" }));
   };
 
@@ -458,15 +574,54 @@ export default function OrderForm() {
   // ❄ Efek salju akhir tahun
   const isSnowEvent = (month === 12 && day >= 24) || (month === 1 && day <= 2);
 
-  // ✅ Total IDR untuk konversi crypto
-  const totalIDR = useMemo(() => {
-    if (selectedService === "Aplikasi Premium") {
-      return Number(durationPrice || 0);
-    }
-    return Number((budget || "").replace(/\./g, "") || 0);
-  }, [selectedService, durationPrice, budget]);
+  // ✅ Helpers domain
+  const sanitizeDomainBase = (s) => {
+    return (s || "")
+      .trim()
+      .toLowerCase()
+      .replace(/^https?:\/\//, "")
+      .replace(/\/.*$/, "")
+      .replace(/\s+/g, "")
+      .replace(/[^a-z0-9-]/g, "");
+  };
 
-  // ✅ Estimasi crypto dihitung 1x (FIX bug toFixed null / inconsistent)
+  const getDomainFull = () => {
+    const base = sanitizeDomainBase(domainBase);
+    if (!base || !domainTld) return "";
+    return `${base}${domainTld}`;
+  };
+
+  const domainPricePerYear = useMemo(() => {
+    return Number(DOMAIN_PRICES[domainTld] || 0);
+  }, [domainTld]);
+
+  const domainCost = useMemo(() => {
+    if (selectedService !== "Web Development") return 0;
+    if (domainMode !== "custom") return 0;
+    const full = getDomainFull();
+    if (!full) return 0;
+    const years = Number(domainYears || 1);
+    return Number(domainPricePerYear || 0) * Number(years || 1);
+  }, [
+    selectedService,
+    domainMode,
+    domainBase,
+    domainTld,
+    domainYears,
+    domainPricePerYear,
+  ]);
+
+  // ✅ Total IDR untuk konversi crypto (sudah termasuk fee + domain kalau WebDev custom)
+  const totalIDR = useMemo(() => {
+    const base =
+      selectedService === "Aplikasi Premium"
+        ? Number(durationPrice || 0)
+        : Number((budget || "").replace(/\./g, "") || 0);
+
+    return Number(base || 0) + Number(NUSANTARA_FEE || 0) + Number(domainCost || 0);
+  }, [selectedService, durationPrice, budget, NUSANTARA_FEE, domainCost]);
+
+  // ✅ Estimasi crypto dihitung 1x
   const estimatedCrypto = useMemo(() => {
     if (!cryptoRate || !totalIDR) return null;
     const amt = Number(totalIDR) / Number(cryptoRate);
@@ -474,7 +629,7 @@ export default function OrderForm() {
     return amt;
   }, [cryptoRate, totalIDR]);
 
-  // ✅ Ambil kurs crypto → IDR (auto update) saat memilih Crypto
+  // ✅ Ambil kurs crypto → IDR (auto update)
   useEffect(() => {
     if (!showCrypto) return;
 
@@ -502,9 +657,7 @@ export default function OrderForm() {
 
         if (!alive) return;
 
-        if (!rate) {
-          throw new Error("Rate tidak ditemukan");
-        }
+        if (!rate) throw new Error("Rate tidak ditemukan");
 
         setCryptoRate(rate);
       } catch (err) {
@@ -518,7 +671,7 @@ export default function OrderForm() {
     };
 
     fetchRate();
-    const t = setInterval(fetchRate, 30000); // refresh tiap 30 detik
+    const t = setInterval(fetchRate, 30000);
 
     return () => {
       alive = false;
@@ -527,26 +680,15 @@ export default function OrderForm() {
   }, [showCrypto, cryptoCoin]);
 
   const getCryptoAddress = () => {
-    if (cryptoCoin === "USDT") {
-      return CRYPTO_WALLETS?.USDT?.[cryptoNetwork] || "";
-    }
-    if (cryptoCoin === "BTC") {
-      return CRYPTO_WALLETS?.BTC?.MAINNET || "";
-    }
-    if (cryptoCoin === "ETH") {
-      return CRYPTO_WALLETS?.ETH?.MAINNET || "";
-    }
-    if (cryptoCoin === "BNB") {
-      return CRYPTO_WALLETS?.BNB?.BEP20 || "";
-    }
+    if (cryptoCoin === "USDT") return CRYPTO_WALLETS?.USDT?.[cryptoNetwork] || "";
+    if (cryptoCoin === "BTC") return CRYPTO_WALLETS?.BTC?.MAINNET || "";
+    if (cryptoCoin === "ETH") return CRYPTO_WALLETS?.ETH?.MAINNET || "";
+    if (cryptoCoin === "BNB") return CRYPTO_WALLETS?.BNB?.BEP20 || "";
     return "";
   };
 
-  // ✅ Label network dibuat jelas (anti salah kirim)
   const getCryptoNetworkLabel = () => {
-    if (cryptoCoin === "USDT") {
-      return cryptoNetwork === "TRC20" ? "TRC20 (TRON)" : "BEP20 (BSC)";
-    }
+    if (cryptoCoin === "USDT") return cryptoNetwork === "TRC20" ? "TRC20 (TRON)" : "BEP20 (BSC)";
     if (cryptoCoin === "BTC") return "BTC (MAINNET)";
     if (cryptoCoin === "ETH") return "ETHEREUM (MAINNET)";
     if (cryptoCoin === "BNB") return "BSC (BEP20)";
@@ -560,17 +702,13 @@ export default function OrderForm() {
     setShowGopay(method === "GoPay");
     setShowPaypal(method === "PayPal");
     setShowBCA(method === "BCA");
-
-    // ✅ Crypto toggle
     setShowCrypto(method === "Crypto");
 
-    // ✅ hapus error paymentMethod saat user memilih
     setFieldErrors((prev) => ({ ...prev, paymentMethod: "" }));
   };
 
-  // ✅ NEW: helper class untuk merah + helper hapus error per field
-  const inputErrorClass =
-    "border-red-400 focus:ring-red-400 focus:border-red-400";
+  // ✅ helper class untuk merah
+  const inputErrorClass = "border-red-400 focus:ring-red-400 focus:border-red-400";
   const baseSelectClass =
     "mt-2 w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-indigo-600";
   const baseSelectClassBig =
@@ -579,14 +717,86 @@ export default function OrderForm() {
     "w-full mt-2 h-32 px-3 py-2 border rounded-lg shadow-sm focus:border-indigo-600 focus:ring resize-none";
   const baseDateClass = "mt-2 w-full border rounded-lg p-3";
 
-  const getClass = (base, key) =>
-    `${base} ${fieldErrors?.[key] ? inputErrorClass : ""}`;
+  const getClass = (base, key) => `${base} ${fieldErrors?.[key] ? inputErrorClass : ""}`;
 
   const clearFieldError = (key) => {
     setFieldErrors((prev) => {
       if (!prev?.[key]) return prev;
       return { ...prev, [key]: "" };
     });
+  };
+
+  // ✅ Domain checker via API (/pages/api/domain-check.js)
+  const checkDomain = async () => {
+    const full = getDomainFull();
+
+    if (!full) {
+      setDomainStatus("unknown");
+      setFieldErrors((prev) => ({
+        ...prev,
+        domainBase: "Isi nama domain dulu. Contoh: tokokamu",
+      }));
+      return;
+    }
+
+    // validasi format domain
+    if (!/^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(full)) {
+      setDomainStatus("unknown");
+      setFieldErrors((prev) => ({
+        ...prev,
+        domainBase: "Format domain tidak valid. Contoh: tokokamu + pilih ekstensi",
+      }));
+      return;
+    }
+
+    setDomainStatus("checking");
+
+    try {
+      const res = await fetch(`/api/domain-check?domain=${encodeURIComponent(full)}`);
+      const data = await res.json();
+
+      if (!data?.ok) {
+        setDomainStatus("unknown");
+        return;
+      }
+
+      setDomainStatus(data.status || "unknown");
+    } catch (e) {
+      setDomainStatus("unknown");
+    }
+  };
+
+  const pickAiTld = () => {
+    const sub = (selectedSubService || "").toLowerCase();
+
+    // sederhana tapi berguna
+    if (
+      sub.includes("e-commerce") ||
+      sub.includes("toko") ||
+      sub.includes("umkm") ||
+      sub.includes("company") ||
+      sub.includes("profile") ||
+      sub.includes("jasa")
+    ) {
+      setDomainAiSuggestion("Saran AI: domain bisnis cocok pakai .shop / .store / .business (atau .company).");
+      setDomainTld(".shop");
+      return;
+    }
+
+    if (sub.includes("portfolio") || sub.includes("blog") || sub.includes("pribadi") || sub.includes("linktree")) {
+      setDomainAiSuggestion("Saran AI: portfolio cocok pakai .site / .online / .page / .portfolio.");
+      setDomainTld(".site");
+      return;
+    }
+
+    if (sub.includes("web app") || sub.includes("dashboard") || sub.includes("sistem") || sub.includes("aplikasi")) {
+      setDomainAiSuggestion("Saran AI: proyek teknologi cocok pakai .dev / .app / .tech (kalau startup: .io / .ai).");
+      setDomainTld(".dev");
+      return;
+    }
+
+    setDomainAiSuggestion("Saran AI: paling aman pakai .site / .website (umum dan bagus).");
+    setDomainTld(".site");
   };
 
   const handleSubmit = (e) => {
@@ -596,8 +806,7 @@ export default function OrderForm() {
 
     // VALIDASI UMUM
     if (name.trim().length < 3) fe.name = "Nama harus berisi setidaknya 3 karakter.";
-    if (!phone.match(/^08\d{8,}$/))
-      fe.phone = "Nomor HP tidak valid (gunakan format 08xxxxxxxxxx).";
+    if (!phone.match(/^08\d{8,}$/)) fe.phone = "Nomor HP tidak valid (gunakan format 08xxxxxxxxxx).";
     if (!selectedService) fe.selectedService = "Silakan pilih layanan terlebih dahulu.";
 
     if (selectedSubService === "Lainnya" && customSubService.trim().length < 3) {
@@ -610,43 +819,90 @@ export default function OrderForm() {
       if (!duration) fe.duration = "Silakan pilih durasi langganan.";
     } else {
       // VALIDASI NORMAL
-      if (!budget.match(/^\d{1,3}(\.\d{3})*$/))
+      if (!budget.match(/^\d{1,3}(\.\d{3})*$/)) {
         fe.budget = "Budget harus format angka benar, contoh: 150.000.";
-      if (!deadline || new Date(deadline) <= new Date())
+      } else {
+        const b = Number((budget || "").replace(/\./g, "") || 0);
+
+        // minimal budget webdev
+        if (selectedService === "Web Development" && b < MIN_WEBDEV_BUDGET) {
+          fe.budget = `Minimal budget Web Development adalah Rp ${MIN_WEBDEV_BUDGET.toLocaleString("id-ID")}.`;
+        }
+      }
+
+      if (!deadline || new Date(deadline) <= new Date()) {
         fe.deadline = "Deadline harus minimal 1 hari setelah tanggal hari ini.";
+      }
+
+      // VALIDASI DOMAIN khusus Web Development
+      if (selectedService === "Web Development") {
+        if (!domainMode) fe.domainMode = "Pilih metode domain: domain berbayar atau subdomain gratis.";
+
+        if (domainMode === "custom") {
+          if (!sanitizeDomainBase(domainBase)) fe.domainBase = "Isi nama domain (tanpa ekstensi), contoh: tokokamu";
+          if (!domainTld) fe.domainTld = "Pilih ekstensi domain (.site/.shop/.dev/dll).";
+          if (!domainYears) fe.domainYears = "Pilih durasi domain (1/2/3 tahun).";
+
+          if (domainStatus === "taken") {
+            fe.domainStatus = "Domain sudah dipakai. Silakan pilih domain lain.";
+          }
+
+          if (domainStatus !== "available") {
+            fe.domainStatus = "Silakan cek domain dulu sampai statusnya 'Tersedia'.";
+          }
+        }
+
+        if (domainMode === "subdomain") {
+          if (!subdomainProvider) fe.subdomainProvider = "Pilih subdomain: Netlify atau Vercel.";
+          if (!subdomainLabel.trim()) fe.subdomainLabel = "Isi nama subdomain (contoh: tokokamu.netlify.app).";
+
+          // validasi: harus pakai domain yang disediakan
+          const lower = (subdomainLabel || "").trim().toLowerCase();
+          if (lower && !FREE_DOMAINS.some((d) => lower.endsWith(`.${d}`) || lower === d)) {
+            fe.subdomainLabel = "Subdomain harus berakhir dengan .netlify.app atau .vercel.app.";
+          }
+        }
+      }
     }
 
-    if (message.trim().length < 10)
-      fe.message = "Pesan terlalu singkat. Tulis setidaknya 10 karakter.";
+    if (message.trim().length < 10) fe.message = "Pesan terlalu singkat. Tulis setidaknya 10 karakter.";
     if (!paymentMethod) fe.paymentMethod = "Pilih metode pembayaran terlebih dahulu.";
 
     // VALIDASI tambahan untuk Crypto
     if (paymentMethod === "Crypto") {
       const addr = getCryptoAddress();
-      if (!addr) {
-        fe.crypto = "Alamat wallet crypto belum diisi. Cek konfigurasi CRYPTO_WALLETS.";
-      }
+      if (!addr) fe.crypto = "Alamat wallet crypto belum diisi. Cek konfigurasi CRYPTO_WALLETS.";
     }
 
-    // jika ada error
+    // kalau ada error
     if (Object.keys(fe).length > 0) {
       setFieldErrors(fe);
-
-      // ✅ banner global: “lihat ke atas”
       setError("Ada kesalahan pada pengisian form. Silakan periksa kolom yang ditandai merah.");
       return;
     }
 
-    // Jika semua valid:
+    // kalau valid
     setError("");
     setFieldErrors({});
     setIsSubmitting(true);
 
     const waNumber = "6287860592111";
-    const detailService =
-      selectedSubService === "Lainnya" ? customSubService : selectedSubService;
+    const detailService = selectedSubService === "Lainnya" ? customSubService : selectedSubService;
 
     const estimated = estimatedCrypto;
+
+    const domainText =
+      selectedService === "Web Development"
+        ? domainMode === "custom"
+          ? `🌍 *Domain:* ${getDomainFull()}\n` +
+            `📌 *Status Domain:* ${domainStatus === "available" ? "Tersedia" : domainStatus === "taken" ? "Sudah dipakai" : "Tidak diketahui"}\n` +
+            `🧾 *Harga Domain / Tahun:* Rp ${formatIDR(domainPricePerYear)}\n` +
+            `📅 *Durasi Domain:* ${domainYears} tahun\n` +
+            `💸 *Total Domain:* Rp ${formatIDR(domainCost)}\n`
+          : domainMode === "subdomain"
+          ? `🌍 *Domain:* ${subdomainLabel}\n` + `📌 *Tipe:* Subdomain gratis (${subdomainProvider})\n`
+          : ""
+        : "";
 
     const extraCryptoText =
       paymentMethod === "Crypto"
@@ -656,9 +912,7 @@ export default function OrderForm() {
           (cryptoRate
             ? `📈 *Kurs:* 1 ${cryptoCoin} = Rp ${Number(cryptoRate).toLocaleString("id-ID")}\n`
             : `📈 *Kurs:* (gagal diambil / belum tersedia)\n`) +
-          (typeof estimated === "number"
-            ? `💰 *Estimasi Bayar:* ${estimated.toFixed(6)} ${cryptoCoin}\n`
-            : `💰 *Estimasi Bayar:* -\n`)
+          (typeof estimated === "number" ? `💰 *Estimasi Bayar:* ${estimated.toFixed(6)} ${cryptoCoin}\n` : `💰 *Estimasi Bayar:* -\n`)
         : "";
 
     const encodedMessage = encodeURIComponent(
@@ -667,10 +921,17 @@ export default function OrderForm() {
         `👤 *Nama:* ${name}\n` +
         `📞 *Nomor WhatsApp:* ${phone}\n` +
         `🛠️ *Layanan:* ${selectedService}${detailService ? ` - ${detailService}` : ""}\n` +
+        (domainText ? domainText : "") +
         `${
           selectedService === "Aplikasi Premium"
-            ? `⏳ *Durasi Langganan:* ${duration}\n💰 *Harga:* Rp ${Number(durationPrice || 0).toLocaleString("id-ID")}\n`
-            : `💰 *Budget:* Rp ${budget}\n⏰ *Deadline:* ${deadline}\n`
+            ? `⏳ *Durasi Langganan:* ${duration}\n` +
+              `💰 *Harga:* Rp ${Number(durationPrice || 0).toLocaleString("id-ID")}\n` +
+              `🧾 *Biaya Layanan Nusantara:* Rp ${NUSANTARA_FEE.toLocaleString("id-ID")}\n` +
+              `💵 *Total (Harga + Fee + Domain jika ada):* Rp ${Number(totalIDR || 0).toLocaleString("id-ID")}\n`
+            : `💰 *Budget:* Rp ${budget}\n` +
+              `🧾 *Biaya Layanan Nusantara:* Rp ${NUSANTARA_FEE.toLocaleString("id-ID")}\n` +
+              `💵 *Total (Budget + Fee + Domain jika ada):* Rp ${Number(totalIDR || 0).toLocaleString("id-ID")}\n` +
+              `⏰ *Deadline:* ${deadline}\n`
         }` +
         `💳 *Metode Pembayaran:* ${paymentMethod}\n` +
         (paymentMethod === "Crypto" ? `${extraCryptoText}` : "") +
@@ -813,6 +1074,14 @@ export default function OrderForm() {
                       clearFieldError("selectedSubService");
                       clearFieldError("customSubService");
                       clearFieldError("duration");
+
+                      clearFieldError("domainMode");
+                      clearFieldError("domainBase");
+                      clearFieldError("domainTld");
+                      clearFieldError("domainYears");
+                      clearFieldError("domainStatus");
+                      clearFieldError("subdomainProvider");
+                      clearFieldError("subdomainLabel");
                     }}
                     className={getClass(baseSelectClass, "selectedService")}
                   >
@@ -888,7 +1157,9 @@ export default function OrderForm() {
                     </select>
 
                     {fieldErrors?.selectedSubService ? (
-                      <p className="mt-1 text-xs text-red-600">{fieldErrors.selectedSubService}</p>
+                      <p className="mt-1 text-xs text-red-600">
+                        {fieldErrors.selectedSubService}
+                      </p>
                     ) : null}
                   </div>
                 )}
@@ -907,7 +1178,9 @@ export default function OrderForm() {
                       className={`mt-2 ${fieldErrors?.customSubService ? inputErrorClass : ""}`}
                     />
                     {fieldErrors?.customSubService ? (
-                      <p className="mt-1 text-xs text-red-600">{fieldErrors.customSubService}</p>
+                      <p className="mt-1 text-xs text-red-600">
+                        {fieldErrors.customSubService}
+                      </p>
                     ) : null}
                   </div>
                 )}
@@ -926,6 +1199,11 @@ export default function OrderForm() {
                       {fieldErrors?.budget ? (
                         <p className="mt-1 text-xs text-red-600">{fieldErrors.budget}</p>
                       ) : null}
+                      {selectedService === "Web Development" && (
+                        <p className="mt-1 text-[11px] text-gray-500">
+                          Minimal budget Web Development: Rp {formatIDR(MIN_WEBDEV_BUDGET)}
+                        </p>
+                      )}
                     </div>
 
                     <div>
@@ -943,6 +1221,271 @@ export default function OrderForm() {
                       {fieldErrors?.deadline ? (
                         <p className="mt-1 text-xs text-red-600">{fieldErrors.deadline}</p>
                       ) : null}
+                    </div>
+
+                    {/* ✅ Domain Section khusus Web Development */}
+                    {selectedService === "Web Development" && (
+                      <div className="mt-2 space-y-3">
+                        <label className="font-semibold text-gray-800">Domain Website</label>
+
+                        <select
+                          value={domainMode}
+                          onChange={(e) => {
+                            setDomainMode(e.target.value);
+                            setDomainBase("");
+                            setDomainTld(".site");
+                            setDomainYears("1");
+                            setDomainStatus("");
+                            setDomainAiSuggestion("");
+                            setSubdomainProvider("");
+                            setSubdomainLabel("");
+
+                            clearFieldError("domainMode");
+                            clearFieldError("domainBase");
+                            clearFieldError("domainTld");
+                            clearFieldError("domainYears");
+                            clearFieldError("domainStatus");
+                            clearFieldError("subdomainProvider");
+                            clearFieldError("subdomainLabel");
+                          }}
+                          className={getClass(baseSelectClassBig, "domainMode")}
+                        >
+                          <option value="">-- Pilih Metode Domain --</option>
+                          <option value="custom">Domain berbayar (pilih ekstensi + durasi + cek)</option>
+                          <option value="subdomain">Domain gratis (netlify.app / vercel.app)</option>
+                        </select>
+
+                        {fieldErrors?.domainMode ? (
+                          <p className="mt-1 text-xs text-red-600">{fieldErrors.domainMode}</p>
+                        ) : null}
+
+                        {/* ✅ CUSTOM DOMAIN */}
+                        {domainMode === "custom" && (
+                          <div className="space-y-2">
+                            <p className="text-xs text-gray-500">
+                              Domain dibeli sendiri (misal Hostinger/Namecheap/dll). Pilih ekstensi & durasi,
+                              lalu cek ketersediaan.
+                            </p>
+
+                            {/* AI Suggestion */}
+                            <div className="w-full p-3 rounded-xl bg-gray-50 border text-xs text-gray-700">
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="font-semibold">Pilihan dari AI</span>
+                                <button
+                                  type="button"
+                                  className="text-xs px-3 py-1.5 rounded-lg bg-gray-900 text-white hover:bg-black transition"
+                                  onClick={pickAiTld}
+                                >
+                                  Pilihkan
+                                </button>
+                              </div>
+                              <p className="mt-2">
+                                {domainAiSuggestion || "Klik 'Pilihkan' untuk saran ekstensi domain sesuai kebutuhan."}
+                              </p>
+                            </div>
+
+                            {/* base + tld + years */}
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                              <div className="sm:col-span-1">
+                                <label className="text-xs text-gray-600">Nama Domain</label>
+                                <Input
+                                  type="text"
+                                  value={domainBase}
+                                  onChange={(e) => {
+                                    setDomainBase(e.target.value);
+                                    setDomainStatus("");
+                                    clearFieldError("domainBase");
+                                    clearFieldError("domainStatus");
+                                  }}
+                                  placeholder="contoh: tokokamu"
+                                  className={`mt-2 ${fieldErrors?.domainBase ? inputErrorClass : ""}`}
+                                />
+                                {fieldErrors?.domainBase ? (
+                                  <p className="mt-1 text-xs text-red-600">{fieldErrors.domainBase}</p>
+                                ) : null}
+                              </div>
+
+                              <div className="sm:col-span-1">
+                                <label className="text-xs text-gray-600">Ekstensi</label>
+                                <select
+                                  className={getClass(
+                                    "mt-2 w-full border rounded-lg p-3 focus:ring-2 focus:ring-indigo-600",
+                                    "domainTld"
+                                  )}
+                                  value={domainTld}
+                                  onChange={(e) => {
+                                    setDomainTld(e.target.value);
+                                    setDomainStatus("");
+                                    clearFieldError("domainTld");
+                                    clearFieldError("domainStatus");
+                                  }}
+                                >
+                                  {DOMAIN_GROUPS.map((group) => (
+                                    <optgroup key={group.label} label={group.label}>
+                                      {group.options.map((tld) => (
+                                        <option key={tld} value={tld}>
+                                          {tld}
+                                        </option>
+                                      ))}
+                                    </optgroup>
+                                  ))}
+                                </select>
+                                {fieldErrors?.domainTld ? (
+                                  <p className="mt-1 text-xs text-red-600">{fieldErrors.domainTld}</p>
+                                ) : null}
+                              </div>
+
+                              <div className="sm:col-span-1">
+                                <label className="text-xs text-gray-600">Durasi</label>
+                                <select
+                                  className={getClass(
+                                    "mt-2 w-full border rounded-lg p-3 focus:ring-2 focus:ring-indigo-600",
+                                    "domainYears"
+                                  )}
+                                  value={domainYears}
+                                  onChange={(e) => {
+                                    setDomainYears(e.target.value);
+                                    setDomainStatus("");
+                                    clearFieldError("domainYears");
+                                    clearFieldError("domainStatus");
+                                  }}
+                                >
+                                  <option value="1">1 Tahun</option>
+                                  <option value="2">2 Tahun</option>
+                                  <option value="3">3 Tahun</option>
+                                </select>
+                                {fieldErrors?.domainYears ? (
+                                  <p className="mt-1 text-xs text-red-600">{fieldErrors.domainYears}</p>
+                                ) : null}
+                              </div>
+                            </div>
+
+                            {/* Price card */}
+                            <div className="mt-2 w-full p-4 rounded-xl bg-gray-50 border text-sm">
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Domain</span>
+                                <span className="font-semibold text-gray-900">{getDomainFull() || "-"}</span>
+                              </div>
+
+                              <div className="flex justify-between mt-1">
+                                <span className="text-gray-600">Harga / tahun (estimasi)</span>
+                                <span className="font-semibold text-gray-900">
+                                  Rp {formatIDR(domainPricePerYear || 0)}
+                                </span>
+                              </div>
+
+                              <div className="my-2 h-px w-full bg-black/10" />
+
+                              <div className="flex justify-between">
+                                <span className="text-gray-700 font-semibold">Total Domain ({domainYears} tahun)</span>
+                                <span className="font-extrabold text-gray-900">
+                                  Rp {formatIDR(domainCost || 0)}
+                                </span>
+                              </div>
+
+                              <p className="mt-2 text-[11px] text-gray-500">
+                                *Harga domain bisa berbeda tergantung tempat beli domain. Ini estimasi “wajar” per tahun.*
+                              </p>
+                            </div>
+
+                            {/* cek domain */}
+                            <div className="flex gap-2">
+                              <button
+                                type="button"
+                                onClick={checkDomain}
+                                className="mt-2 px-4 py-2 rounded-lg bg-gray-900 text-white hover:bg-black transition disabled:opacity-50"
+                                disabled={!sanitizeDomainBase(domainBase) || domainStatus === "checking"}
+                              >
+                                {domainStatus === "checking" ? "Cek..." : "Cek Domain"}
+                              </button>
+
+                              <div className="mt-2 flex-1 text-xs text-gray-500 flex items-center">
+                                {domainStatus === "available" && "✅ Tersedia"}
+                                {domainStatus === "taken" && "❌ Sudah dipakai"}
+                                {domainStatus === "unknown" && "⚠️ Tidak diketahui"}
+                                {domainStatus === "checking" && "⏳ Mengecek..."}
+                              </div>
+                            </div>
+
+                            {fieldErrors?.domainStatus ? (
+                              <p className="mt-1 text-xs text-red-600">{fieldErrors.domainStatus}</p>
+                            ) : null}
+
+                            {domainStatus && (
+                              <div
+                                className={`mt-2 text-xs rounded-lg border p-3 ${
+                                  domainStatus === "available"
+                                    ? "bg-green-50 border-green-200 text-green-700"
+                                    : domainStatus === "taken"
+                                    ? "bg-red-50 border-red-200 text-red-700"
+                                    : "bg-yellow-50 border-yellow-200 text-yellow-700"
+                                }`}
+                              >
+                                {domainStatus === "checking" && "Sedang mengecek domain..."}
+                                {domainStatus === "available" && "✅ Domain tersedia (kemungkinan belum terdaftar / belum dipakai)."}
+                                {domainStatus === "taken" && "❌ Domain sudah terdaftar / dipakai."}
+                                {domainStatus === "unknown" && "⚠️ Status tidak bisa dipastikan (coba cek lagi nanti)."}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* ✅ SUBDOMAIN GRATIS */}
+                        {domainMode === "subdomain" && (
+                          <div className="space-y-2">
+                            <p className="text-xs text-gray-500">
+                              Dari kami hanya menyediakan subdomain gratis: <b>netlify.app</b> atau <b>vercel.app</b>.
+                            </p>
+
+                            <select
+                              value={subdomainProvider}
+                              onChange={(e) => {
+                                setSubdomainProvider(e.target.value);
+                                clearFieldError("subdomainProvider");
+                              }}
+                              className={getClass(baseSelectClassBig, "subdomainProvider")}
+                            >
+                              <option value="">-- Pilih Provider --</option>
+                              <option value="netlify">Netlify (netlify.app)</option>
+                              <option value="vercel">Vercel (vercel.app)</option>
+                            </select>
+
+                            {fieldErrors?.subdomainProvider ? (
+                              <p className="mt-1 text-xs text-red-600">{fieldErrors.subdomainProvider}</p>
+                            ) : null}
+
+                            <Input
+                              type="text"
+                              value={subdomainLabel}
+                              onChange={(e) => {
+                                setSubdomainLabel(e.target.value);
+                                clearFieldError("subdomainLabel");
+                              }}
+                              placeholder={
+                                subdomainProvider === "vercel"
+                                  ? "contoh: tokokamu.vercel.app"
+                                  : "contoh: tokokamu.netlify.app"
+                              }
+                              className={`mt-2 ${fieldErrors?.subdomainLabel ? inputErrorClass : ""}`}
+                            />
+
+                            {fieldErrors?.subdomainLabel ? (
+                              <p className="mt-1 text-xs text-red-600">{fieldErrors.subdomainLabel}</p>
+                            ) : null}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* info biaya layanan */}
+                    <div className="mt-2 w-full p-4 rounded-xl bg-gray-50 border">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Biaya Layanan Nusantara</span>
+                        <span className="font-semibold text-gray-900">Rp {formatIDR(NUSANTARA_FEE)}</span>
+                      </div>
+                      <p className="mt-2 text-[11px] text-gray-400">
+                        Total yang dihitung untuk pembayaran (termasuk crypto) sudah termasuk biaya layanan dan domain (jika pilih domain berbayar).
+                      </p>
                     </div>
                   </>
                 )}
@@ -1005,9 +1548,7 @@ export default function OrderForm() {
                             <span className="text-2xl">🎅</span>
                             <div>
                               <p className="font-bold text-red-700">Event Akhir Tahun</p>
-                              <p className="text-sm text-red-600 font-medium">
-                                Berlaku: 25 Desember – 2 Januari
-                              </p>
+                              <p className="text-sm text-red-600 font-medium">Berlaku: 25 Desember – 2 Januari</p>
                             </div>
                           </div>
                         )}
@@ -1016,10 +1557,7 @@ export default function OrderForm() {
                           {isPromo && (
                             <>
                               <p className="text-gray-400 text-sm line-through">
-                                Rp{" "}
-                                {Number(
-                                  appPrices?.[selectedSubService]?.[duration] || 0
-                                ).toLocaleString("id-ID")}
+                                Rp {Number(appPrices?.[selectedSubService]?.[duration] || 0).toLocaleString("id-ID")}
                               </p>
                               <p className="text-red-600 text-2xl font-bold">
                                 Rp {Number(durationPrice || 0).toLocaleString("id-ID")}
@@ -1056,18 +1594,12 @@ export default function OrderForm() {
 
                         <div className="mt-2">
                           <p className="text-4xl sm:text-5xl font-extrabold tracking-tight text-black">
-                            Rp{" "}
-                            {duration
-                              ? Number(durationPrice || 0).toLocaleString("id-ID")
-                              : "-"}
+                            Rp {duration ? Number(durationPrice || 0).toLocaleString("id-ID") : "-"}
                           </p>
 
                           {isPromo && duration && selectedSubService && (
                             <p className="mt-1 text-sm text-black/40 line-through">
-                              Rp{" "}
-                              {Number(
-                                appPrices?.[selectedSubService]?.[duration] || 0
-                              ).toLocaleString("id-ID")}
+                              Rp {Number(appPrices?.[selectedSubService]?.[duration] || 0).toLocaleString("id-ID")}
                             </p>
                           )}
 
@@ -1083,6 +1615,17 @@ export default function OrderForm() {
                         </div>
                       </div>
                     </motion.div>
+
+                    {/* info biaya layanan */}
+                    <div className="mt-4 w-full p-4 rounded-xl bg-gray-50 border">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Biaya Layanan Nusantara</span>
+                        <span className="font-semibold text-gray-900">Rp {formatIDR(NUSANTARA_FEE)}</span>
+                      </div>
+                      <p className="mt-2 text-[11px] text-gray-400">
+                        Total untuk pembayaran (termasuk crypto) sudah termasuk biaya layanan.
+                      </p>
+                    </div>
                   </>
                 )}
 
@@ -1135,9 +1678,7 @@ export default function OrderForm() {
                         </span>
                       </div>
 
-                      <span className="text-xs text-gray-500 mt-1">
-                        Scan untuk melanjutkan pembayaran
-                      </span>
+                      <span className="text-xs text-gray-500 mt-1">Scan untuk melanjutkan pembayaran</span>
 
                       <div className="mt-5 p-4 rounded-2xl bg-gray-50 border w-48 h-48 flex items-center justify-center shadow-inner">
                         <img
@@ -1155,9 +1696,7 @@ export default function OrderForm() {
                         Download QR
                       </a>
 
-                      <p className="text-[11px] text-gray-400 mt-3">
-                        Pastikan QR terlihat jelas sebelum di-scan
-                      </p>
+                      <p className="text-[11px] text-gray-400 mt-3">Pastikan QR terlihat jelas sebelum di-scan</p>
                     </div>
                   </div>
                 )}
@@ -1173,9 +1712,7 @@ export default function OrderForm() {
                         </span>
                       </div>
 
-                      <span className="text-xs text-gray-500 mt-1">
-                        Transfer ke nomor GoPay berikut
-                      </span>
+                      <span className="text-xs text-gray-500 mt-1">Transfer ke nomor GoPay berikut</span>
 
                       <div className="mt-5 w-full p-4 rounded-xl bg-gray-50 border flex justify-between items-center">
                         <span className="font-semibold text-gray-900 text-base">087860592111</span>
@@ -1189,9 +1726,7 @@ export default function OrderForm() {
                         </button>
                       </div>
 
-                      <p className="text-[11px] text-gray-400 mt-3">
-                        Pastikan nomor benar sebelum transfer
-                      </p>
+                      <p className="text-[11px] text-gray-400 mt-3">Pastikan nomor benar sebelum transfer</p>
                     </div>
                   </div>
                 )}
@@ -1207,9 +1742,7 @@ export default function OrderForm() {
                         </span>
                       </div>
 
-                      <span className="text-xs text-gray-500">
-                        Kirim pembayaran ke email berikut
-                      </span>
+                      <span className="text-xs text-gray-500">Kirim pembayaran ke email berikut</span>
 
                       <div className="mt-4 w-full p-4 rounded-xl bg-gray-50 border flex justify-between items-center gap-3">
                         <span className="font-semibold text-gray-900 text-sm sm:text-base break-all">
@@ -1225,9 +1758,7 @@ export default function OrderForm() {
                         </button>
                       </div>
 
-                      <p className="text-[11px] text-gray-400 mt-2">
-                        Pastikan email benar sebelum kirim
-                      </p>
+                      <p className="text-[11px] text-gray-400 mt-2">Pastikan email benar sebelum kirim</p>
                     </div>
                   </div>
                 )}
@@ -1262,9 +1793,7 @@ export default function OrderForm() {
                         </button>
                       </div>
 
-                      <p className="text-[11px] text-gray-400 mt-3">
-                        Gunakan transfer antar bank bila berbeda bank
-                      </p>
+                      <p className="text-[11px] text-gray-400 mt-3">Gunakan transfer antar bank bila berbeda bank</p>
                     </div>
                   </div>
                 )}
@@ -1285,14 +1814,12 @@ export default function OrderForm() {
                         Kurs akan di-refresh tiap 30 detik.
                       </span>
 
-                      {/* pesan error crypto (kalau wallet kosong) */}
                       {fieldErrors?.crypto ? (
                         <div className="mt-4 w-full bg-red-50 border border-red-300 text-red-700 rounded-lg p-3 text-xs">
                           {fieldErrors.crypto}
                         </div>
                       ) : null}
 
-                      {/* pilih coin */}
                       <div className="mt-4 w-full">
                         <label className="text-xs text-gray-600">Pilih Coin</label>
                         <select
@@ -1310,7 +1837,6 @@ export default function OrderForm() {
                         </select>
                       </div>
 
-                      {/* pilih network khusus USDT */}
                       {cryptoCoin === "USDT" && (
                         <div className="mt-4 w-full">
                           <label className="text-xs text-gray-600">Pilih Network USDT</label>
@@ -1329,7 +1855,6 @@ export default function OrderForm() {
                         </div>
                       )}
 
-                      {/* total + kurs + estimasi */}
                       <div className="mt-4 w-full p-4 rounded-xl bg-gray-50 border space-y-2">
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-600">Total (IDR)</span>
@@ -1366,12 +1891,9 @@ export default function OrderForm() {
 
                         {cryptoError && <p className="text-xs text-red-600">{cryptoError}</p>}
 
-                        <p className="text-[11px] text-gray-400">
-                          *Estimasi bisa berubah karena kurs real-time.*
-                        </p>
+                        <p className="text-[11px] text-gray-400">*Estimasi bisa berubah karena kurs real-time.*</p>
                       </div>
 
-                      {/* wallet address */}
                       <div className="mt-4 w-full p-4 rounded-xl bg-white border">
                         <p className="text-xs text-gray-500 mb-2">
                           Alamat Wallet ({cryptoCoin} - {getCryptoNetworkLabel()})
@@ -1418,9 +1940,7 @@ export default function OrderForm() {
                       active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
                   >
                     <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-500 rounded-xl"></span>
-                    <span className="relative z-10">
-                      {isSubmitting ? "Mengirim..." : "Kirim Pesanan via WhatsApp"}
-                    </span>
+                    <span className="relative z-10">{isSubmitting ? "Mengirim..." : "Kirim Pesanan via WhatsApp"}</span>
                   </Button>
                 </div>
               </form>
@@ -1433,3 +1953,57 @@ export default function OrderForm() {
     </>
   );
 }
+
+// ------------------------------
+// ✅ FILE 2: pages/api/domain-check.js  (WAJIB ADA)
+// ------------------------------
+// Tempel file ini di: /pages/api/domain-check.js
+//
+// Fungsi: cek domain itu "taken" (sudah terdaftar) atau "available" (belum terdaftar)
+// dengan RDAP publik (rdap.org). Kalau error/rate-limit -> "unknown".
+
+/*
+export default async function handler(req, res) {
+  try {
+    const domainRaw = String(req.query.domain || "").trim().toLowerCase();
+
+    // basic sanitization: hanya huruf/angka/dot/dash
+    const domain = domainRaw.replace(/^https?:\/\//, "").replace(/\/.*$/, "");
+    const isValid = /^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(domain);
+
+    if (!isValid) {
+      return res
+        .status(400)
+        .json({ ok: false, status: "unknown", message: "Domain tidak valid." });
+    }
+
+    // timeout helper
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), 8000);
+
+    // RDAP lookup
+    const rdapUrl = `https://rdap.org/domain/${encodeURIComponent(domain)}`;
+    const resp = await fetch(rdapUrl, {
+      method: "GET",
+      signal: controller.signal,
+      headers: { accept: "application/rdap+json, application/json" },
+      redirect: "follow",
+    });
+
+    clearTimeout(t);
+
+    if (resp.status === 200) {
+      return res.status(200).json({ ok: true, status: "taken" });
+    }
+
+    if (resp.status === 404) {
+      return res.status(200).json({ ok: true, status: "available" });
+    }
+
+    // kadang 429/5xx
+    return res.status(200).json({ ok: true, status: "unknown" });
+  } catch (e) {
+    return res.status(200).json({ ok: true, status: "unknown" });
+  }
+}
+*/
