@@ -19,21 +19,12 @@ export default function ProfilPage() {
     return rt;
   }, [router.query.returnTo]);
 
-const avatarChoices = [
-  "https://api.dicebear.com/7.x/thumbs/svg?seed=ln1",
-  "https://api.dicebear.com/7.x/thumbs/svg?seed=ln2",
-  "https://api.dicebear.com/7.x/thumbs/svg?seed=ln3",
-  "https://api.dicebear.com/7.x/thumbs/svg?seed=ln4",
-  "https://api.dicebear.com/7.x/thumbs/svg?seed=ln5",
-  "https://api.dicebear.com/7.x/thumbs/svg?seed=ln6",
-  "https://api.dicebear.com/7.x/thumbs/svg?seed=ln7",
-  "https://api.dicebear.com/7.x/thumbs/svg?seed=ln8",
-  "https://api.dicebear.com/7.x/thumbs/svg?seed=ln9",
-  "https://api.dicebear.com/7.x/thumbs/svg?seed=ln10",
-  "https://api.dicebear.com/7.x/thumbs/svg?seed=ln11",
-  "https://api.dicebear.com/7.x/thumbs/svg?seed=ln12",
+  // ✅ avatar hanya dari pilihan ini (tidak ada input URL)
+const avatarChoices = Array.from({ length: 12 }, (_, i) => {
+  const seed = `ln${i + 1}`;
+  return `https://api.dicebear.com/7.x/fun-emoji/svg?seed=${seed}`;
+});
 
-];
   useEffect(() => {
     const run = async () => {
       setError("");
@@ -48,7 +39,13 @@ const avatarChoices = [
 
         setUser(data.user || null);
         setName(data.user?.name || "");
-        setAvatarUrl(data.user?.avatar_url || "");
+
+        // ✅ kalau avatar user ada, pakai
+        // ✅ kalau kosong / bukan dari list, set default ke pilihan pertama
+        const existing = (data.user?.avatar_url || "").trim();
+        const safeDefault = avatarChoices[0];
+
+        setAvatarUrl(avatarChoices.includes(existing) ? existing : existing || safeDefault);
       } catch (e) {
         router.replace(`/login?returnTo=${encodeURIComponent("/profil?returnTo=" + returnTo)}`);
       } finally {
@@ -61,49 +58,51 @@ const avatarChoices = [
   }, [returnTo]);
 
   const onSave = async (e) => {
-  e.preventDefault();
-  setError("");
-  setLoading(true);
+    e.preventDefault();
+    setError("");
+    setLoading(true);
 
-  try {
-    const avatarUrlFinal = (avatarUrl || "").trim();
+    try {
+      // ✅ HARD LOCK: avatar_url harus dari avatarChoices
+      const avatarUrlFinal = avatarChoices.includes(avatarUrl) ? avatarUrl : avatarChoices[0];
 
-    const res = await fetch("/api/user/profile/update", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include", // ✅ PENTING
-      body: JSON.stringify({
-        name: name.trim(),
-        avatar_url: avatarUrlFinal,
-      }),
-    });
+      const res = await fetch("/api/user/profile/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          name: name.trim(),
+          avatar_url: avatarUrlFinal,
+        }),
+      });
 
-    const j = await res.json();
+      const j = await res.json();
 
-    if (!res.ok || !j?.ok) {
-      setError(j?.error || "Gagal simpan profil.");
-      return;
+      if (!res.ok || !j?.ok) {
+        setError(j?.error || "Gagal simpan profil.");
+        return;
+      }
+
+      router.replace(returnTo || "/order/diskon");
+    } catch (err) {
+      setError("Terjadi error. Coba lagi.");
+    } finally {
+      setLoading(false);
     }
+  };
 
-    router.replace(returnTo || "/order/diskon");
-  } catch (err) {
-    setError("Terjadi error. Coba lagi.");
-  } finally {
-    setLoading(false);
-  }
-};
-const onLogout = async () => {
-  setLoading(true);
-  try {
-    await fetch("/api/user/auth/logout", {
-      method: "POST",
-      credentials: "include", // ✅ penting biar cookie terhapus
-    });
-    router.replace("/login");
-  } finally {
-    setLoading(false);
-  }
-};
+  const onLogout = async () => {
+    setLoading(true);
+    try {
+      await fetch("/api/user/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+      router.replace("/login");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (checking) {
     return (
@@ -125,7 +124,7 @@ const onLogout = async () => {
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Profil</h1>
               <p className="text-sm text-gray-500 mt-1">
-                Lengkapi profil dulu biar bisa lanjut checkout promo.
+                Lengkapi profil dulu biar bisa lanjut checkout diskon.
               </p>
             </div>
 
@@ -179,6 +178,7 @@ const onLogout = async () => {
               />
             </div>
 
+            {/* ✅ PILIH AVATAR TETAP ADA */}
             <div>
               <label className="text-sm text-gray-700">Pilih Avatar</label>
               <div className="mt-3 grid grid-cols-4 gap-3">
@@ -193,6 +193,7 @@ const onLogout = async () => {
                         "border rounded-xl p-2 hover:bg-gray-50 transition " +
                         (active ? "ring-2 ring-indigo-600 border-indigo-600" : "")
                       }
+                      aria-label="Pilih avatar"
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={url} alt="avatar" className="w-14 h-14 mx-auto" />
@@ -200,24 +201,9 @@ const onLogout = async () => {
                   );
                 })}
               </div>
-
-              <p className="mt-3 text-xs text-gray-500">
-                Avatar ini cuma buat tampilan (kayak WA/IG). Kamu boleh ganti kapan aja.
-              </p>
             </div>
 
-            <div>
-              <label className="text-sm text-gray-700">Atau isi URL Avatar (opsional)</label>
-              <input
-                className="mt-2 w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-indigo-600"
-                value={avatarUrl}
-                onChange={(e) => setAvatarUrl(e.target.value)}
-                placeholder="https://..."
-              />
-              <p className="mt-2 text-xs text-gray-500">
-                Kalau kamu punya foto online (misalnya link gambar), tempel di sini.
-              </p>
-            </div>
+            {/* ❌ INPUT URL AVATAR DIHAPUS TOTAL */}
 
             <button
               type="submit"
@@ -228,7 +214,8 @@ const onLogout = async () => {
             </button>
 
             <p className="text-xs text-gray-500 text-center">
-              Setelah disimpan, kamu otomatis diarahkan ke: <span className="font-semibold">{returnTo}</span>
+              Setelah disimpan, kamu otomatis diarahkan ke:{" "}
+              <span className="font-semibold">{returnTo}</span>
             </p>
           </form>
         </div>

@@ -40,15 +40,14 @@ export default function OrderDiskonPage() {
   const [cryptoLoading, setCryptoLoading] = useState(false);
   const [cryptoError, setCryptoError] = useState("");
 
-  // DISKON EVENT: 19 Feb 2026 - 20 Feb 2026 (diskon 47%)
-  const isPromoEvent = useMemo(() => {
-    const now = new Date();
-    // pakai waktu lokal browser user
-    const start = new Date("2026-02-19T00:00:00");
-    const end = new Date("2026-02-20T23:59:59");
-    return now >= start && now <= end;
-  }, []);
 
+const isDiskonEvent = useMemo(() => {
+  const now = new Date();
+  // pakai waktu lokal browser user
+  const start = new Date("2026-02-19T00:00:00");
+  const end = new Date("2026-02-22T23:59:59");
+  return now >= start && now <= end;
+}, []);
   const discountMultiplier = 0.53; // 47% off
   const discountLabel = "47% OFF";
   const RamadanDecor = () => {
@@ -403,7 +402,7 @@ useEffect(() => {
   const computePrice = (sub, dur) => {
     const raw = appPrices?.[sub]?.[dur] ?? 0;
     const base = Number(raw) || 0;
-    if (!isPromoEvent) return base;
+if (!isDiskonEvent) return base;
     return Math.round(base * discountMultiplier);
   };
 
@@ -423,9 +422,9 @@ useEffect(() => {
     }
 
     // promo harus dalam range
-    if (!isPromoEvent) {
-      fe.promo = "Promo belum aktif / sudah berakhir. Halaman ini hanya untuk event promo.";
-    }
+    if (!isDiskonEvent) {
+  fe.diskon = "Diskon belum aktif / sudah berakhir. Halaman ini hanya untuk event diskon.";
+}
 
     if (Object.keys(fe).length > 0) {
       setFieldErrors(fe);
@@ -459,22 +458,21 @@ useEffect(() => {
     // - ada tag [PROMO-RAMADAN-47]
     // - ada path sumber: /order/diskon
     // - ada harga normal & harga promo
-    const encodedMessage = encodeURIComponent(
-      `*Hai Layanan Nusantara!* 👋✨\n\n` +
-        `*[PROMO-RAMADAN-47]*\n` +
-        `*Sumber:* /order/diskon\n\n` +
-        `👤 *Nama:* ${name}\n` +
-        `📞 *Nomor WhatsApp:* ${phone}\n` +
-        `📦 *Aplikasi:* ${selectedSubService}\n` +
-        `⏳ *Durasi:* ${duration}\n` +
-        `💸 *Harga Normal:* Rp ${normalPrice.toLocaleString("id-ID")}\n` +
-        `🔥 *Harga Promo (${discountLabel}):* Rp ${promoPrice.toLocaleString("id-ID")}\n` +
-        `💳 *Metode Pembayaran:* ${paymentMethod}\n` +
-        (paymentMethod === "Crypto" ? `${extraCryptoText}` : "") +
-        `📝 *Catatan:* ${message}\n\n` +
-        `Terima kasih!\n${name}`
-    );
-
+const encodedMessage = encodeURIComponent(
+  `*Hai Layanan Nusantara!* 👋✨\n\n` +
+    `*[DISKON-47]*\n` +
+    `*Sumber:* /order/diskon\n\n` +
+    `👤 *Nama:* ${name}\n` +
+    `📞 *Nomor WhatsApp:* ${phone}\n` +
+    `📦 *Aplikasi:* ${selectedSubService}\n` +
+    `⏳ *Durasi:* ${duration}\n` +
+    `💸 *Harga Normal:* Rp ${normalPrice.toLocaleString("id-ID")}\n` +
+    `🔥 *Harga Diskon (${discountLabel}):* Rp ${diskonPrice.toLocaleString("id-ID")}\n` +
+    `💳 *Metode Pembayaran:* ${paymentMethod}\n` +
+    (paymentMethod === "Crypto" ? `${extraCryptoText}` : "") +
+    `📝 *Catatan:* ${message}\n\n` +
+    `Terima kasih!\n${name}`
+);
     setTimeout(() => {
       window.open(`https://wa.me/${waNumber}?text=${encodedMessage}`, "_blank");
       setIsSubmitting(false);
@@ -492,7 +490,7 @@ useEffect(() => {
   return (
     <>
       <Head>
-        <title>Order Promo - Layanan Nusantara</title>
+        <title>Diskon Spesial - Layanan Nusantara</title>
       </Head>
 
     <div className="pt-28 pb-12 bg-white min-h-screen relative">
@@ -504,41 +502,32 @@ useEffect(() => {
             transition={{ duration: 0.5 }}
             className="border border-gray-200 rounded-2xl shadow-sm p-6 bg-white relative overflow-hidden"
           >
-            <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start justify-between gap-3">
   <div className="min-w-0">
-    <div className="flex items-center gap-2">
-      <h1 className="text-2xl font-bold text-gray-900">Order Promo</h1>
-      <span className="text-xs px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100 font-semibold">
-        Ramadan
-      </span>
-    </div>
+    <h1 className="text-2xl font-bold text-gray-900">Diskon Ramadhan</h1>
 
-    <p className="text-sm text-gray-500 mt-1">
-      Promo <b>{discountLabel}</b> hanya aktif: <b>19 Feb 2026</b> sampai <b>20 Feb 2026</b>.
-    </p>
-
-    <div className="mt-3">
-      <RamadanBadge active={isPromoEvent} label={discountLabel} />
-    </div>
+<p className="text-sm text-gray-500 mt-1">
+  Diskon <b>{discountLabel}</b> aktif <b>19–22 Feb 2026</b>.
+</p>
   </div>
 
-<Link
-  href="/profil?returnTo=/order/diskon"
-  className="text-sm font-semibold text-indigo-700 hover:underline"
->
-  Edit Profil
-</Link>
+  <Link
+    href="/profil?returnTo=/order/diskon"
+    className="text-sm font-semibold text-indigo-700 hover:underline whitespace-nowrap"
+  >
+    Edit Profil
+  </Link>
 </div>
 
-            {!isPromoEvent ? (
-              <div className="mt-4 bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm p-3 rounded-lg">
-                Promo sedang tidak aktif. Halaman ini hanya bisa checkout saat event promo.
-              </div>
-            ) : (
-              <div className="mt-4 bg-green-50 border border-green-200 text-green-800 text-sm p-3 rounded-lg">
-                Promo aktif! Diskon otomatis diterapkan ke harga aplikasi premium.
-              </div>
-            )}
+         {!isDiskonEvent ? (
+  <div className="mt-4 bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm p-3 rounded-lg">
+    Diskon sedang tidak aktif. Halaman ini hanya bisa checkout saat event diskon.
+  </div>
+) : (
+  <div className="mt-4 bg-green-50 border border-green-200 text-green-800 text-sm p-3 rounded-lg">
+    Diskon aktif! Potongan otomatis diterapkan ke harga.
+  </div>
+)}
 
             {error ? (
               <div
@@ -546,9 +535,9 @@ useEffect(() => {
                 className="mt-4 bg-red-50 border border-red-200 text-red-700 text-sm p-3 rounded-lg"
               >
                 {error}
-                {fieldErrors?.promo ? (
-                  <div className="mt-2 text-xs">{fieldErrors.promo}</div>
-                ) : null}
+            {fieldErrors?.diskon ? (
+  <div className="mt-2 text-xs">{fieldErrors.diskon}</div>
+) : null}
               </div>
             ) : null}
 <form onSubmit={handleSubmit} className="mt-6 space-y-4 text-sm">
@@ -634,20 +623,20 @@ useEffect(() => {
                   </span>
                 </div>
 
-                {isPromoEvent && duration && selectedSubService ? (
-                  <div className="mt-2 text-xs text-gray-600">
-                    <div className="flex justify-between">
-                      <span>Normal</span>
-                      <span className="line-through">
-                        Rp {Number(appPrices[selectedSubService][duration] || 0).toLocaleString("id-ID")}
-                      </span>
-                    </div>
-                    <div className="flex justify-between font-semibold text-green-700">
-                      <span>Promo ({discountLabel})</span>
-                      <span>Rp {Number(durationPrice || 0).toLocaleString("id-ID")}</span>
-                    </div>
-                  </div>
-                ) : null}
+                {isDiskonEvent && duration && selectedSubService ? (
+  <div className="mt-2 text-xs text-gray-600">
+    <div className="flex justify-between">
+      <span>Normal</span>
+      <span className="line-through">
+        Rp {Number(appPrices[selectedSubService][duration] || 0).toLocaleString("id-ID")}
+      </span>
+    </div>
+    <div className="flex justify-between font-semibold text-green-700">
+      <span>Diskon ({discountLabel})</span>
+      <span>Rp {Number(durationPrice || 0).toLocaleString("id-ID")}</span>
+    </div>
+  </div>
+) : null}
               </div>
 
               <div>
@@ -685,16 +674,44 @@ useEffect(() => {
                 ) : null}
               </div>
 
-              {showQris && (
-                <div className="border rounded-2xl p-4">
-                  <p className="font-semibold text-gray-900">QRIS</p>
-                  <p className="text-xs text-gray-500 mt-1">Scan QR untuk pembayaran.</p>
-                  <div className="mt-3">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/image/qiris.jpg" alt="QRIS" className="w-48 h-48 object-contain rounded-xl border bg-gray-50" />
+           {/* QRIS */}
+                {showQris && (
+                  <div className="mt-4 w-full p-6 rounded-2xl border border-gray-100 shadow-sm bg-white">
+                    <div className="flex flex-col items-center">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-semibold text-gray-900">QRIS Payment</h3>
+                        <span className="px-2 py-0.5 text-[10px] rounded-md bg-gray-100 text-gray-500">
+                          Secure
+                        </span>
+                      </div>
+
+                      <span className="text-xs text-gray-500 mt-1">
+                        Scan untuk melanjutkan pembayaran
+                      </span>
+
+                      <div className="mt-5 p-4 rounded-2xl bg-gray-50 border w-48 h-48 flex items-center justify-center shadow-inner">
+                        <img
+                          src="/image/qiris.jpg"
+                          alt="QRIS"
+                          className="w-full h-full object-contain rounded-xl"
+                        />
+                      </div>
+
+                      <a
+                        href="/image/qiris.jpg"
+                        download
+                        className="mt-6 w-full text-center py-2.5 text-[15px] font-medium rounded-xl bg-gray-900 text-white hover:bg-black transition-all active:scale-[0.98] shadow-md"
+                      >
+                        Download QR
+                      </a>
+
+                      <p className="text-[11px] text-gray-400 mt-3">
+                        Pastikan QR terlihat jelas sebelum di-scan
+                      </p>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+
 
               {showGopay && (
                 <div className="border rounded-2xl p-4">
@@ -842,15 +859,13 @@ useEffect(() => {
 
               <button
                 type="submit"
-                disabled={isSubmitting || !isPromoEvent}
+              disabled={isSubmitting || !isDiskonEvent}
                 className="w-full mt-2 bg-indigo-600 text-white rounded-xl py-3 font-semibold hover:bg-indigo-700 disabled:opacity-50"
               >
-                {isSubmitting ? "Mengirim..." : "Kirim Pesanan Promo via WhatsApp"}
+               {isSubmitting ? "Mengirim..." : "Kirim Pesanan Diskon via WhatsApp"}
               </button>
 
-              <p className="text-[11px] text-gray-500 text-center">
-                Sistem akan menambahkan tag *[PROMO-RAMADAN-47]* agar admin bisa bedain order promo.
-              </p>
+           
             </form>
           </motion.div>
         </div>
