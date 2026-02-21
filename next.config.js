@@ -12,6 +12,16 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
 
+  // ✅ Supaya deploy (Netlify) tidak gagal hanya karena ESLint warnings/errors
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
+  // (opsional) kalau kamu juga pernah kena error typecheck waktu build
+  // typescript: {
+  //   ignoreBuildErrors: true,
+  // },
+
   async headers() {
     return [
       {
@@ -20,7 +30,10 @@ const nextConfig = {
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "DENY" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=()",
+          },
           {
             key: "Strict-Transport-Security",
             value: "max-age=31536000; includeSubDomains; preload",

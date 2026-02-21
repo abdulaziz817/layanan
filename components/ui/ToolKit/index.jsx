@@ -1,5 +1,6 @@
 import SectionWrapper from "../../SectionWrapper";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -229,12 +230,15 @@ const ToolKit = () => {
       "group-hover:-translate-y-0.5",
     ].join(" ")}
   >
-    <img
-      src={item.icon}
-      alt={item.title}
-      className="w-12 h-12 object-contain"
-      loading="lazy"
-    />
+   <Image
+  src={item.icon}
+  alt={item.title}
+  width={48}
+  height={48}
+  className="w-12 h-12 object-contain"
+  loading="lazy"
+  unoptimized
+/>
     {/* ring glow tipis */}
     <span
       className={[

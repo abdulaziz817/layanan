@@ -1,6 +1,7 @@
 import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -248,9 +249,9 @@ export default function LoginPage() {
 
                 <div className="mt-2 flex items-center justify-between text-sm">
                   <span className="text-gray-500">Gunakan password akun kamu.</span>
-                  <a className="text-indigo-700 font-semibold hover:underline" href="/reset-password">
-                    Lupa password?
-                  </a>
+                  <Link className="text-indigo-700 font-semibold hover:underline" href="/reset-password">
+  Lupa password?
+</Link>
                 </div>
               </div>
 
@@ -273,9 +274,9 @@ export default function LoginPage() {
 
             <div className="mt-5 text-sm text-gray-600">
               Belum punya akun?{" "}
-              <a className="text-indigo-700 font-semibold hover:underline" href="/register">
-                Daftar
-              </a>
+             <Link className="text-indigo-700 font-semibold hover:underline" href="/register">
+  Daftar
+</Link>
             </div>
           </div>
 

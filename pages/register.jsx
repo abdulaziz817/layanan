@@ -1,6 +1,7 @@
 import Head from "next/head";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -372,9 +373,7 @@ export default function RegisterPage() {
 
             <div className="mt-5 text-sm text-gray-600">
               Sudah punya akun?{" "}
-              <a className="text-indigo-700 font-semibold hover:underline" href="/login">
-                Login
-              </a>
+             <Link href="/login" className="...">Masuk</Link>
             </div>
           </div>
 
