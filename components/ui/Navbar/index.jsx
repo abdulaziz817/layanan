@@ -38,15 +38,14 @@ export default function Navbar() {
     { title: 'Software', path: '/#toolkit' },
     { title: 'Testimoni', path: '/#testimonials' },
 
+    // ✅ Blog boleh di website & PWA
+    { title: 'Blog', path: '/blog' },
+
     // ✅ Diskon hanya tampil kalau PWA + event diskon aktif
     ...(pwa && isDiskonEvent ? [{ title: 'Diskon', path: '/order/diskon' }] : []),
 
-    ...(pwa
-      ? [
-          { title: 'Blog', path: '/blog' },
-          { title: 'Reward', path: '/reward' },
-        ]
-      : []),
+    // ✅ Reward tetap khusus PWA
+    ...(pwa ? [{ title: 'Reward', path: '/reward' }] : []),
   ]
 
   const scrollToAnchor = (id) => {
@@ -61,12 +60,40 @@ export default function Navbar() {
   const handleNavClick = (path) => {
     setMenuOpen(false)
 
+    // ✅ hard guard: jangan izinkan route PWA-only kalau bukan PWA
+    // ❗ Blog DILEPAS (bukan PWA-only)
+    const pwaOnlyPaths = [
+      '/order',
+      '/order/diskon',
+      '/reward',
+      '/login',
+      '/register',
+      '/reset-password',
+      '/profil',
+    ]
+
+    if (!pwa && pwaOnlyPaths.includes(path)) {
+      router.push('/#cta') // arahkan ke install section kamu
+      return
+    }
+
     if (path.startsWith('/#')) {
       router.push(path)
       return
     }
 
     if (pathname !== path) router.push(path)
+  }
+
+  // ✅ tombol CTA: label tetap, aksi beda
+  const handleCTA = () => {
+    setMenuOpen(false)
+    if (pwa) {
+      router.push('/order')
+      return
+    }
+    // website → arahkan ke install / info
+    router.push('/#cta')
   }
 
   useEffect(() => {
@@ -99,12 +126,14 @@ export default function Navbar() {
             </button>
           ))}
 
-          <Link
-            href="/order"
+          {/* ✅ LABEL TETAP "Pesan Sekarang" */}
+          <button
+            type="button"
+            onClick={handleCTA}
             className="bg-gray-800 text-white px-5 py-2 rounded-md hover:bg-gray-700 transition"
           >
             Pesan Sekarang
-          </Link>
+          </button>
         </nav>
 
         {/* MOBILE BUTTON */}
@@ -163,13 +192,14 @@ export default function Navbar() {
           </nav>
 
           <div className="px-5 pt-4 pb-6">
-            <Link
-              href="/order"
-              onClick={() => setMenuOpen(false)}
+            {/* ✅ LABEL TETAP "Pesan Sekarang" */}
+            <button
+              type="button"
+              onClick={handleCTA}
               className="block w-full text-center bg-gray-800 text-white py-3 rounded-xl shadow hover:bg-gray-700 hover:scale-[1.02] transition-transform"
             >
               Pesan Sekarang
-            </Link>
+            </button>
           </div>
         </aside>
       </div>

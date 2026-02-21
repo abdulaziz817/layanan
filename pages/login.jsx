@@ -1,10 +1,14 @@
 import Head from "next/head";
+import { isPWA } from "../../utils/isPWA"; // ✅ sesuaikan path, kalau login ada di /pages/login.jsx biasanya "../utils/isPWA"
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
+
+  // ✅ gate allow render khusus PWA
+  const [allow, setAllow] = useState(false);
 
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
@@ -18,8 +22,22 @@ export default function LoginPage() {
     return router.query.returnTo ? String(router.query.returnTo) : "/order/diskon";
   }, [router.query.returnTo]);
 
+  // ✅ GATE PWA: kalau bukan PWA, redirect keluar
+  useEffect(() => {
+    if (!router.isReady) return;
+
+    if (!isPWA()) {
+      router.replace("/");
+      return;
+    }
+
+    setAllow(true);
+  }, [router]);
+
   // kalau sudah login, arahkan langsung
   useEffect(() => {
+    if (!allow) return;
+
     const run = async () => {
       try {
         const res = await fetch("/api/user/auth/me");
@@ -39,11 +57,17 @@ export default function LoginPage() {
 
     run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [allow]);
 
   const onSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    // ✅ extra guard: kalau bukan PWA, jangan proses login
+    if (!isPWA()) {
+      router.replace("/");
+      return;
+    }
 
     if (!phone.trim() || !password.trim()) {
       setError("Nomor WA dan password wajib diisi.");
@@ -55,7 +79,7 @@ export default function LoginPage() {
       const res = await fetch("/api/user/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include", // penting
+        credentials: "include",
         body: JSON.stringify({
           phone: phone.trim(),
           password,
@@ -84,6 +108,18 @@ export default function LoginPage() {
     }
   };
 
+  // ✅ kalau belum allow (belum lolos gate PWA), jangan render form
+  if (!allow) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="flex items-center gap-3 text-gray-600">
+          <span className="h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-gray-700" />
+          <p>Mengalihkan...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (checking) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
@@ -103,7 +139,6 @@ export default function LoginPage() {
 
       <div className="min-h-screen bg-white flex items-center justify-center px-4 py-10">
         <div className="w-full max-w-md">
-          {/* Header kecil */}
           <div className="mb-6 text-center">
             <div className="mx-auto mb-3 h-12 w-12 rounded-2xl bg-indigo-600/10 flex items-center justify-center">
               <svg
@@ -125,7 +160,6 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* Card */}
           <div className="border border-gray-200 rounded-2xl bg-white shadow-[0_10px_30px_-20px_rgba(0,0,0,.25)] p-6">
             {error ? (
               <div className="mb-4 bg-red-50 border border-red-200 text-red-700 text-sm p-3 rounded-xl">
@@ -149,7 +183,6 @@ export default function LoginPage() {
             ) : null}
 
             <form onSubmit={onSubmit} className="space-y-4">
-              {/* WA */}
               <div>
                 <label className="text-sm font-medium text-gray-800">Nomor WhatsApp</label>
                 <div className="mt-2 relative">
@@ -177,7 +210,6 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              {/* Password + eye */}
               <div>
                 <label className="text-sm font-medium text-gray-800">Password</label>
                 <div className="mt-2 relative">
@@ -214,7 +246,6 @@ export default function LoginPage() {
                     title={showPw ? "Sembunyikan password" : "Tampilkan password"}
                   >
                     {showPw ? (
-                      // eye-off
                       <svg
                         viewBox="0 0 24 24"
                         className="h-5 w-5"
@@ -230,7 +261,6 @@ export default function LoginPage() {
                         <path d="M1 1l22 22" />
                       </svg>
                     ) : (
-                      // eye
                       <svg
                         viewBox="0 0 24 24"
                         className="h-5 w-5"
@@ -250,8 +280,8 @@ export default function LoginPage() {
                 <div className="mt-2 flex items-center justify-between text-sm">
                   <span className="text-gray-500">Gunakan password akun kamu.</span>
                   <Link className="text-indigo-700 font-semibold hover:underline" href="/reset-password">
-  Lupa password?
-</Link>
+                    Lupa password?
+                  </Link>
                 </div>
               </div>
 
@@ -274,14 +304,11 @@ export default function LoginPage() {
 
             <div className="mt-5 text-sm text-gray-600">
               Belum punya akun?{" "}
-             <Link className="text-indigo-700 font-semibold hover:underline" href="/register">
-  Daftar
-</Link>
+              <Link className="text-indigo-700 font-semibold hover:underline" href="/register">
+                Daftar
+              </Link>
             </div>
           </div>
-
-        
-        
         </div>
       </div>
     </>

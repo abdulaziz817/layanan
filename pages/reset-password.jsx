@@ -1,8 +1,15 @@
 import Head from "next/head";
-import { useState } from "react";
+import { isPWA } from "../../utils/isPWA"; // ✅ sesuaikan path
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import Link from "next/link";
 
 export default function ResetPasswordPage() {
+  const router = useRouter();
+
+  // ✅ gate allow render khusus PWA
+  const [allow, setAllow] = useState(false);
+
   const [phone, setPhone] = useState("");
 
   // hasil dari request token
@@ -25,10 +32,28 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  // ✅ GATE PWA: kalau bukan PWA, redirect keluar
+  useEffect(() => {
+    if (!router.isReady) return;
+
+    if (!isPWA()) {
+      router.replace("/");
+      return;
+    }
+
+    setAllow(true);
+  }, [router]);
+
   const requestToken = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
+
+    // ✅ extra guard: kalau bukan PWA, jangan proses
+    if (!isPWA()) {
+      router.replace("/");
+      return;
+    }
 
     // reset state hasil request sebelumnya
     setResetId("");
@@ -46,6 +71,7 @@ export default function ResetPasswordPage() {
       const r = await fetch("/api/user/auth/reset/request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // ✅ optional (kalau backend pakai session/cookie)
         body: JSON.stringify({ phone: p }),
       });
 
@@ -74,6 +100,12 @@ export default function ResetPasswordPage() {
     setError("");
     setSuccess("");
 
+    // ✅ extra guard: kalau bukan PWA, jangan proses
+    if (!isPWA()) {
+      router.replace("/");
+      return;
+    }
+
     const t = String(token || "").trim();
     const rid = String(resetId || "").trim();
     const np = String(newPassword || "");
@@ -100,6 +132,7 @@ export default function ResetPasswordPage() {
       const r = await fetch("/api/user/auth/reset/confirm", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // ✅ optional
         body: JSON.stringify({
           reset_id: rid,
           token: t,
@@ -122,6 +155,18 @@ export default function ResetPasswordPage() {
       setLoading(false);
     }
   };
+
+  // ✅ kalau belum allow (belum lolos gate PWA), jangan render form
+  if (!allow) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="flex items-center gap-3 text-gray-600">
+          <span className="h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-gray-700" />
+          <p>Mengalihkan...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -198,13 +243,31 @@ export default function ResetPasswordPage() {
 
             {/* STEP INDICATOR */}
             <div className="mb-4 flex items-center gap-2 text-xs text-gray-600">
-              <span className={`px-2 py-1 rounded-full border ${step === 1 ? "bg-gray-900 text-white border-gray-900" : "bg-white border-gray-200"}`}>
+              <span
+                className={`px-2 py-1 rounded-full border ${
+                  step === 1
+                    ? "bg-gray-900 text-white border-gray-900"
+                    : "bg-white border-gray-200"
+                }`}
+              >
                 1. Request
               </span>
-              <span className={`px-2 py-1 rounded-full border ${step === 2 ? "bg-gray-900 text-white border-gray-900" : "bg-white border-gray-200"}`}>
+              <span
+                className={`px-2 py-1 rounded-full border ${
+                  step === 2
+                    ? "bg-gray-900 text-white border-gray-900"
+                    : "bg-white border-gray-200"
+                }`}
+              >
                 2. Password Baru
               </span>
-              <span className={`px-2 py-1 rounded-full border ${step === 3 ? "bg-gray-900 text-white border-gray-900" : "bg-white border-gray-200"}`}>
+              <span
+                className={`px-2 py-1 rounded-full border ${
+                  step === 3
+                    ? "bg-gray-900 text-white border-gray-900"
+                    : "bg-white border-gray-200"
+                }`}
+              >
                 3. Selesai
               </span>
             </div>
@@ -213,7 +276,9 @@ export default function ResetPasswordPage() {
             {step === 1 && (
               <form onSubmit={requestToken} className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-800">Nomor WhatsApp</label>
+                  <label className="text-sm font-medium text-gray-800">
+                    Nomor WhatsApp
+                  </label>
                   <div className="mt-2 relative">
                     <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-400">
                       <svg
@@ -436,6 +501,9 @@ export default function ResetPasswordPage() {
                     setConfirmNewPassword("");
                     setShowPw(false);
                     setShowPw2(false);
+                    setResetId("");
+                    setToken("");
+                    setExpiresAt("");
                   }}
                   className="w-full border border-gray-200 rounded-xl py-3 font-semibold hover:bg-gray-50 disabled:opacity-50"
                 >

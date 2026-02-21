@@ -1,9 +1,13 @@
 import Head from "next/head";
+import { isPWA } from "../../utils/isPWA"; // ✅ sesuaikan path
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 
 export default function ProfilPage() {
   const router = useRouter();
+
+  // ✅ gate allow render khusus PWA
+  const [allow, setAllow] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [checking, setChecking] = useState(true);
@@ -20,16 +24,35 @@ export default function ProfilPage() {
   }, [router.query.returnTo]);
 
   // ✅ avatar hanya dari pilihan ini (tidak ada input URL)
-const avatarChoices = Array.from({ length: 12 }, (_, i) => {
-  const seed = `ln${i + 1}`;
-  return `https://api.dicebear.com/7.x/fun-emoji/svg?seed=${seed}`;
-});
+  const avatarChoices = Array.from({ length: 12 }, (_, i) => {
+    const seed = `ln${i + 1}`;
+    return `https://api.dicebear.com/7.x/fun-emoji/svg?seed=${seed}`;
+  });
+
+  // ✅ GATE PWA: kalau bukan PWA, redirect keluar
+  useEffect(() => {
+    if (!router.isReady) return;
+
+    if (!isPWA()) {
+      router.replace("/");
+      return;
+    }
+
+    setAllow(true);
+  }, [router]);
 
   useEffect(() => {
     const run = async () => {
       setError("");
+
+      // ✅ extra guard: kalau bukan PWA, jangan fetch user
+      if (!isPWA()) {
+        router.replace("/");
+        return;
+      }
+
       try {
-        const res = await fetch("/api/user/auth/me");
+        const res = await fetch("/api/user/auth/me", { credentials: "include" });
         const data = await res.json();
 
         if (!data?.ok) {
@@ -62,6 +85,12 @@ const avatarChoices = Array.from({ length: 12 }, (_, i) => {
     setError("");
     setLoading(true);
 
+    // ✅ extra guard: kalau bukan PWA, jangan proses submit
+    if (!isPWA()) {
+      router.replace("/");
+      return;
+    }
+
     try {
       // ✅ HARD LOCK: avatar_url harus dari avatarChoices
       const avatarUrlFinal = avatarChoices.includes(avatarUrl) ? avatarUrl : avatarChoices[0];
@@ -93,6 +122,13 @@ const avatarChoices = Array.from({ length: 12 }, (_, i) => {
 
   const onLogout = async () => {
     setLoading(true);
+
+    // ✅ extra guard
+    if (!isPWA()) {
+      router.replace("/");
+      return;
+    }
+
     try {
       await fetch("/api/user/auth/logout", {
         method: "POST",
@@ -104,10 +140,14 @@ const avatarChoices = Array.from({ length: 12 }, (_, i) => {
     }
   };
 
-  if (checking) {
+  // ✅ kalau belum allow (belum lolos gate PWA), jangan render page
+  if (!allow || checking) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600">Memuat profil...</p>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="flex items-center gap-3 text-gray-600">
+          <span className="h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-gray-700" />
+          <p>{checking ? "Memuat profil..." : "Mengalihkan..."}</p>
+        </div>
       </div>
     );
   }
@@ -212,11 +252,6 @@ const avatarChoices = Array.from({ length: 12 }, (_, i) => {
             >
               {loading ? "Menyimpan..." : "Simpan Profil"}
             </button>
-
-            <p className="text-xs text-gray-500 text-center">
-              Setelah disimpan, kamu otomatis diarahkan ke:{" "}
-              <span className="font-semibold">{returnTo}</span>
-            </p>
           </form>
         </div>
       </div>

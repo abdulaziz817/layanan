@@ -1,10 +1,14 @@
 import Head from "next/head";
+import { isPWA } from "../../utils/isPWA"; // ✅ sesuaikan path (kalau file ini ada di /pages/register.jsx biasanya "../utils/isPWA")
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 
 export default function RegisterPage() {
   const router = useRouter();
+
+  // ✅ gate allow render khusus PWA
+  const [allow, setAllow] = useState(false);
 
   const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
@@ -19,8 +23,22 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  // ✅ GATE PWA: kalau bukan PWA, redirect keluar
+  useEffect(() => {
+    if (!router.isReady) return;
+
+    if (!isPWA()) {
+      router.replace("/");
+      return;
+    }
+
+    setAllow(true);
+  }, [router]);
+
   // kalau sudah login, langsung lempar
   useEffect(() => {
+    if (!allow) return;
+
     const run = async () => {
       try {
         const res = await fetch("/api/user/auth/me");
@@ -36,14 +54,21 @@ export default function RegisterPage() {
         setChecking(false);
       }
     };
+
     run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [allow]);
 
   const onSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
+
+    // ✅ extra guard: kalau bukan PWA, jangan proses register
+    if (!isPWA()) {
+      router.replace("/");
+      return;
+    }
 
     const p = phone.trim();
     const n = name.trim();
@@ -74,6 +99,7 @@ export default function RegisterPage() {
       const res = await fetch("/api/user/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // ✅ optional (kalau backend butuh session)
         body: JSON.stringify({
           phone: p,
           name: n,
@@ -89,6 +115,7 @@ export default function RegisterPage() {
       }
 
       setSuccess("Berhasil daftar. Sekarang login dulu ya.");
+
       setTimeout(() => {
         const returnTo = router.query.returnTo ? String(router.query.returnTo) : "/profil";
         router.replace(`/login?returnTo=${encodeURIComponent(returnTo)}`);
@@ -99,6 +126,18 @@ export default function RegisterPage() {
       setLoading(false);
     }
   };
+
+  // ✅ kalau belum allow (belum lolos gate PWA), jangan render form
+  if (!allow) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="flex items-center gap-3 text-gray-600">
+          <span className="h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-gray-700" />
+          <p>Mengalihkan...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (checking) {
     return (
@@ -346,7 +385,6 @@ export default function RegisterPage() {
                   </button>
                 </div>
 
-                {/* indikator cocok/tidak */}
                 {confirmPassword.length > 0 ? (
                   <p className={`mt-2 text-xs ${password === confirmPassword ? "text-green-600" : "text-red-600"}`}>
                     {password === confirmPassword ? "Password cocok ✅" : "Password belum sama ❌"}
@@ -373,11 +411,11 @@ export default function RegisterPage() {
 
             <div className="mt-5 text-sm text-gray-600">
               Sudah punya akun?{" "}
-             <Link href="/login" className="...">Masuk</Link>
+              <Link className="text-indigo-700 font-semibold hover:underline" href="/login">
+                Masuk
+              </Link>
             </div>
           </div>
-
-          
         </div>
       </div>
     </>
