@@ -5,8 +5,9 @@
 // ✅ NEW: Validasi dengan highlight merah per field + scroll ke banner error + pesan "lihat ke atas"
 
 import Head from "next/head";
-import Input from "../components/ui/Input";
-import Button from "../components/ui/Button";
+import Input from "../../components/ui/Input";
+import Button from "../../components/ui/Button";
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
