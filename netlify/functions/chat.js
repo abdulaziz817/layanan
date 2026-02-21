@@ -296,7 +296,7 @@ exports.handler = async (event) => {
           const clean = await fetchCleanText("https://abdulaziznusantara.netlify.app/");
           userPrompt = buildAzizPrompt(clean, message, "lebih lengkap");
         } else {
-          const clean = await fetchCleanText("https://layanannusantara.store/");
+          const clean = await fetchCleanText("https://layanannusantara.store/tentang");
           userPrompt = buildAzizPrompt(clean, message, "ringkas");
         }
       } catch {
