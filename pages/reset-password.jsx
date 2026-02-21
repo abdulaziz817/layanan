@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { isPWA } from "../../utils/isPWA"; // ✅ sesuaikan path
+import { isPWA } from "../utils/isPWA";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";

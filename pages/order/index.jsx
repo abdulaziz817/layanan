@@ -1,15 +1,3 @@
-// pages/order.jsx
-// ✅ Versi FULL + Crypto Payment (auto update kurs) + FIX bug toFixed(null)
-// ✅ Tambahan: hitung estimasi 1x (useMemo), label network jelas, reset network saat ganti coin,
-// ✅ Copy button aman kalau address kosong, dan WA message konsisten.
-// ✅ NEW: Validasi dengan highlight merah per field + scroll ke banner error + pesan "lihat ke atas"
-// ✅ ADD: Domain checker khusus Web Development (cek domain tersedia / sudah dipakai)
-// ✅ ADD: Biaya layanan Nusantara Rp 1.500 (masuk total)
-// ✅ ADD: Minimal budget Web Development Rp 150.000
-// ✅ ADD: Domain pricing "wajar" + pilihan kategori TLD + durasi 1/2/3 tahun + total domain tampil otomatis
-// ✅ ADD: Domain gratis: netlify.app & vercel.app (subdomain)
-// ✅ NOTE: Untuk domain checker butuh API route: /pages/api/domain-check.js (aku tulis lengkap di bawah)
-
 import Head from "next/head";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";

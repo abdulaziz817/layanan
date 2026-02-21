@@ -10,7 +10,6 @@ const withPWA = require("next-pwa")({
 
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
 
   // ✅ Supaya deploy (Netlify) tidak gagal hanya karena ESLint warnings/errors
   eslint: {

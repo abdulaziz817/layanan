@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { isPWA } from "../../utils/isPWA"; // ✅ sesuaikan path, kalau login ada di /pages/login.jsx biasanya "../utils/isPWA"
+import { isPWA } from "../utils/isPWA";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
