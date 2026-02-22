@@ -36,6 +36,20 @@ const includesAny = (text, arr) => {
 const pickLastUserFromHistory = (history = []) =>
   [...history].reverse().find((h) => h?.role === "user")?.content || "";
 
+const pickLastDetectedProductFromHistory = (history = []) => {
+  // cari di assistant messages yang pernah menyebut nama produk
+  for (const h of [...history].reverse()) {
+    if (h?.role !== "assistant") continue;
+    const txt = normalize(h.content);
+    for (const key in products) {
+      const p = products[key];
+      if (!p?.name) continue;
+      if (txt.includes(normalize(p.name))) return p;
+    }
+  }
+  return null;
+};
+
 // ✅ IMPORTANT: sanitasi history -> hanya role valid + content
 const sanitizeHistory = (history = [], max = 12) => {
   if (!Array.isArray(history)) return [];
@@ -219,22 +233,27 @@ Pertanyaan user: ${userMessage}
 
 function buildAzizPrompt(cleanSource, userMessage, mode = "ringkas") {
   return `
-User ingin mengetahui informasi ${mode.toUpperCase()} tentang Abdul Aziz.
+Kamu adalah asisten resmi Layanan Nusantara.
 
 Sumber:
 ${cleanSource}
 
-Jawab berdasarkan sumber di atas dengan ringkas, rapi, dan relevan.
-Pertanyaan user: ${userMessage}
-`.trim();
-}
+ATURAN WAJIB:
+- Jangan gunakan frasa: "tidak menemukan", "tidak ada informasi", "saya tidak menemukan", "mohon maaf tidak menemukan".
+- Jangan mengarang.
+- Jika pertanyaan menanyakan perusahaan tertentu dan tidak disebut di sumber:
+  katakan: "Di profil yang tersedia, perusahaan itu tidak disebutkan."
+  lalu tampilkan pengalaman yang memang tertulis di sumber.
 
-function buildGeneralPrompt(cleanSource, userMessage) {
-  return `
-Gunakan informasi berikut untuk menjawab pertanyaan user dengan ringkas:
-${cleanSource}
+Mode: ${mode}
 
-Pertanyaan user: ${userMessage}
+Pertanyaan user:
+${userMessage}
+
+Format jawaban:
+- 1 kalimat pembuka
+- Bullet list poin-poin utama
+- Jika butuh klarifikasi, tanya 1 pertanyaan paling penting
 `.trim();
 }
 
@@ -281,44 +300,70 @@ exports.handler = async (event) => {
     const combinedMessage = isFollowUp && lastUser ? lastUser : message;
 
     const product = detectProduct(combinedMessage);
+    let detectedProduct = product;
+if (!detectedProduct && isFollowUp) {
+  detectedProduct = pickLastDetectedProductFromHistory(history);
+}
 
     const talkedAboutAzizBefore = history.some(
-      (h) => h.role === "assistant" && normalize(h.content).includes("abdul aziz")
-    );
+  (h) => h.role === "assistant" && includesAny(h.content, ["abdul aziz", "abdul", "aziz"])
+);
 
     let userPrompt = String(message);
 
-    // ====== LOGIKA PROFIL AZIZ ======
-    const askAboutAziz = includesAny(message, ["aziz", "abdul", "pembuat", "owner"]);
-    if (askAboutAziz) {
-      try {
-        if (talkedAboutAzizBefore) {
-          const clean = await fetchCleanText("https://zizzz.netlify.app/");
-          userPrompt = buildAzizPrompt(clean, message, "lebih lengkap");
-        } else {
-          const clean = await fetchCleanText("https://layanannusantara.store/tentang");
-          userPrompt = buildAzizPrompt(clean, message, "ringkas");
-        }
-      } catch {
-        userPrompt = `Jawab pertanyaan tentang Abdul Aziz secara ringkas dan profesional.\nPertanyaan user: ${message}`;
-      }
-    }
+// ====== LOGIKA PROFIL AZIZ ======
+const askAboutAziz = includesAny(message, [
+  "abdul aziz","aziz","abdul",
+  "owner","pemilik","founder","pendiri","ceo",
+  "instagram","ig","wa","whatsapp","nomor","kontak","alamat","pengalaman",
+  "karier","kerja","riwayat"
+]);
 
-    // ====== LOGIKA PRODUK ======
-    if (product) {
-      userPrompt = buildProductPrompt(product, message, isFollowUp);
-    }
+// intent pengalaman (biar kalau tanya PT/perusahaan langsung ambil zizzz)
+const askAzizExperience = askAboutAziz && includesAny(message, [
+  "pt","perusahaan","kerja","pengalaman","karier","jabatan","timeline","riwayat"
+]);
 
-    // ====== LOGIKA UMUM ======
-    if (includesAny(message, ["layanan nusantara"]) && !product && !askAboutAziz) {
-      try {
-        const clean = await fetchCleanText("https://layanannusantara.store/");
-        userPrompt = buildGeneralPrompt(clean, message);
-      } catch {
-        userPrompt = `Jawab pertanyaan user tentang Layanan Nusantara secara ringkas dan jelas.\nPertanyaan user: ${message}`;
-      }
-    }
+if (askAboutAziz) {
+  try {
+    // prioritas: kalau nanya pengalaman kerja -> ambil zizzz (lebih lengkap)
+    const url = askAzizExperience
+      ? "https://zizzz.netlify.app/"
+      : "https://layanannusantara.store/tentang/aziz"; // sumber resmi kamu
 
+    const clean = await fetchCleanText(url);
+
+    userPrompt = buildAzizPrompt(clean, message, askAzizExperience ? "lebih lengkap" : "ringkas");
+  } catch {
+    // fallback ke sumber lain
+    try {
+      const url2 = talkedAboutAzizBefore
+        ? "https://zizzz.netlify.app/"
+        : "https://abdulaziznusantara.netlify.app/";
+      const clean2 = await fetchCleanText(url2);
+      userPrompt = buildAzizPrompt(clean2, message, talkedAboutAzizBefore ? "lebih lengkap" : "ringkas");
+    } catch {
+      userPrompt = `Jawab pertanyaan tentang Abdul Aziz secara profesional dan jangan mengarang.\nPertanyaan user: ${message}`;
+    }
+  }
+}
+
+// ====== LOGIKA PRODUK ======
+// ✅ produk hanya jalan kalau BUKAN pertanyaan Abdul Aziz
+if (!askAboutAziz && detectedProduct) {
+  userPrompt = buildProductPrompt(detectedProduct, message, isFollowUp);
+}
+
+// ====== LOGIKA UMUM ======
+// ✅ umum hanya jalan kalau bukan Aziz dan bukan produk
+if (!askAboutAziz && !detectedProduct && includesAny(message, ["layanan nusantara"])) {
+  try {
+    const clean = await fetchCleanText("https://layanannusantara.store/");
+    userPrompt = buildGeneralPrompt(clean, message);
+  } catch {
+    userPrompt = `Jawab pertanyaan user tentang Layanan Nusantara secara ringkas dan jelas.\nPertanyaan user: ${message}`;
+  }
+}
     // ====== KIRIM KE GROQ ======
     const groqRes = await fetchWithTimeout(
       "https://api.groq.com/openai/v1/chat/completions",

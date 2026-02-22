@@ -20,18 +20,21 @@ export default function Hero() {
   const [isPWA, setIsPWA] = useState(false);
 
   // 🔁 ANIMASI TEXT
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setFadeStage("fadeOut");
+useEffect(() => {
+  const interval = setInterval(() => {
+    setFadeStage("fadeOut");
 
-      setTimeout(() => {
-        setIndex((prev) => (prev + 1) % services.length);
-        setFadeStage("fadeIn");
-      }, 600);
-    }, 3000);
+    const t = setTimeout(() => {
+      setIndex((prev) => (prev + 1) % services.length);
+      setFadeStage("fadeIn");
+    }, 600);
 
-    return () => clearInterval(interval);
-  }, []);
+    // cleanup timeout tiap tick
+    return () => clearTimeout(t);
+  }, 3000);
+
+  return () => clearInterval(interval);
+}, [services.length]);
 
   // 📦 LISTENER INSTALL PWA
   useEffect(() => {
@@ -60,10 +63,10 @@ export default function Hero() {
     setDeferredPrompt(null);
   };
 
-  const fadeClass =
-    fadeStage === "fadeIn"
-      ? "opacity-100 translate-y-0 scale-105"
-      : "opacity-0 translate-y-4 scale-95";
+const fadeClass =
+  fadeStage === "fadeIn"
+    ? "opacity-100 translate-y-0 scale-100"
+    : "opacity-0 translate-y-4 scale-95";
 
   return (
     <section className="bg-white px-6 py-20 sm:py-28 min-h-screen flex items-center justify-center">
@@ -72,13 +75,13 @@ export default function Hero() {
           Solusi Jasa Layanan Terpercaya
         </h1>
 
-        <div className="relative h-16 sm:h-20 overflow-hidden mb-6">
-          <h2
-            className={`absolute inset-0 flex items-center justify-center text-center text-2xl sm:text-4xl font-semibold text-indigo-600 transition-all duration-700 ease-in-out transform ${fadeClass}`}
-          >
-            {services[index]}
-          </h2>
-        </div>
+<div className="relative min-h-[72px] sm:min-h-[96px] mb-6 flex items-center justify-center">
+  <h2
+    className={`px-3 text-center text-2xl sm:text-4xl font-semibold text-indigo-600 transition-all duration-700 ease-in-out transform ${fadeClass}`}
+  >
+    {services[index]}
+  </h2>
+</div>
 
         <p className="text-base sm:text-lg text-gray-600 max-w-xl mx-auto mb-10">
           Kami menyediakan layanan berkualitas tinggi untuk kebutuhan teknologi dan kreativitas Anda.

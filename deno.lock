@@ -15,16 +15,20 @@
         "npm:@next/font@13.0.7",
         "npm:@supabase/supabase-js@^2.90.1",
         "npm:@tailwindcss/forms@~0.5.3",
+        "npm:@upstash/ratelimit@^2.0.8",
+        "npm:@upstash/redis@^1.36.2",
         "npm:aos@^2.3.4",
         "npm:autoprefixer@^10.4.13",
         "npm:canvas-confetti@^1.9.3",
         "npm:chart.js@^4.5.1",
         "npm:clsx@^2.1.1",
+        "npm:cookie@^1.1.1",
         "npm:date-fns@^4.1.0",
         "npm:eslint-config-next@13.1.1",
         "npm:eslint@8.30.0",
         "npm:framer-motion@^12.24.10",
         "npm:googleapis@168",
+        "npm:helmet@^8.1.0",
         "npm:html-to-image@^1.11.13",
         "npm:html2canvas@^1.4.1",
         "npm:html2pdf.js@~0.10.3",
@@ -37,6 +41,7 @@
         "npm:postcss@^8.4.20",
         "npm:qrcode.react@^4.2.0",
         "npm:qrcode@^1.5.4",
+        "npm:rate-limiter-flexible@^9.1.1",
         "npm:react-chartjs-2@^5.3.1",
         "npm:react-datepicker@^8.4.0",
         "npm:react-dom@^19.2.3",
@@ -46,7 +51,10 @@
         "npm:react-typed@^2.0.12",
         "npm:react@^19.2.3",
         "npm:swiper@^11.2.8",
-        "npm:tailwindcss@^3.2.4"
+        "npm:tailwindcss@^3.2.4",
+        "npm:uuid@13",
+        "npm:web-push@^3.6.7",
+        "npm:zod@^4.3.6"
       ]
     }
   }

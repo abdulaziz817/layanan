@@ -51,6 +51,10 @@ export default function OrderForm() {
   const [showPaypal, setShowPaypal] = useState(false);
   const [showBCA, setShowBCA] = useState(false);
 
+  // ✅ Fee hanya untuk Web Development (HARUS setelah selectedService)
+  const shouldApplyFee = selectedService === "Web Development";
+  const serviceFee = shouldApplyFee ? NUSANTARA_FEE : 0;
+
   // ✅ NEW: field errors
   const [fieldErrors, setFieldErrors] = useState({});
 
@@ -600,14 +604,15 @@ export default function OrderForm() {
   ]);
 
   // ✅ Total IDR untuk konversi crypto (sudah termasuk fee + domain kalau WebDev custom)
-  const totalIDR = useMemo(() => {
-    const base =
-      selectedService === "Aplikasi Premium"
-        ? Number(durationPrice || 0)
-        : Number((budget || "").replace(/\./g, "") || 0);
+// ✅ Total IDR untuk konversi crypto (fee hanya WebDev + domain hanya WebDev custom)
+const totalIDR = useMemo(() => {
+  const base =
+    selectedService === "Aplikasi Premium"
+      ? Number(durationPrice || 0)
+      : Number((budget || "").replace(/\./g, "") || 0);
 
-    return Number(base || 0) + Number(NUSANTARA_FEE || 0) + Number(domainCost || 0);
-  }, [selectedService, durationPrice, budget, NUSANTARA_FEE, domainCost]);
+  return Number(base || 0) + Number(serviceFee || 0) + Number(domainCost || 0);
+}, [selectedService, durationPrice, budget, serviceFee, domainCost]);
 
   // ✅ Estimasi crypto dihitung 1x
   const estimatedCrypto = useMemo(() => {
@@ -1172,81 +1177,98 @@ export default function OrderForm() {
                     ) : null}
                   </div>
                 )}
+{selectedService !== "Aplikasi Premium" && (
+  <>
+    <div>
+      <label>Budget (Rp)</label>
+      <Input
+        type="text"
+        value={budget}
+        onChange={handleBudgetChange}
+        placeholder="Contoh: 150.000"
+        className={`mt-2 ${fieldErrors?.budget ? inputErrorClass : ""}`}
+      />
+      {fieldErrors?.budget ? (
+        <p className="mt-1 text-xs text-red-600">{fieldErrors.budget}</p>
+      ) : null}
+      {selectedService === "Web Development" && (
+        <p className="mt-1 text-[11px] text-gray-500">
+          Minimal budget Web Development: Rp {formatIDR(MIN_WEBDEV_BUDGET)}
+        </p>
+      )}
+    </div>
 
-                {selectedService !== "Aplikasi Premium" && (
-                  <>
-                    <div>
-                      <label>Budget (Rp)</label>
-                      <Input
-                        type="text"
-                        value={budget}
-                        onChange={handleBudgetChange}
-                        placeholder="Contoh: 150.000"
-                        className={`mt-2 ${fieldErrors?.budget ? inputErrorClass : ""}`}
-                      />
-                      {fieldErrors?.budget ? (
-                        <p className="mt-1 text-xs text-red-600">{fieldErrors.budget}</p>
-                      ) : null}
-                      {selectedService === "Web Development" && (
-                        <p className="mt-1 text-[11px] text-gray-500">
-                          Minimal budget Web Development: Rp {formatIDR(MIN_WEBDEV_BUDGET)}
-                        </p>
-                      )}
-                    </div>
+    <div>
+      <label>Deadline (kapan selesai)</label>
+      <input
+        type="date"
+        min={minDate}
+        value={deadline}
+        onChange={(e) => {
+          setDeadline(e.target.value);
+          clearFieldError("deadline");
+        }}
+        className={getClass(baseDateClass, "deadline")}
+      />
+      {fieldErrors?.deadline ? (
+        <p className="mt-1 text-xs text-red-600">{fieldErrors.deadline}</p>
+      ) : null}
+    </div>
 
-                    <div>
-                      <label>Deadline (kapan selesai)</label>
-                      <input
-                        type="date"
-                        min={minDate}
-                        value={deadline}
-                        onChange={(e) => {
-                          setDeadline(e.target.value);
-                          clearFieldError("deadline");
-                        }}
-                        className={getClass(baseDateClass, "deadline")}
-                      />
-                      {fieldErrors?.deadline ? (
-                        <p className="mt-1 text-xs text-red-600">{fieldErrors.deadline}</p>
-                      ) : null}
-                    </div>
+    {/* ✅ Domain Section khusus Web Development */}
+    {selectedService === "Web Development" && (
+      <div className="mt-2 space-y-3">
+        <label className="font-semibold text-gray-800">Domain Website</label>
 
-                    {/* ✅ Domain Section khusus Web Development */}
-                    {selectedService === "Web Development" && (
-                      <div className="mt-2 space-y-3">
-                        <label className="font-semibold text-gray-800">Domain Website</label>
+        <select
+          value={domainMode}
+          onChange={(e) => {
+            setDomainMode(e.target.value);
+            setDomainBase("");
+            setDomainTld(".site");
+            setDomainYears("1");
+            setDomainStatus("");
+            setDomainAiSuggestion("");
+            setSubdomainProvider("");
+            setSubdomainLabel("");
 
-                        <select
-                          value={domainMode}
-                          onChange={(e) => {
-                            setDomainMode(e.target.value);
-                            setDomainBase("");
-                            setDomainTld(".site");
-                            setDomainYears("1");
-                            setDomainStatus("");
-                            setDomainAiSuggestion("");
-                            setSubdomainProvider("");
-                            setSubdomainLabel("");
+            clearFieldError("domainMode");
+            clearFieldError("domainBase");
+            clearFieldError("domainTld");
+            clearFieldError("domainYears");
+            clearFieldError("domainStatus");
+            clearFieldError("subdomainProvider");
+            clearFieldError("subdomainLabel");
+          }}
+          className={getClass(baseSelectClassBig, "domainMode")}
+        >
+          <option value="">-- Pilih Metode Domain --</option>
+          <option value="custom">Domain berbayar (pilih ekstensi + durasi + cek)</option>
+          <option value="subdomain">Domain gratis (netlify.app / vercel.app)</option>
+        </select>
 
-                            clearFieldError("domainMode");
-                            clearFieldError("domainBase");
-                            clearFieldError("domainTld");
-                            clearFieldError("domainYears");
-                            clearFieldError("domainStatus");
-                            clearFieldError("subdomainProvider");
-                            clearFieldError("subdomainLabel");
-                          }}
-                          className={getClass(baseSelectClassBig, "domainMode")}
-                        >
-                          <option value="">-- Pilih Metode Domain --</option>
-                          <option value="custom">Domain berbayar (pilih ekstensi + durasi + cek)</option>
-                          <option value="subdomain">Domain gratis (netlify.app / vercel.app)</option>
-                        </select>
+        {fieldErrors?.domainMode ? (
+          <p className="mt-1 text-xs text-red-600">{fieldErrors.domainMode}</p>
+        ) : null}
 
-                        {fieldErrors?.domainMode ? (
-                          <p className="mt-1 text-xs text-red-600">{fieldErrors.domainMode}</p>
-                        ) : null}
+        {/* ... LANJUTKAN ISI DOMAIN kamu (custom & subdomain) DI SINI ... */}
+      </div>
+    )}
 
+    {/* ✅ Biaya Layanan Nusantara: HANYA tampil kalau Web Development */}
+    {selectedService === "Web Development" && (
+      <div className="mt-2 w-full p-4 rounded-xl bg-gray-50 border">
+        <div className="flex justify-between text-sm">
+          <span className="text-gray-600">Biaya Layanan Nusantara</span>
+          <span className="font-semibold text-gray-900">Rp {formatIDR(NUSANTARA_FEE)}</span>
+        </div>
+        <p className="mt-2 text-[11px] text-gray-400">
+          Total yang dihitung untuk pembayaran (termasuk crypto) sudah termasuk biaya layanan dan domain (jika pilih domain berbayar).
+        </p>
+      </div>
+    )}
+  </>
+)}
                         {/* ✅ CUSTOM DOMAIN */}
                         {domainMode === "custom" && (
                           <div className="space-y-2">
@@ -1418,145 +1440,135 @@ export default function OrderForm() {
                           </div>
                         )}
 
-                        {/* ✅ SUBDOMAIN GRATIS */}
-                        {domainMode === "subdomain" && (
-                          <div className="space-y-2">
-                            <p className="text-xs text-gray-500">
-                              Dari kami hanya menyediakan subdomain gratis: <b>netlify.app</b> atau <b>vercel.app</b>.
-                            </p>
+                    {/* ✅ SUBDOMAIN GRATIS */}
+{domainMode === "subdomain" && (
+  <div className="space-y-2">
+    <p className="text-xs text-gray-500">
+      Dari kami hanya menyediakan subdomain gratis: <b>netlify.app</b> atau <b>vercel.app</b>.
+    </p>
 
-                            <select
-                              value={subdomainProvider}
-                              onChange={(e) => {
-                                setSubdomainProvider(e.target.value);
-                                clearFieldError("subdomainProvider");
-                              }}
-                              className={getClass(baseSelectClassBig, "subdomainProvider")}
-                            >
-                              <option value="">-- Pilih Provider --</option>
-                              <option value="netlify">Netlify (netlify.app)</option>
-                              <option value="vercel">Vercel (vercel.app)</option>
-                            </select>
+    <select
+      value={subdomainProvider}
+      onChange={(e) => {
+        setSubdomainProvider(e.target.value);
+        clearFieldError("subdomainProvider");
+      }}
+      className={getClass(baseSelectClassBig, "subdomainProvider")}
+    >
+      <option value="">-- Pilih Provider --</option>
+      <option value="netlify">Netlify (netlify.app)</option>
+      <option value="vercel">Vercel (vercel.app)</option>
+    </select>
 
-                            {fieldErrors?.subdomainProvider ? (
-                              <p className="mt-1 text-xs text-red-600">{fieldErrors.subdomainProvider}</p>
-                            ) : null}
+    {fieldErrors?.subdomainProvider ? (
+      <p className="mt-1 text-xs text-red-600">{fieldErrors.subdomainProvider}</p>
+    ) : null}
 
-                            <Input
-                              type="text"
-                              value={subdomainLabel}
-                              onChange={(e) => {
-                                setSubdomainLabel(e.target.value);
-                                clearFieldError("subdomainLabel");
-                              }}
-                              placeholder={
-                                subdomainProvider === "vercel"
-                                  ? "contoh: tokokamu.vercel.app"
-                                  : "contoh: tokokamu.netlify.app"
-                              }
-                              className={`mt-2 ${fieldErrors?.subdomainLabel ? inputErrorClass : ""}`}
-                            />
+    <Input
+      type="text"
+      value={subdomainLabel}
+      onChange={(e) => {
+        setSubdomainLabel(e.target.value);
+        clearFieldError("subdomainLabel");
+      }}
+      placeholder={
+        subdomainProvider === "vercel"
+          ? "contoh: tokokamu.vercel.app"
+          : "contoh: tokokamu.netlify.app"
+      }
+      className={`mt-2 ${fieldErrors?.subdomainLabel ? inputErrorClass : ""}`}
+    />
 
-                            {fieldErrors?.subdomainLabel ? (
-                              <p className="mt-1 text-xs text-red-600">{fieldErrors.subdomainLabel}</p>
-                            ) : null}
-                          </div>
-                        )}
-                      </div>
-                    )}
+    {fieldErrors?.subdomainLabel ? (
+      <p className="mt-1 text-xs text-red-600">{fieldErrors.subdomainLabel}</p>
+    ) : null}
+  </div>
+)}
 
-                    {/* info biaya layanan */}
-                    <div className="mt-2 w-full p-4 rounded-xl bg-gray-50 border">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Biaya Layanan Nusantara</span>
-                        <span className="font-semibold text-gray-900">Rp {formatIDR(NUSANTARA_FEE)}</span>
-                      </div>
-                      <p className="mt-2 text-[11px] text-gray-400">
-                        Total yang dihitung untuk pembayaran (termasuk crypto) sudah termasuk biaya layanan dan domain (jika pilih domain berbayar).
-                      </p>
-                    </div>
-                  </>
-                )}
+{/* ✅ Tutup Domain Section Web Development */}
 
-                {selectedService === "Aplikasi Premium" && (
-                  <>
-                    <div className="mt-1">
-                      <label className="font-semibold text-gray-800">Pilih Durasi</label>
+{/* ✅ Biaya Layanan Nusantara: HANYA MUNCUL KALO WEB DEVELOPMENT */}
 
-                      <select
-                        className={getClass(
-                          `
-                          mt-2 w-full p-3 border border-gray-300 rounded-lg
-                          bg-white shadow-sm text-sm
-                          focus:outline-none focus:ring-2 focus:ring-indigo-600
-                        `,
-                          "duration"
-                        )}
-                        value={duration}
-                        onChange={(e) => {
-                          const dur = e.target.value;
-                          setDuration(dur);
-                          clearFieldError("duration");
 
-                          const raw = appPrices?.[selectedSubService]?.[dur] ?? 0;
-                          const price = Number(raw) || 0;
-                          const finalPrice = isPromo ? Math.round(price * 0.6) : price;
-                          setDurationPrice(finalPrice);
-                        }}
-                        disabled={!selectedSubService || !appPrices?.[selectedSubService]}
-                      >
-                        <option value="">-- Pilih Durasi --</option>
+{selectedService === "Aplikasi Premium" && (
+  <>
+    <div className="mt-1">
+      <label className="font-semibold text-gray-800">Pilih Durasi</label>
 
-                        {selectedSubService &&
-                          appPrices?.[selectedSubService] &&
-                          Object.keys(appPrices[selectedSubService]).map((dur) => (
-                            <option key={dur} value={dur}>
-                              {dur}
-                            </option>
-                          ))}
-                      </select>
+      <select
+        className={getClass(
+          `
+          mt-2 w-full p-3 border border-gray-300 rounded-lg
+          bg-white shadow-sm text-sm
+          focus:outline-none focus:ring-2 focus:ring-indigo-600
+        `,
+          "duration"
+        )}
+        value={duration}
+        onChange={(e) => {
+          const dur = e.target.value;
+          setDuration(dur);
+          clearFieldError("duration");
 
-                      {fieldErrors?.duration ? (
-                        <p className="mt-1 text-xs text-red-600">{fieldErrors.duration}</p>
-                      ) : null}
-                    </div>
+          const raw = appPrices?.[selectedSubService]?.[dur] ?? 0;
+          const price = Number(raw) || 0;
+          const finalPrice = isPromo ? Math.round(price * 0.6) : price;
+          setDurationPrice(finalPrice);
+        }}
+        disabled={!selectedSubService || !appPrices?.[selectedSubService]}
+      >
+        <option value="">-- Pilih Durasi --</option>
 
-                    {duration && (
-                      <div className="relative w-full text-center space-y-2 py-3">
-                        {isPromo && (
-                          <div className="absolute right-2 top-2">
-                            <span className="text-red-500 text-[11px] font-semibold bg-red-50 px-2 py-0.5 rounded">
-                              40% OFF
-                            </span>
-                          </div>
-                        )}
+        {selectedSubService &&
+          appPrices?.[selectedSubService] &&
+          Object.keys(appPrices[selectedSubService]).map((dur) => (
+            <option key={dur} value={dur}>
+              {dur}
+            </option>
+          ))}
+      </select>
 
-                        {isPromo && (
-                          <div className="bg-red-100 border border-red-300 text-red-700 p-3 rounded-xl mb-3 flex items-center gap-2">
-                            <span className="text-2xl">🎅</span>
-                            <div>
-                              <p className="font-bold text-red-700">Event Akhir Tahun</p>
-                              <p className="text-sm text-red-600 font-medium">Berlaku: 25 Desember – 2 Januari</p>
-                            </div>
-                          </div>
-                        )}
+      {fieldErrors?.duration ? (
+        <p className="mt-1 text-xs text-red-600">{fieldErrors.duration}</p>
+      ) : null}
+    </div>
 
-                        <div className="mt-3 text-center">
-                          {isPromo && (
-                            <>
-                              <p className="text-gray-400 text-sm line-through">
-                                Rp {Number(appPrices?.[selectedSubService]?.[duration] || 0).toLocaleString("id-ID")}
-                              </p>
-                              <p className="text-red-600 text-2xl font-bold">
-                                Rp {Number(durationPrice || 0).toLocaleString("id-ID")}
-                              </p>
-                            </>
-                          )}
+    {duration && (
+      <div className="relative w-full text-center space-y-2 py-3">
+        {isPromo && (
+          <div className="absolute right-2 top-2">
+            <span className="text-red-500 text-[11px] font-semibold bg-red-50 px-2 py-0.5 rounded">
+              40% OFF
+            </span>
+          </div>
+        )}
 
-                          {!isPromo && null}
-                        </div>
-                      </div>
-                    )}
+        {isPromo && (
+          <div className="bg-red-100 border border-red-300 text-red-700 p-3 rounded-xl mb-3 flex items-center gap-2">
+            <span className="text-2xl">🎅</span>
+            <div>
+              <p className="font-bold text-red-700">Event Akhir Tahun</p>
+              <p className="text-sm text-red-600 font-medium">Berlaku: 25 Desember – 2 Januari</p>
+            </div>
+          </div>
+        )}
+
+        <div className="mt-3 text-center">
+          {isPromo && (
+            <>
+              <p className="text-gray-400 text-sm line-through">
+                Rp {Number(appPrices?.[selectedSubService]?.[duration] || 0).toLocaleString("id-ID")}
+              </p>
+              <p className="text-red-600 text-2xl font-bold">
+                Rp {Number(durationPrice || 0).toLocaleString("id-ID")}
+              </p>
+            </>
+          )}
+
+          {!isPromo && null}
+        </div>
+      </div>
+    )}
 
                     {/* PRICE CARD */}
                     <motion.div
