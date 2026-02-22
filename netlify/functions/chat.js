@@ -293,7 +293,7 @@ exports.handler = async (event) => {
     if (askAboutAziz) {
       try {
         if (talkedAboutAzizBefore) {
-          const clean = await fetchCleanText("https://abdulaziznusantara.netlify.app/");
+          const clean = await fetchCleanText("https://zizzz.netlify.app/");
           userPrompt = buildAzizPrompt(clean, message, "lebih lengkap");
         } else {
           const clean = await fetchCleanText("https://layanannusantara.store/tentang");
