@@ -1263,7 +1263,7 @@ const totalIDR = useMemo(() => {
           <span className="font-semibold text-gray-900">Rp {formatIDR(NUSANTARA_FEE)}</span>
         </div>
         <p className="mt-2 text-[11px] text-gray-400">
-          Total yang dihitung untuk pembayaran (termasuk crypto) sudah termasuk biaya layanan dan domain (jika pilih domain berbayar).
+         Berlaku khusus untuk operasional dan proses pengerjaan layanan pembuatan website.
         </p>
       </div>
     )}
@@ -1617,15 +1617,7 @@ const totalIDR = useMemo(() => {
                     </motion.div>
 
                     {/* info biaya layanan */}
-                    <div className="mt-4 w-full p-4 rounded-xl bg-gray-50 border">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Biaya Layanan Nusantara</span>
-                        <span className="font-semibold text-gray-900">Rp {formatIDR(NUSANTARA_FEE)}</span>
-                      </div>
-                      <p className="mt-2 text-[11px] text-gray-400">
-                        Total untuk pembayaran (termasuk crypto) sudah termasuk biaya layanan.
-                      </p>
-                    </div>
+                    
                   </>
                 )}
 
