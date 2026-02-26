@@ -46,13 +46,13 @@ export default function OrderDiskonPage() {
 
   const isDiskonEvent = useMemo(() => {
     const now = new Date();
-    const start = new Date("2026-02-19T00:00:00");
-    const end = new Date("2026-02-22T23:59:59");
+  const start = new Date("2026-02-26T00:00:00");
+  const end = new Date("2026-03-16T23:59:59"); // sampai 24.00 (akhir hari)
     return now >= start && now <= end;
   }, []);
 
-  const discountMultiplier = 0.53; // 47% off
-  const discountLabel = "47% OFF";
+  const discountMultiplier = 0.58; // 42% off
+  const discountLabel = "42% OFF";
 
   const RamadanDecor = () => {
     const stars = Array.from({ length: 10 });
@@ -450,7 +450,7 @@ export default function OrderDiskonPage() {
     // ⚠️ FIX BUG: kamu tulis diskonPrice tapi variabelnya gak ada → pakai promoPrice
     const encodedMessage = encodeURIComponent(
       `*Hai Layanan Nusantara!* 👋✨\n\n` +
-        `*[DISKON-47]*\n` +
+        `*[DISKON-42]*\n` +
         `*Sumber:* /order/diskon\n\n` +
         `👤 *Nama:* ${name}\n` +
         `📞 *Nomor WhatsApp:* ${phone}\n` +
@@ -506,9 +506,9 @@ export default function OrderDiskonPage() {
               <div className="min-w-0">
                 <h1 className="text-2xl font-bold text-gray-900">Diskon Ramadhan</h1>
 
-                <p className="text-sm text-gray-500 mt-1">
-                  Diskon <b>{discountLabel}</b> aktif <b>19–22 Feb 2026</b>.
-                </p>
+          <p className="text-sm text-gray-500 mt-1">
+  Diskon <b>{discountLabel}</b> aktif <b>26 Feb – 16 Mar 2026</b>.
+</p>
               </div>
 
               <Link

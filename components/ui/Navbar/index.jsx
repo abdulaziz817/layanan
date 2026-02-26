@@ -23,8 +23,8 @@ export default function Navbar() {
   useEffect(() => {
     const check = () => {
       const now = new Date() // waktu lokal user
-      const start = new Date('2026-02-19T00:00:00')
-      const end = new Date('2026-02-22T23:59:59')
+const start = new Date('2026-02-26T00:00:00')
+const end = new Date('2026-03-16T23:59:59') // sampai 24.00 (akhir hari)
       setIsDiskonEvent(now >= start && now <= end)
     }
 

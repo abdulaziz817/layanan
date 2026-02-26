@@ -101,6 +101,11 @@ export default function OrderForm() {
     ".solutions": 280000,
     ".enterprise": 320000,
     ".group": 170000,
+    ".com": 150000,
+".net": 170000,
+".org": 160000,
+".co": 300000,
+".id": 220000,
   };
 
   const DOMAIN_TECH = {
@@ -114,6 +119,9 @@ export default function OrderForm() {
     ".systems": 250000,
     ".network": 210000,
     ".software": 260000,
+    ".xyz": 140000,
+".app": 200000,
+".cloud": 240000,
   };
 
   const DOMAIN_CREATIVE = {
@@ -127,6 +135,10 @@ export default function OrderForm() {
     ".digital": 180000,
     ".gallery": 170000,
     ".works": 160000,
+    ".media": 210000,
+".studio": 190000,
+".art": 150000,
+".co": 300000, // opsional, sering dipakai brand kreatif
   };
 
   const DOMAIN_PORTFOLIO = {
@@ -140,6 +152,12 @@ export default function OrderForm() {
     ".bio": 190000,
     ".name": 120000,
     ".pro": 210000,
+    ".me": 170000,
+".my.id": 120000,
+".web.id": 120000,
+".online": 150000,
+".site": 140000,
+".name": 120000,
   };
 
   const DOMAIN_PRICES = {
