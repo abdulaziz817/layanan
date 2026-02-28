@@ -420,6 +420,7 @@ export default function OrderForm() {
     "Web Development",
     "Preset Fotografi",
     "Aplikasi Premium",
+    "Baso Ikan Tuna",
   ];
 
   const serviceSubOptions = {
@@ -560,6 +561,12 @@ export default function OrderForm() {
       "Duolingo",
       "Express VPN",
     ],
+
+  "Baso Ikan Tuna": [
+  "Offline - Cikampek",
+  "Offline - Sukaseuri",
+  "Offline - Purwakarta",
+],
   };
 
   const formatRupiah = (value) => {
@@ -719,7 +726,8 @@ const totalIDR = useMemo(() => {
   };
 
   // ✅ helper class untuk merah
-  const inputErrorClass = "border-red-400 focus:ring-red-400 focus:border-red-400";
+const inputErrorClass =
+  "!border-red-400 focus:!ring-red-400 focus:!border-red-400";
   const baseSelectClass =
     "mt-2 w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-indigo-600";
   const baseSelectClassBig =
@@ -811,6 +819,11 @@ const totalIDR = useMemo(() => {
   };
 
   const handleSubmit = (e) => {
+    if (selectedService && serviceSubOptions[selectedService]) {
+  if (!selectedSubService) {
+    fe.selectedSubService = "Silakan pilih detail layanan terlebih dahulu.";
+  }
+}
     e.preventDefault();
 
     const fe = {};
@@ -824,27 +837,33 @@ const totalIDR = useMemo(() => {
       fe.customSubService = "Masukkan detail layanan jika memilih 'Lainnya' (min. 3 karakter).";
     }
 
-    // KHUSUS "APLIKASI PREMIUM"
-    if (selectedService === "Aplikasi Premium") {
-      if (!selectedSubService) fe.selectedSubService = "Silakan pilih detail aplikasi terlebih dahulu.";
-      if (!duration) fe.duration = "Silakan pilih durasi langganan.";
+
+    // ✅ VALIDASI DETAIL LAYANAN UNTUK BASO IKAN TUNA
+if (selectedService === "Baso Ikan Tuna") {
+  if (!selectedSubService) {
+    fe.selectedSubService = "Silakan pilih lokasi offline terlebih dahulu.";
+  }
+}
+if (selectedService === "Aplikasi Premium") {
+  if (!selectedSubService) fe.selectedSubService = "Silakan pilih detail aplikasi terlebih dahulu.";
+  if (!duration) fe.duration = "Silakan pilih durasi langganan.";
+} else {
+  // ✅ SKIP budget & deadline khusus Baso Ikan Tuna
+  if (selectedService !== "Baso Ikan Tuna") {
+    if (!budget.match(/^\d{1,3}(\.\d{3})*$/)) {
+      fe.budget = "Budget harus format angka benar, contoh: 150.000.";
     } else {
-      // VALIDASI NORMAL
-      if (!budget.match(/^\d{1,3}(\.\d{3})*$/)) {
-        fe.budget = "Budget harus format angka benar, contoh: 150.000.";
-      } else {
-        const b = Number((budget || "").replace(/\./g, "") || 0);
+      const b = Number((budget || "").replace(/\./g, "") || 0);
 
-        // minimal budget webdev
-        if (selectedService === "Web Development" && b < MIN_WEBDEV_BUDGET) {
-          fe.budget = `Minimal budget Web Development adalah Rp ${MIN_WEBDEV_BUDGET.toLocaleString("id-ID")}.`;
-        }
+      if (selectedService === "Web Development" && b < MIN_WEBDEV_BUDGET) {
+        fe.budget = `Minimal budget Web Development adalah Rp ${MIN_WEBDEV_BUDGET.toLocaleString("id-ID")}.`;
       }
+    }
 
-      if (!deadline || new Date(deadline) <= new Date()) {
-        fe.deadline = "Deadline harus minimal 1 hari setelah tanggal hari ini.";
-      }
-
+    if (!deadline || new Date(deadline) <= new Date()) {
+      fe.deadline = "Deadline harus minimal 1 hari setelah tanggal hari ini.";
+    }
+  }
       // VALIDASI DOMAIN khusus Web Development
       if (selectedService === "Web Development") {
         if (!domainMode) fe.domainMode = "Pilih metode domain: domain berbayar atau subdomain gratis.";
@@ -902,58 +921,109 @@ const totalIDR = useMemo(() => {
 
     const estimated = estimatedCrypto;
 
-    const domainText =
-      selectedService === "Web Development"
-        ? domainMode === "custom"
-          ? `🌍 *Domain:* ${getDomainFull()}\n` +
-            `📌 *Status Domain:* ${domainStatus === "available" ? "Tersedia" : domainStatus === "taken" ? "Sudah dipakai" : "Tidak diketahui"}\n` +
-            `🧾 *Harga Domain / Tahun:* Rp ${formatIDR(domainPricePerYear)}\n` +
-            `📅 *Durasi Domain:* ${domainYears} tahun\n` +
-            `💸 *Total Domain:* Rp ${formatIDR(domainCost)}\n`
-          : domainMode === "subdomain"
-          ? `🌍 *Domain:* ${subdomainLabel}\n` + `📌 *Tipe:* Subdomain gratis (${subdomainProvider})\n`
-          : ""
-        : "";
+// ✅ ICON UNICODE (biar tidak rusak jadi kotak)
+const ICON = {
+  hello: "\u{1F44B}\u2728", // 👋✨
+  person: "\u{1F464}", // 👤
+  phone: "\u{1F4DE}", // 📞
+  tool: "\u{1F6E0}\uFE0F", // 🛠️
+  money: "\u{1F4B0}", // 💰
+  receipt: "\u{1F9FE}", // 🧾
+  total: "\u{1F4B5}", // 💵
+  clock: "\u23F0", // ⏰
+  card: "\u{1F4B3}", // 💳
+  note: "\u{1F4DD}", // 📝
+  pin: "\u{1F4CD}", // 📍
+  globe: "\u{1F30D}", // 🌍
+  pushpin: "\u{1F4CC}", // 📌
+  calendar: "\u{1F4C5}", // 📅
+  chart: "\u{1F4C8}", // 📈
+  bank: "\u{1F3E6}", // 🏦
+  coin: "\u{1FA99}", // 🪙
+};
 
-    const extraCryptoText =
-      paymentMethod === "Crypto"
-        ? `🪙 *Coin:* ${cryptoCoin}\n` +
-          `🌐 *Network:* ${getCryptoNetworkLabel()}\n` +
-          `🏦 *Alamat Wallet:* ${getCryptoAddress()}\n` +
-          (cryptoRate
-            ? `📈 *Kurs:* 1 ${cryptoCoin} = Rp ${Number(cryptoRate).toLocaleString("id-ID")}\n`
-            : `📈 *Kurs:* (gagal diambil / belum tersedia)\n`) +
-          (typeof estimated === "number" ? `💰 *Estimasi Bayar:* ${estimated.toFixed(6)} ${cryptoCoin}\n` : `💰 *Estimasi Bayar:* -\n`)
-        : "";
+// ✅ Domain text (khusus Web Development)
+const domainText =
+  selectedService === "Web Development"
+    ? domainMode === "custom"
+      ? `${ICON.globe} *Domain:* ${getDomainFull()}\n` +
+        `${ICON.pushpin} *Status Domain:* ${
+          domainStatus === "available"
+            ? "Tersedia"
+            : domainStatus === "taken"
+            ? "Sudah dipakai"
+            : "Tidak diketahui"
+        }\n` +
+        `${ICON.receipt} *Harga Domain / Tahun:* Rp ${formatIDR(domainPricePerYear)}\n` +
+        `${ICON.calendar} *Durasi Domain:* ${domainYears} tahun\n` +
+        `💸 *Total Domain:* Rp ${formatIDR(domainCost)}\n`
+      : domainMode === "subdomain"
+      ? `${ICON.globe} *Domain:* ${subdomainLabel}\n` +
+        `${ICON.pushpin} *Tipe:* Subdomain gratis (${subdomainProvider})\n`
+      : ""
+    : "";
 
-    const encodedMessage = encodeURIComponent(
-      `*Hai Layanan Nusantara!* 👋✨\n\n` +
-        `Saya ingin memesan layanan berikut:\n\n` +
-        `👤 *Nama:* ${name}\n` +
-        `📞 *Nomor WhatsApp:* ${phone}\n` +
-        `🛠️ *Layanan:* ${selectedService}${detailService ? ` - ${detailService}` : ""}\n` +
-        (domainText ? domainText : "") +
-        `${
-          selectedService === "Aplikasi Premium"
-            ? `⏳ *Durasi Langganan:* ${duration}\n` +
-              `💰 *Harga:* Rp ${Number(durationPrice || 0).toLocaleString("id-ID")}\n` +
-              `🧾 *Biaya Layanan Nusantara:* Rp ${NUSANTARA_FEE.toLocaleString("id-ID")}\n` +
-              `💵 *Total (Harga + Fee + Domain jika ada):* Rp ${Number(totalIDR || 0).toLocaleString("id-ID")}\n`
-            : `💰 *Budget:* Rp ${budget}\n` +
-              `🧾 *Biaya Layanan Nusantara:* Rp ${NUSANTARA_FEE.toLocaleString("id-ID")}\n` +
-              `💵 *Total (Budget + Fee + Domain jika ada):* Rp ${Number(totalIDR || 0).toLocaleString("id-ID")}\n` +
-              `⏰ *Deadline:* ${deadline}\n`
-        }` +
-        `💳 *Metode Pembayaran:* ${paymentMethod}\n` +
-        (paymentMethod === "Crypto" ? `${extraCryptoText}` : "") +
-        `📝 *Pesan Tambahan:* ${message}\n\n` +
-        `Terima kasih!\n${name}`
-    );
+// ✅ Crypto extra text (muncul kalau pilih Crypto)
+const extraCryptoText =
+  paymentMethod === "Crypto"
+    ? `${ICON.coin} *Coin:* ${cryptoCoin}\n` +
+      `🌐 *Network:* ${getCryptoNetworkLabel()}\n` +
+      `${ICON.bank} *Alamat Wallet:* ${getCryptoAddress()}\n` +
+      (cryptoRate
+        ? `${ICON.chart} *Kurs:* 1 ${cryptoCoin} = Rp ${Number(cryptoRate).toLocaleString(
+            "id-ID"
+          )}\n`
+        : `${ICON.chart} *Kurs:* (gagal diambil / belum tersedia)\n`) +
+      (typeof estimated === "number"
+        ? `${ICON.money} *Estimasi Bayar:* ${estimated.toFixed(6)} ${cryptoCoin}\n`
+        : `${ICON.money} *Estimasi Bayar:* -\n`)
+    : "";
 
-    setTimeout(() => {
-      window.open(`https://wa.me/${waNumber}?text=${encodedMessage}`, "_blank");
-      setIsSubmitting(false);
-    }, 1000);
+// ✅ ENCODED MESSAGE (FINAL)
+const encodedMessage = encodeURIComponent(
+  `*Hai Layanan Nusantara!* ${ICON.hello}\n\n` +
+    `Saya ingin memesan layanan berikut:\n\n` +
+    `${ICON.person} *Nama:* ${name}\n` +
+    `${ICON.phone} *Nomor WhatsApp:* ${phone}\n` +
+    `${ICON.tool} *Layanan:* ${selectedService}${detailService ? ` - ${detailService}` : ""}\n` +
+    (domainText ? domainText : "") +
+    `${
+      // 🍜 BASO IKAN TUNA
+      selectedService === "Baso Ikan Tuna"
+        ? `${ICON.pin} *Lokasi Offline:* ${detailService || "-"}\n` +
+          `${ICON.money} *Harga:* Coming Soon\n`
+
+      // 🎬 APLIKASI PREMIUM (TANPA FEE)
+      : selectedService === "Aplikasi Premium"
+        ? `⏳ *Durasi Langganan:* ${duration}\n` +
+          `${ICON.money} *Harga:* Rp ${Number(durationPrice || 0).toLocaleString("id-ID")}\n` +
+          `${ICON.total} *Total:* Rp ${Number(durationPrice || 0).toLocaleString("id-ID")}\n`
+
+      // 🖥 WEB DEVELOPMENT (PAKAI FEE + DOMAIN JIKA ADA)
+      : selectedService === "Web Development"
+        ? `${ICON.money} *Budget:* Rp ${budget}\n` +
+          `${ICON.receipt} *Biaya Layanan Nusantara:* Rp ${NUSANTARA_FEE.toLocaleString("id-ID")}\n` +
+          `${ICON.total} *Total (Budget + Fee + Domain jika ada):* Rp ${Number(totalIDR || 0).toLocaleString(
+            "id-ID"
+          )}\n` +
+          `${ICON.clock} *Deadline:* ${deadline}\n`
+
+      // ✨ LAYANAN LAIN (TANPA FEE)
+      : `${ICON.money} *Budget:* Rp ${budget}\n` +
+        `${ICON.total} *Total:* Rp ${Number((budget || "").replace(/\./g, "") || 0).toLocaleString("id-ID")}\n` +
+        `${ICON.clock} *Deadline:* ${deadline}\n`
+    }` +
+    `${ICON.card} *Metode Pembayaran:* ${paymentMethod}\n` +
+    (paymentMethod === "Crypto" ? `${extraCryptoText}` : "") +
+    `${ICON.note} *Pesan Tambahan:* ${message}\n\n` +
+    `Terima kasih!\n${name}`
+);
+
+// ✅ KIRIM KE WHATSAPP
+setTimeout(() => {
+  window.open(`https://wa.me/${waNumber}?text=${encodedMessage}`, "_blank");
+  setIsSubmitting(false);
+}, 1000);
   };
 
   return (
@@ -1140,6 +1210,7 @@ const totalIDR = useMemo(() => {
                           "🎨 Desain & Editing",
                           "▶️ Video Premium",
                           "📚 Aplikasi Lainnya",
+                         
                         ].includes(subItem);
 
                         return (
@@ -1195,8 +1266,9 @@ const totalIDR = useMemo(() => {
                     ) : null}
                   </div>
                 )}
-{selectedService !== "Aplikasi Premium" && (
+{selectedService !== "Aplikasi Premium" && selectedService !== "Baso Ikan Tuna" && (
   <>
+    {/* Budget */}
     <div>
       <label>Budget (Rp)</label>
       <Input
@@ -1209,6 +1281,7 @@ const totalIDR = useMemo(() => {
       {fieldErrors?.budget ? (
         <p className="mt-1 text-xs text-red-600">{fieldErrors.budget}</p>
       ) : null}
+
       {selectedService === "Web Development" && (
         <p className="mt-1 text-[11px] text-gray-500">
           Minimal budget Web Development: Rp {formatIDR(MIN_WEBDEV_BUDGET)}
@@ -1216,6 +1289,7 @@ const totalIDR = useMemo(() => {
       )}
     </div>
 
+    {/* Deadline */}
     <div>
       <label>Deadline (kapan selesai)</label>
       <input
@@ -1506,6 +1580,47 @@ const totalIDR = useMemo(() => {
 {/* ✅ Tutup Domain Section Web Development */}
 
 {/* ✅ Biaya Layanan Nusantara: HANYA MUNCUL KALO WEB DEVELOPMENT */}
+
+{selectedService === "Baso Ikan Tuna" && (
+  <motion.div
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.35 }}
+    className="
+      mt-6 rounded-2xl bg-white
+      border border-black/10
+      shadow-[0_14px_40px_rgba(0,0,0,0.10)]
+    "
+  >
+    <div className="p-5 sm:p-6">
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-[11px] uppercase tracking-widest text-black/60 font-semibold">
+          Harga Baso Ikan Tuna
+        </p>
+
+        <span className="rounded-full border border-amber-500 px-3 py-1 text-[11px] font-bold text-amber-600">
+          Coming Soon
+        </span>
+      </div>
+
+      <div className="mt-2">
+        <p className="text-4xl sm:text-5xl font-extrabold tracking-tight text-black">
+          Coming Soon
+        </p>
+        <p className="mt-2 text-xs text-black/60">
+          Harga akan diumumkan segera. Pilih lokasi offline di detail layanan.
+        </p>
+      </div>
+
+      <div className="my-4 h-px w-full bg-black/10" />
+
+      <div className="flex flex-col gap-2 text-xs text-black/60 sm:flex-row sm:items-center sm:justify-between">
+        <span>Mode: Offline</span>
+        <span>{selectedSubService ? `Lokasi: ${selectedSubService}` : "Pilih lokasi dulu"}</span>
+      </div>
+    </div>
+  </motion.div>
+)}
 
 
 {selectedService === "Aplikasi Premium" && (
