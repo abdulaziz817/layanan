@@ -51,8 +51,8 @@ export default function OrderDiskonPage() {
     return now >= start && now <= end;
   }, []);
 
-  const discountMultiplier = 0.58; // 42% off
-  const discountLabel = "42% OFF";
+  const discountMultiplier = 0.7; // 30% off
+ const discountLabel = "30% OFF";
 
   const RamadanDecor = () => {
     const stars = Array.from({ length: 10 });
@@ -450,7 +450,7 @@ export default function OrderDiskonPage() {
     // ⚠️ FIX BUG: kamu tulis diskonPrice tapi variabelnya gak ada → pakai promoPrice
     const encodedMessage = encodeURIComponent(
       `*Hai Layanan Nusantara!* 👋✨\n\n` +
-        `*[DISKON-42]*\n` +
+       `*[DISKON-30]*\n` +
         `*Sumber:* /order/diskon\n\n` +
         `👤 *Nama:* ${name}\n` +
         `📞 *Nomor WhatsApp:* ${phone}\n` +
