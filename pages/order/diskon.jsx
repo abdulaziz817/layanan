@@ -51,8 +51,8 @@ export default function OrderDiskonPage() {
     return now >= start && now <= end;
   }, []);
 
-  const discountMultiplier = 0.7; // 30% off
- const discountLabel = "30% OFF";
+  const discountMultiplier = 0.8; // 20% off
+const discountLabel = "20% OFF";
 
   const RamadanDecor = () => {
     const stars = Array.from({ length: 10 });
@@ -448,21 +448,29 @@ export default function OrderDiskonPage() {
         : "";
 
     // ⚠️ FIX BUG: kamu tulis diskonPrice tapi variabelnya gak ada → pakai promoPrice
-    const encodedMessage = encodeURIComponent(
-      `*Hai Layanan Nusantara!* 👋✨\n\n` +
-       `*[DISKON-30]*\n` +
-        `*Sumber:* /order/diskon\n\n` +
-        `👤 *Nama:* ${name}\n` +
-        `📞 *Nomor WhatsApp:* ${phone}\n` +
-        `📦 *Aplikasi:* ${selectedSubService}\n` +
-        `⏳ *Durasi:* ${duration}\n` +
-        `💸 *Harga Normal:* Rp ${normalPrice.toLocaleString("id-ID")}\n` +
-        `🔥 *Harga Diskon (${discountLabel}):* Rp ${promoPrice.toLocaleString("id-ID")}\n` +
-        `💳 *Metode Pembayaran:* ${paymentMethod}\n` +
-        (paymentMethod === "Crypto" ? `${extraCryptoText}` : "") +
-        `📝 *Catatan:* ${message}\n\n` +
-        `Terima kasih!\n${name}`
-    );
+   const encodedMessage = encodeURIComponent(
+  `*Hai Layanan Nusantara!* 👋\n` +
+  `Saya ingin melakukan pemesanan melalui promo Ramadhan 🎉\n` +
+  `*Diskon Spesial: 20% OFF*\n\n` +
+
+  `━━━━━━━━━━━━━━━━\n` +
+  `📦 *Detail Pesanan*\n` +
+  `━━━━━━━━━━━━━━━━\n` +
+  `👤 *Nama:* ${name}\n` +
+  `📞 *Nomor WhatsApp:* ${phone}\n` +
+  `📦 *Aplikasi:* ${selectedSubService}\n` +
+  `⏳ *Durasi:* ${duration}\n\n` +
+
+  `💸 *Harga Normal:* Rp ${normalPrice.toLocaleString("id-ID")}\n` +
+  `🔥 *Harga Promo:* Rp ${promoPrice.toLocaleString("id-ID")}\n\n` +
+
+  `💳 *Metode Pembayaran:* ${paymentMethod}\n` +
+  (paymentMethod === "Crypto" ? `${extraCryptoText}` : "") +
+  `📝 *Catatan:* ${message}\n` +
+  `━━━━━━━━━━━━━━━━\n\n` +
+
+  `Terima kasih 🙏\n${name}`
+);
 
     setTimeout(() => {
       window.open(`https://wa.me/${waNumber}?text=${encodedMessage}`, "_blank");
@@ -481,9 +489,10 @@ export default function OrderDiskonPage() {
 
   if (checking) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600">Memeriksa akun...</p>
-      </div>
+<div className="min-h-screen flex flex-col items-center justify-center gap-3">
+  <div className="w-8 h-8 border-4 border-gray-200 border-t-gray-800 rounded-full animate-spin"></div>
+  <p className="text-gray-600 text-sm">Menyiapkan akun Anda...</p>
+</div>
     );
   }
 
