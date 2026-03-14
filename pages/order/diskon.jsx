@@ -51,8 +51,9 @@ export default function OrderDiskonPage() {
     return now >= start && now <= end;
   }, []);
 
-  const discountMultiplier = 0.8; // 20% off
-const discountLabel = "20% OFF";
+const discountMultiplier = 0.9; // 10% off
+const discountLabel = "10% OFF";
+
 
   const RamadanDecor = () => {
     const stars = Array.from({ length: 10 });
@@ -245,6 +246,7 @@ const discountLabel = "20% OFF";
     Fizzo: { "1 Tahun · Sharing": "28000" },
     Wibuku: { "1 Bulan · Sharing": "25000" },
     "Drakor ID": { "1 Bulan · Sharing": "15000" },
+
     Dramabox: { "1 Bulan · Sharing": "25000" },
     Iqiyl: { "1 Bulan · Sharing": "17000", "1 Tahun · Sharing": "34000" },
     "Prime Video": {
@@ -450,7 +452,7 @@ const discountLabel = "20% OFF";
    const encodedMessage = encodeURIComponent(
   `*Hai Layanan Nusantara!* 👋\n` +
   `Saya ingin melakukan pemesanan melalui promo Ramadhan 🎉\n` +
-  `*Diskon Spesial: 20% OFF*\n\n` +
+  `*Diskon Spesial: 10% OFF*\n\n` +
 
   `━━━━━━━━━━━━━━━━\n` +
   `📦 *Detail Pesanan*\n` +
