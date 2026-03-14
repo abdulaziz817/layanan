@@ -197,10 +197,9 @@ const discountLabel = "20% OFF";
     },
     "Netflix Premium": {
       "7 Hari · Pribadi · 1 Perangkat": "26000",
-      "1 Bulan · Pribadi · 1 Perangkat": "49000",
       "7 Hari · Sharing · 2 Perangkat": "24000",
-      "1 Bulan · Sharing · 2 Perangkat": "40000",
-      "1 Bulan · Semi Private · 2 Perangkat": "61000",
+      "1 Bulan · Sharing · 2 Perangkat": "48000",
+      "1 Bulan · Semi Private · 2 Perangkat": "64000",
     },
     "Disney Hotstar": {
       "1 Bulan · Semua Perangkat": "20000",
