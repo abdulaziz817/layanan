@@ -196,7 +196,7 @@ const discountLabel = "20% OFF";
       "1 Bulan · Pelajar · Non Garansi": "13000",
     },
     "Netflix Premium": {
-      "7 Hari · Pribadi · 1 Perangkat": "26000",
+      "1 Hari · Sharing · 1 Perangkat": "10000",
       "7 Hari · Sharing · 2 Perangkat": "24000",
       "1 Bulan · Sharing · 2 Perangkat": "48000",
       "1 Bulan · Semi Private · 2 Perangkat": "64000",
