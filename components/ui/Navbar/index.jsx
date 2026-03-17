@@ -20,19 +20,18 @@ export default function Navbar() {
   }, [])
 
   // ✅ auto update status promo (biar ga perlu refresh)
-  useEffect(() => {
-    const check = () => {
-      const now = new Date() // waktu lokal user
-const start = new Date('2026-02-26T00:00:00')
-const end = new Date('2026-03-16T23:59:59') // sampai 24.00 (akhir hari)
-      setIsDiskonEvent(now >= start && now <= end)
-    }
+useEffect(() => {
+  const check = () => {
+    const now = new Date()
+    const start = new Date('2026-03-17T00:00:00')
+    const end = new Date('2026-03-22T23:59:59')
+    setIsDiskonEvent(now >= start && now <= end)
+  }
 
-    check()
-    const t = setInterval(check, 30_000)
-    return () => clearInterval(t)
-  }, [])
-
+  check()
+  const t = setInterval(check, 30_000)
+  return () => clearInterval(t)
+}, [])
   const navigation = [
     { title: 'Tentang', path: '/#cta' },
     { title: 'Software', path: '/#toolkit' },
