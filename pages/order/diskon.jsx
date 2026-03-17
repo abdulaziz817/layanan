@@ -46,7 +46,7 @@ export default function OrderDiskonPage() {
 
 const isDiskonEvent = useMemo(() => {
   const now = new Date();
-  const start = new Date("2026-03-16T00:00:00");
+  const start = new Date("2026-03-20T00:00:00");
   const end = new Date("2026-03-22T23:59:59");
   return now >= start && now <= end;
 }, []);
@@ -451,7 +451,7 @@ const discountLabel = "30% OFF";
     // ⚠️ FIX BUG: kamu tulis diskonPrice tapi variabelnya gak ada → pakai promoPrice
    const encodedMessage = encodeURIComponent(
   `*Hai Layanan Nusantara!* 👋\n` +
-  `Saya ingin melakukan pemesanan melalui promo Hari Raya Idul Fitri 🎉\n` +
+  `Saya ingin melakukan pemesanan melalui Diskon Hari Raya Idul Fitri 🎉\n` +
  `*Diskon Spesial: 30% OFF*\n\n` +
 
   `━━━━━━━━━━━━━━━━\n` +
@@ -514,10 +514,9 @@ const discountLabel = "30% OFF";
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <h1 className="text-2xl font-bold text-gray-900">Diskon Ramadhan</h1>
-
-          <p className="text-sm text-gray-500 mt-1">
-Diskon <b>{discountLabel}</b> aktif <b>17 – 22 Mar 2026</b>.
+                <h1 className="text-2xl font-bold text-gray-900">Diskon Idul Fitri</h1>
+<p className="text-sm text-gray-500 mt-1">
+  Diskon <b>{discountLabel}</b> aktif <b>20 – 22 Mar 2026</b>.
 </p>
               </div>
 
