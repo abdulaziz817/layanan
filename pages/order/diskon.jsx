@@ -451,7 +451,7 @@ const discountLabel = "30% OFF";
     // ⚠️ FIX BUG: kamu tulis diskonPrice tapi variabelnya gak ada → pakai promoPrice
    const encodedMessage = encodeURIComponent(
   `*Hai Layanan Nusantara!* 👋\n` +
-  `Saya ingin melakukan pemesanan melalui promo Ramadhan 🎉\n` +
+  `Saya ingin melakukan pemesanan melalui promo Hari Raya Idul Fitri 🎉\n` +
  `*Diskon Spesial: 30% OFF*\n\n` +
 
   `━━━━━━━━━━━━━━━━\n` +
@@ -517,7 +517,7 @@ const discountLabel = "30% OFF";
                 <h1 className="text-2xl font-bold text-gray-900">Diskon Ramadhan</h1>
 
           <p className="text-sm text-gray-500 mt-1">
- Diskon <b>{discountLabel}</b> aktif <b>20 – 22 Mar 2026</b>.
+Diskon <b>{discountLabel}</b> aktif <b>17 – 22 Mar 2026</b>.
 </p>
               </div>
 
