@@ -46,7 +46,7 @@ export default function OrderDiskonPage() {
 
 const isDiskonEvent = useMemo(() => {
   const now = new Date();
-  const start = new Date("2026-03-17T00:00:00");
+  const start = new Date("2026-03-16T00:00:00");
   const end = new Date("2026-03-22T23:59:59");
   return now >= start && now <= end;
 }, []);
