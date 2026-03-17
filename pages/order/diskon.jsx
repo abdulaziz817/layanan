@@ -44,72 +44,72 @@ export default function OrderDiskonPage() {
   const [cryptoLoading, setCryptoLoading] = useState(false);
   const [cryptoError, setCryptoError] = useState("");
 
-  const isDiskonEvent = useMemo(() => {
-    const now = new Date();
-  const start = new Date("2026-02-26T00:00:00");
-  const end = new Date("2026-03-16T23:59:59"); // sampai 24.00 (akhir hari)
-    return now >= start && now <= end;
-  }, []);
+const isDiskonEvent = useMemo(() => {
+  const now = new Date();
+  const start = new Date("2026-03-17T00:00:00");
+  const end = new Date("2026-03-22T23:59:59");
+  return now >= start && now <= end;
+}, []);
 
-const discountMultiplier = 0.9; // 10% off
-const discountLabel = "10% OFF";
+const discountMultiplier = 0.7; // 30% off
+const discountLabel = "30% OFF";
 
 
-  const RamadanDecor = () => {
-    const stars = Array.from({ length: 10 });
+  const IdulFitriDecor = () => {
+  const stars = Array.from({ length: 10 });
 
-    return (
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-24 -right-24 h-56 w-56 rounded-full bg-indigo-100/40 blur-3xl" />
-        <div className="absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-emerald-100/30 blur-3xl" />
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div className="absolute -top-24 -right-24 h-56 w-56 rounded-full bg-indigo-100/40 blur-3xl" />
+      <div className="absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-emerald-100/30 blur-3xl" />
 
-        <motion.div
-          initial={{ opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="absolute -top-6 right-6"
-        >
-          <div className="relative">
-            <svg width="84" height="84" viewBox="0 0 84 84" fill="none">
-              <circle cx="42" cy="42" r="28" stroke="rgba(17,24,39,0.18)" strokeWidth="2" />
-              <circle cx="52" cy="36" r="28" fill="white" />
-              <circle cx="52" cy="36" r="28" stroke="rgba(17,24,39,0.06)" strokeWidth="2" />
-            </svg>
+      <motion.div
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="absolute -top-6 right-6"
+      >
+        <div className="relative">
+          <svg width="84" height="84" viewBox="0 0 84 84" fill="none">
+            <circle cx="42" cy="42" r="28" stroke="rgba(17,24,39,0.18)" strokeWidth="2" />
+            <circle cx="52" cy="36" r="28" fill="white" />
+            <circle cx="52" cy="36" r="28" stroke="rgba(17,24,39,0.06)" strokeWidth="2" />
+          </svg>
 
-            <motion.div
-              animate={{ y: [0, 4, 0] }}
-              transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute -left-12 top-10"
-            >
-              <div className="h-10 w-7 rounded-xl border border-gray-200 bg-white shadow-sm flex items-center justify-center">
-                <div className="h-2 w-2 rounded-full bg-indigo-200" />
-              </div>
-              <div className="mx-auto mt-1 h-6 w-px bg-gray-200" />
-            </motion.div>
-          </div>
-        </motion.div>
+          <motion.div
+            animate={{ y: [0, 4, 0] }}
+            transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -left-12 top-10"
+          >
+            <div className="h-10 w-7 rounded-xl border border-gray-200 bg-white shadow-sm flex items-center justify-center">
+              <div className="h-2 w-2 rounded-full bg-indigo-200" />
+            </div>
+            <div className="mx-auto mt-1 h-6 w-px bg-gray-200" />
+          </motion.div>
+        </div>
+      </motion.div>
 
-        {stars.map((_, i) => (
-          <motion.span
-            key={i}
-            className="absolute inline-block h-1.5 w-1.5 rounded-full bg-gray-400"
-            style={{
-              left: `${10 + i * 8}%`,
-              top: `${8 + (i % 4) * 10}%`,
-              opacity: 0.2,
-            }}
-            animate={{ opacity: [0.12, 0.35, 0.12], scale: [1, 1.4, 1] }}
-            transition={{
-              duration: 2 + (i % 3) * 0.6,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: i * 0.08,
-            }}
-          />
-        ))}
-      </div>
-    );
-  };
+      {stars.map((_, i) => (
+        <motion.span
+          key={i}
+          className="absolute inline-block h-1.5 w-1.5 rounded-full bg-gray-400"
+          style={{
+            left: `${10 + i * 8}%`,
+            top: `${8 + (i % 4) * 10}%`,
+            opacity: 0.2,
+          }}
+          animate={{ opacity: [0.12, 0.35, 0.12], scale: [1, 1.4, 1] }}
+          transition={{
+            duration: 2 + (i % 3) * 0.6,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: i * 0.08,
+          }}
+        />
+      ))}
+    </div>
+  );
+};
 
   // ✅ GATE PALING AWAL: PWA + event
   useEffect(() => {
@@ -452,7 +452,7 @@ const discountLabel = "10% OFF";
    const encodedMessage = encodeURIComponent(
   `*Hai Layanan Nusantara!* 👋\n` +
   `Saya ingin melakukan pemesanan melalui promo Ramadhan 🎉\n` +
-  `*Diskon Spesial: 10% OFF*\n\n` +
+ `*Diskon Spesial: 30% OFF*\n\n` +
 
   `━━━━━━━━━━━━━━━━\n` +
   `📦 *Detail Pesanan*\n` +
@@ -504,7 +504,7 @@ const discountLabel = "10% OFF";
       </Head>
 
       <div className="pt-28 pb-12 bg-white min-h-screen relative">
-        <RamadanDecor />
+       <IdulFitriDecor />
         <div className="max-w-xl mx-auto px-4 text-gray-700">
           <motion.div
             initial={{ opacity: 0, y: 18 }}
@@ -517,7 +517,7 @@ const discountLabel = "10% OFF";
                 <h1 className="text-2xl font-bold text-gray-900">Diskon Ramadhan</h1>
 
           <p className="text-sm text-gray-500 mt-1">
-  Diskon <b>{discountLabel}</b> aktif <b>26 Feb – 16 Mar 2026</b>.
+ Diskon <b>{discountLabel}</b> aktif <b>20 – 22 Mar 2026</b>.
 </p>
               </div>
 
