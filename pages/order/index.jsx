@@ -175,6 +175,109 @@ export default function OrderForm() {
   ];
 
   const appPrices = {
+    "Vision+": {
+  "1 Bulan · Sharing": "44000",
+  "1 Bulan · Private": "76000",
+},
+
+"RCTI+": {
+  "1 Bulan · Sharing": "38000",
+  "1 Bulan · Private": "70000",
+},
+
+"Catchplay+": {
+  "1 Hari · Sharing": "14000",
+  "3 Hari · Sharing": "16000",
+  "7 Hari · Sharing": "18000",
+  "1 Bulan · Sharing": "24000",
+  "1 Tahun · Sharing": "36000",
+},
+
+"Crunchyroll": {
+  "1 Bulan · Sharing": "20000",
+},
+
+"MovieBox": {
+  "1 Bulan · iOS": "20000",
+},
+
+"Gagaoalala": {
+  "1 Hari · Sharing": "10000",
+  "5 Hari · Sharing": "16000",
+  "7 Hari · Sharing": "18000",
+  "1 Bulan · Sharing": "24000",
+},
+
+"Appmus": {
+  "1 Bulan · Sharing": "30000",
+  "2 Bulan · Sharing": "50000",
+  "3 Bulan · Sharing": "60000",
+},
+
+"HBO Max": {
+  "1 Bulan · Sharing": "50000",
+  "1 Bulan · Private": "170000",
+},
+
+/* 🎨 DESAIN & EDITING */
+Polarr: {
+  "1 Tahun · Sharing": "40000",
+},
+
+"Epik Pro": {
+  "1 Tahun · Android Only": "40000",
+},
+
+Remini: {
+  "1 Tahun · iOS": "54000",
+},
+
+IbisPaint: {
+  "1 Tahun · Sharing": "40000",
+},
+
+Lightroom: {
+  "1 Tahun · Sharing": "48000",
+},
+
+VSCO: {
+  "1 Tahun · Android Only": "40000",
+},
+
+OldRoll: {
+  "Lifetime · Android": "44000",
+},
+
+Procreate: {
+  "Lifetime · iPhone": "44000",
+  "Lifetime · iPad": "50000",
+},
+
+/* 📚 APLIKASI LAINNYA */
+"Microsoft 365": {
+  "1 Bulan · Family Plan": "30000",
+},
+
+GoodNotes: {
+  "Lifetime · iPhone/iPad": "44000",
+},
+
+Kilonotes: {
+  "Lifetime · iPhone/iPad": "44000",
+},
+
+GetContact: {
+  "1 Bulan · Premium": "30000",
+},
+
+
+// BATAS REMINNI
+
+
+
+
+
+
     ChatGPT: {
       "1 Bulan · Sharing · Non Garansi": "20000",
       "1 Bulan · Sharing · Stabil · Non Garansi": "22000",
@@ -419,7 +522,7 @@ export default function OrderForm() {
     "Web Development",
     "Preset Fotografi",
     "Aplikasi Premium",
-    "Baso Ikan Tuna",
+
   ];
 
   const serviceSubOptions = {
@@ -514,58 +617,71 @@ export default function OrderForm() {
     ],
 
     "Aplikasi Premium": [
-      "🎬 Streaming Film",
-      "Bstation Premium",
-      "Disney Hotstar",
-      "HBO GO",
-      "HBO",
-      "iQIYI",
-      "Netflix Premium",
-      "Prime Video",
-      "Vidio",
-      "Viu Premium",
-      "Viu Anlim",
-      "WeTV",
-      "Youku",
-      "Wibuku",
-      "Dramabox",
-      "Loklok",
-      "Drakor ID",
+  "🎬 Streaming Film",
+  "Netflix Premium",
+  "Disney Hotstar",
+  "Prime Video",
+  "Vidio",
+  "Viu Premium",
+  "Viu Anlim",
+  "WeTV",
+  "iQIYI",
+  "Youku",
+  "Loklok",
+  "Drakor ID",
+  "Vision+",
+  "RCTI+",
+  "Catchplay+",
+  "Crunchyroll",
+  "MovieBox",
+  "Gagaoalala",
+  "Bstation Premium",
+  "HBO Max",
+  "Appmus",
+  "Wibuku",
+  "Dramabox",
 
-      "🎵 Musik & Audio",
-      "Apple Music",
-      "Spotify",
-      "Melolo",
+  "🎵 Musik & Audio",
+  "Spotify",
+  "Apple Music",
+  "Melolo",
 
-      "🤖 AI",
-      "ChatGPT",
-      "Google Gemini",
-      "Perplexity AI",
+  "🤖 AI",
+  "ChatGPT",
+  "Google Gemini",
+  "Perplexity AI",
 
-      "🎨 Desain & Editing",
-      "Canva Pro",
-      "CapCut Pro",
-      "Alight Motion",
-      "Wink",
-      "Meitu",
-      "PicsArt",
+  "🎨 Desain & Editing",
+  "Canva Pro",
+  "CapCut Pro",
+  "Alight Motion",
+  "Wink",
+  "Meitu",
+  "PicsArt",
+  "Polarr",
+  "Epik Pro",
+  "Remini",
+  "IbisPaint",
+  "Lightroom",
+  "VSCO",
+  "OldRoll",
+  "Procreate",
 
-      "▶️ Video Premium",
-      "TikTok Premium",
-      "YouTube Premium",
-      "Zoom",
+  "▶️ Video Premium",
+  "YouTube Premium",
+  "TikTok Premium",
+  "Zoom",
 
-      "📚 Aplikasi Lainnya",
-      "Fizzo",
-      "Duolingo",
-      "Express VPN",
-    ],
+  "📚 Aplikasi Lainnya",
+  "Duolingo",
+  "Microsoft 365",
+  "GoodNotes",
+  "Kilonotes",
+  "GetContact",
+  "Fizzo",
+  "Express VPN"
+]
 
-  "Baso Ikan Tuna": [
-  "Offline - Cikampek",
-  "Offline - Sukaseuri",
-  "Offline - Purwakarta",
-],
   };
 
   const formatRupiah = (value) => {
@@ -838,7 +954,7 @@ const inputErrorClass =
 
 
     // ✅ VALIDASI DETAIL LAYANAN UNTUK BASO IKAN TUNA
-if (selectedService === "Baso Ikan Tuna") {
+if (true) {
   if (!selectedSubService) {
     fe.selectedSubService = "Silakan pilih lokasi offline terlebih dahulu.";
   }

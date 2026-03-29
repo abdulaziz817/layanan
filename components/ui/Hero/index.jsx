@@ -9,7 +9,6 @@ export default function Hero() {
       "Pembuatan Website Modern",
       "Preset Fotografi Eksklusif",
       "Aplikasi Premium Harga Terbaik",
-      "Baso Ikan Tuna",
     ],
     []
   );

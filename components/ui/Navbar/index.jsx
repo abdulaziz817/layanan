@@ -85,15 +85,10 @@ useEffect(() => {
   }
 
   // ✅ tombol CTA: label tetap, aksi beda
-  const handleCTA = () => {
-    setMenuOpen(false)
-    if (pwa) {
-      router.push('/order')
-      return
-    }
-    // website → arahkan ke install / info
-    router.push('/#cta')
-  }
+const handleCTA = () => {
+  setMenuOpen(false)
+  router.push('/order')
+}
 
   useEffect(() => {
     const hash = window.location.hash
