@@ -255,7 +255,7 @@ Procreate: {
 
 /* 📚 APLIKASI LAINNYA */
 "Microsoft 365": {
-  "1 Bulan · Family Plan": "30000",
+  "1 Bulan · Family Plan": "50000",
 },
 
 GoodNotes: {
@@ -267,7 +267,7 @@ Kilonotes: {
 },
 
 GetContact: {
-  "1 Bulan · Premium": "30000",
+  "1 Bulan · Premium": "17000",
 },
 
 
@@ -280,8 +280,7 @@ GetContact: {
 
     ChatGPT: {
       "1 Bulan · Sharing · Non Garansi": "20000",
-      "1 Bulan · Sharing · Stabil · Non Garansi": "22000",
-      "1 Bulan · Sharing · Garansi": "32000",
+      "1 Bulan · Private · Garansi": "32000",
       "3 Bulan · Sharing · Garansi": "56000",
     },
 
@@ -294,22 +293,30 @@ GetContact: {
 
     "Netflix Premium": {
      "1 Hari · Sharing · 1 Perangkat": "10000",
-      "7 Hari · Sharing · 2 Perangkat": "24000",
-      "1 Bulan · Sharing · 2 Perangkat": "48000",
-      "1 Bulan · Semi Private · 2 Perangkat": "64000",
+     "3 Hari · Sharing · 1 Perangkat": "15000",
+     "7 Hari · Sharing · 1 Perangkat": "24000",
+     "14 Hari · Sharing · 1 Perangkat": "35000",
+     "1 Bulan · Sharing · 2 Perangkat": "48000",
+     "1 Bulan · Semi Private": "64000",
+     "2 Bulan · Semi Private": "870000",
+     "3 Bulan · Semi Private": "120000",
     },
 
     "Disney Hotstar": {
-      "1 Bulan · Semua Perangkat": "20000",
-      "1 Tahun · Semua Perangkat": "120000",
+      "1 Hari · Sharing · Garansi": "12000",
+      "3 Hari · Sharing · Garansi": "15000",
+      "5 Hari · Sharing · Garansi": "20000",
+      "7 Hari · Sharing · Garansi": "25000",
+      "1 Bulan · Sharing · Garansi": "40000",
+      "1 Tahun · Sharing · Garansi": "120000",
     },
 
     Vidio: {
       "1 Bulan · Sharing · HP Only · Garansi": "32000",
       "1 Bulan · Sharing · Semua Perangkat · Garansi": "44000",
-      "1 Bulan · Pribadi · HP Only · Garansi": "51000",
-      "1 Bulan · Pribadi · Semua Perangkat · Garansi": "71000",
-      "1 Tahun · Pribadi · TV Only · Garansi": "10000",
+      "1 Bulan · Private · HP Only · Garansi": "51000",
+      "1 Bulan · Private · Semua Perangkat · Garansi": "71000",
+      "1 Tahun · Private · TV Only · Garansi": "10000",
     },
 
     WeTV: {
@@ -350,7 +357,10 @@ GetContact: {
     },
 
     Fizzo: {
-      "1 Tahun · Sharing": "28000",
+      "1 Bulan · Sharing": "13000",
+      "6 Bulan · Sharing": "21000",
+      "1 Tahun · Sharing": "41000",
+
     },
 
     Wibuku: {
@@ -368,11 +378,14 @@ GetContact: {
     Iqiyl: {
       "1 Bulan · Sharing": "17000",
       "1 Tahun · Sharing": "34000",
+      "1 Bulan · Private": "23000",
+      "1 Tahun · Private": "47000",
+
     },
 
     "Prime Video": {
       "1 Bulan · Sharing · Semua Perangkat": "12000",
-      "1 Bulan · Pribadi · Semua Perangkat": "26000",
+      "1 Bulan · Private · Semua Perangkat": "26000",
     },
 
     Melolo: {
@@ -380,7 +393,8 @@ GetContact: {
     },
 
     Duolingo: {
-      "1 Bulan · Premium": "14000",
+      "14 Hari · Premium": "15000",
+      "1 Bulan · Premium": "17000",
     },
 
     "Perplexity AI": {
@@ -388,12 +402,14 @@ GetContact: {
     },
 
     "Express VPN": {
-      "1 Bulan · Pribadi": "15000",
+      "1 Bulan · Private": "15000",
     },
 
     "Viu Premium": {
-      "1 Bulan · Premium": "12000",
-      "1 Tahun · Premium": "120000",
+      "1 Bulan · Private": "12000",
+      "1 Tahun · Private": "50000",
+      "Lifitime · Private": "85000",
+
     },
 
     Spotify: {
@@ -410,19 +426,25 @@ GetContact: {
     },
 
     "CapCut Pro": {
-      "7 Hari · Pribadi": "10000",
-      "21 Hari · Pribadi": "18000",
-      "35 Hari · Pribadi": "23000",
-      "21 Hari · Sharing": "12000",
-      "35 Hari · Sharing": "16000",
+      "7 Hari · Private": "10000",
+      "14 Hari · Private": "14000",
+      "28 Hari · Private": "19000",
+      "42 Hari · Private": "29000",
+      "7  Bulan · Private · Garansi ": "49000",
     },
 
     "Google Gemini": {
+      "3 Bulan · Sharing": "8000",
       "1 Tahun · Sharing": "25000",
+      "3 Bulan · Private": "15000",
+      "1 Tahun · Private": "50000",
     },
 
     Zoom: {
-      "14 Hari · Pribadi": "14000",
+      "7 Hari · Private": "10000",
+      "14 Hari · Private": "16000",
+      "28 Hari · Private": "40000",
+
     },
 
     "TikTok Premium": {
@@ -446,11 +468,13 @@ GetContact: {
 
     Wink: {
       "7 Hari · Android · Akun Pembeli": "8000",
+      "7 Hari · Android · Akun Penjual": "11000",
+
     },
 
     Meitu: {
-      "7 Hari · Android · Akun Pembeli": "8000",
-      "1 Bulan · Sharing · Akun Pembeli": "17000",
+      "7 Hari · Android · Akun Pembeli": "9000",
+      "1 Bulan · Sharing · Akun Pembeli": "32000",
     },
 
     PicsArt: {
