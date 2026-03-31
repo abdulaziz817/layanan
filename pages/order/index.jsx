@@ -208,17 +208,6 @@ export default function OrderForm() {
   "1 Bulan · Sharing": "24000",
 },
 
-"Appmus": {
-  "1 Bulan · Sharing": "30000",
-  "2 Bulan · Sharing": "50000",
-  "3 Bulan · Sharing": "60000",
-},
-
-"HBO Max": {
-  "1 Bulan · Sharing": "50000",
-  "1 Bulan · Private": "170000",
-},
-
 /* 🎨 DESAIN & EDITING */
 Polarr: {
   "1 Tahun · Sharing": "40000",
@@ -649,7 +638,7 @@ GetContact: {
   "Viu Premium",
   "Viu Anlim",
   "WeTV",
-  "iQIYI",
+  "IQIYI",
   "Youku",
   "Loklok",
   "Drakor ID",
@@ -660,8 +649,6 @@ GetContact: {
   "MovieBox",
   "Gagaoalala",
   "Bstation Premium",
-  "HBO Max",
-  "Appmus",
   "Wibuku",
   "Dramabox",
 
@@ -1875,9 +1862,9 @@ setTimeout(() => {
                             </p>
                           )}
 
-                          <p className="mt-2 text-xs text-black/60">
-                            {duration ? `Durasi: ${duration}` : "Pilih durasi untuk melihat harga"}
-                          </p>
+                      <p className="mt-4 text-xs text-black/60">
+  {duration ? `Durasi: ${duration}` : "Pilih durasi untuk melihat harga"}
+</p>
                         </div>
 
                         <div className="my-4 h-px w-full bg-black/10" />
