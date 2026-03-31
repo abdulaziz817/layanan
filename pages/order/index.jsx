@@ -638,7 +638,7 @@ GetContact: {
   "Viu Premium",
   "Viu Anlim",
   "WeTV",
-  "IQIYI",
+  "iQIYI",
   "Youku",
   "Loklok",
   "Drakor ID",
