@@ -10,6 +10,21 @@ export default function OrderForm() {
   const NUSANTARA_FEE = 1500;
   const MIN_WEBDEV_BUDGET = 150000;
 
+
+
+const MIN_VIDEO_MINUTES = 1;
+const MIN_VIDEO_RATE = 15000; // minimal harga per menit
+
+
+const [videoMinutes, setVideoMinutes] = useState("");
+const [videoRate, setVideoRate] = useState(String(MIN_VIDEO_RATE));
+
+const videoTotal = useMemo(() => {
+  const minutes = Number(videoMinutes || 0);
+  const rate = Number(videoRate || 0);
+  return minutes * rate;
+}, [videoMinutes, videoRate]);
+
   const formatIDR = (n) => {
     const num = Number(n || 0);
     return num.toLocaleString("id-ID");
@@ -530,13 +545,13 @@ GetContact: {
     if (cryptoCoin !== "USDT") setCryptoNetwork("TRC20");
   }, [cryptoCoin]);
 
-  const servicesItems = [
-    "Desain Grafis",
-    "Web Development",
-    "Preset Fotografi",
-    "Aplikasi Premium",
-
-  ];
+const servicesItems = [
+  "Desain Grafis",
+  "Web Development",
+  "Editing Video",
+  "Preset Fotografi",
+  "Aplikasi Premium",
+];
 
   const serviceSubOptions = {
     "Desain Grafis": [
@@ -598,6 +613,19 @@ GetContact: {
       "Website Katalog Produk",
       "Lainnya",
     ],
+
+    "Editing Video": [
+  "Short Video",
+  "Reels / TikTok",
+  "YouTube Editing",
+  "Video Promosi",
+  "Video Produk",
+  "Video Cinematic",
+  "Video Wedding",
+  "Video Company Profile",
+  "Motion Graphic Sederhana",
+  "Lainnya",
+],
 
     "Preset Fotografi": [
       "Editing Foto",
@@ -757,13 +785,18 @@ GetContact: {
   // ✅ Total IDR untuk konversi crypto (sudah termasuk fee + domain kalau WebDev custom)
 // ✅ Total IDR untuk konversi crypto (fee hanya WebDev + domain hanya WebDev custom)
 const totalIDR = useMemo(() => {
-  const base =
-    selectedService === "Aplikasi Premium"
-      ? Number(durationPrice || 0)
-      : Number((budget || "").replace(/\./g, "") || 0);
+  let base = 0;
+
+  if (selectedService === "Aplikasi Premium") {
+    base = Number(durationPrice || 0);
+  } else if (selectedService === "Editing Video") {
+    base = Number(videoTotal || 0);
+  } else {
+    base = Number((budget || "").replace(/\./g, "") || 0);
+  }
 
   return Number(base || 0) + Number(serviceFee || 0) + Number(domainCost || 0);
-}, [selectedService, durationPrice, budget, serviceFee, domainCost]);
+}, [selectedService, durationPrice, videoTotal, budget, serviceFee, domainCost]);
 
   // ✅ Estimasi crypto dihitung 1x
   const estimatedCrypto = useMemo(() => {
@@ -772,6 +805,14 @@ const totalIDR = useMemo(() => {
     if (!isFinite(amt)) return null;
     return amt;
   }, [cryptoRate, totalIDR]);
+
+
+  useEffect(() => {
+  setDuration("");
+  setDurationPrice("");
+  setVideoMinutes("");
+  setVideoRate(String(MIN_VIDEO_RATE));
+}, [selectedSubService]);
 
   // ✅ Ambil kurs crypto → IDR (auto update)
   useEffect(() => {
@@ -945,107 +986,189 @@ const inputErrorClass =
   };
 
   const handleSubmit = (e) => {
-    if (selectedService && serviceSubOptions[selectedService]) {
-  if (!selectedSubService) {
+  e.preventDefault();
+  const fe = {};
+
+  // VALIDASI UMUM
+  if (name.trim().length < 3) {
+    fe.name = "Nama harus berisi setidaknya 3 karakter.";
+  }
+
+  if (!phone.match(/^08\d{8,}$/)) {
+    fe.phone = "Nomor HP tidak valid (gunakan format 08xxxxxxxxxx).";
+  }
+
+  if (!selectedService) {
+    fe.selectedService = "Silakan pilih layanan terlebih dahulu.";
+  }
+
+  if (selectedService && serviceSubOptions[selectedService] && !selectedSubService) {
     fe.selectedSubService = "Silakan pilih detail layanan terlebih dahulu.";
   }
-}
-    e.preventDefault();
 
-    const fe = {};
+  if (selectedSubService === "Lainnya" && customSubService.trim().length < 3) {
+    fe.customSubService =
+      "Masukkan detail layanan jika memilih 'Lainnya' (min. 3 karakter).";
+  }
 
-    // VALIDASI UMUM
-    if (name.trim().length < 3) fe.name = "Nama harus berisi setidaknya 3 karakter.";
-    if (!phone.match(/^08\d{8,}$/)) fe.phone = "Nomor HP tidak valid (gunakan format 08xxxxxxxxxx).";
-    if (!selectedService) fe.selectedService = "Silakan pilih layanan terlebih dahulu.";
+  // =========================
+  // VALIDASI KHUSUS PER LAYANAN
+  // =========================
 
-    if (selectedSubService === "Lainnya" && customSubService.trim().length < 3) {
-      fe.customSubService = "Masukkan detail layanan jika memilih 'Lainnya' (min. 3 karakter).";
+  // Aplikasi Premium
+  if (selectedService === "Aplikasi Premium") {
+    if (!selectedSubService) {
+      fe.selectedSubService = "Silakan pilih detail aplikasi terlebih dahulu.";
     }
 
-
-    // ✅ VALIDASI DETAIL LAYANAN UNTUK BASO IKAN TUNA
-if (true) {
-  if (!selectedSubService) {
-    fe.selectedSubService = "Silakan pilih lokasi offline terlebih dahulu.";
+    if (!duration) {
+      fe.duration = "Silakan pilih durasi langganan.";
+    }
   }
-}
-if (selectedService === "Aplikasi Premium") {
-  if (!selectedSubService) fe.selectedSubService = "Silakan pilih detail aplikasi terlebih dahulu.";
-  if (!duration) fe.duration = "Silakan pilih durasi langganan.";
-} else {
-  // ✅ SKIP budget & deadline khusus Baso Ikan Tuna
-  if (selectedService !== "Baso Ikan Tuna") {
-    if (!budget.match(/^\d{1,3}(\.\d{3})*$/)) {
-      fe.budget = "Budget harus format angka benar, contoh: 150.000.";
-    } else {
-      const b = Number((budget || "").replace(/\./g, "") || 0);
 
-      if (selectedService === "Web Development" && b < MIN_WEBDEV_BUDGET) {
-        fe.budget = `Minimal budget Web Development adalah Rp ${MIN_WEBDEV_BUDGET.toLocaleString("id-ID")}.`;
-      }
+  // Editing Video
+  else if (selectedService === "Editing Video") {
+    if (!selectedSubService) {
+      fe.selectedSubService =
+        "Silakan pilih detail editing video terlebih dahulu.";
+    }
+
+    const minutes = Number(videoMinutes || 0);
+    const rate = Number(videoRate || 0);
+
+    if (!videoMinutes || minutes < MIN_VIDEO_MINUTES) {
+      fe.videoMinutes = `Minimal durasi editing adalah ${MIN_VIDEO_MINUTES} menit.`;
+    }
+
+    if (!videoRate || rate < MIN_VIDEO_RATE) {
+      fe.videoRate = `Minimal harga per menit adalah Rp ${MIN_VIDEO_RATE.toLocaleString(
+        "id-ID"
+      )}.`;
     }
 
     if (!deadline || new Date(deadline) <= new Date()) {
       fe.deadline = "Deadline harus minimal 1 hari setelah tanggal hari ini.";
     }
   }
-      // VALIDASI DOMAIN khusus Web Development
-      if (selectedService === "Web Development") {
-        if (!domainMode) fe.domainMode = "Pilih metode domain: domain berbayar atau subdomain gratis.";
 
-        if (domainMode === "custom") {
-          if (!sanitizeDomainBase(domainBase)) fe.domainBase = "Isi nama domain (tanpa ekstensi), contoh: tokokamu";
-          if (!domainTld) fe.domainTld = "Pilih ekstensi domain (.site/.shop/.dev/dll).";
-          if (!domainYears) fe.domainYears = "Pilih durasi domain (1/2/3 tahun).";
+  // Baso Ikan Tuna
+  else if (selectedService === "Baso Ikan Tuna") {
+    if (!selectedSubService) {
+      fe.selectedSubService = "Silakan pilih lokasi offline terlebih dahulu.";
+    }
+  }
 
-          if (domainStatus === "taken") {
-            fe.domainStatus = "Domain sudah dipakai. Silakan pilih domain lain.";
-          }
+  // Layanan biasa + Web Development
+  else {
+    if (!budget.match(/^\d{1,3}(\.\d{3})*$/)) {
+      fe.budget = "Budget harus format angka benar, contoh: 150.000.";
+    } else {
+      const b = Number((budget || "").replace(/\./g, "") || 0);
 
-          if (domainStatus !== "available") {
-            fe.domainStatus = "Silakan cek domain dulu sampai statusnya 'Tersedia'.";
-          }
-        }
-
-        if (domainMode === "subdomain") {
-          if (!subdomainProvider) fe.subdomainProvider = "Pilih subdomain: Netlify atau Vercel.";
-          if (!subdomainLabel.trim()) fe.subdomainLabel = "Isi nama subdomain (contoh: tokokamu.netlify.app).";
-
-          // validasi: harus pakai domain yang disediakan
-          const lower = (subdomainLabel || "").trim().toLowerCase();
-          if (lower && !FREE_DOMAINS.some((d) => lower.endsWith(`.${d}`) || lower === d)) {
-            fe.subdomainLabel = "Subdomain harus berakhir dengan .netlify.app atau .vercel.app.";
-          }
-        }
+      if (selectedService === "Web Development" && b < MIN_WEBDEV_BUDGET) {
+        fe.budget = `Minimal budget Web Development adalah Rp ${MIN_WEBDEV_BUDGET.toLocaleString(
+          "id-ID"
+        )}.`;
       }
     }
 
-    if (message.trim().length < 10) fe.message = "Pesan terlalu singkat. Tulis setidaknya 10 karakter.";
-    if (!paymentMethod) fe.paymentMethod = "Pilih metode pembayaran terlebih dahulu.";
-
-    // VALIDASI tambahan untuk Crypto
-    if (paymentMethod === "Crypto") {
-      const addr = getCryptoAddress();
-      if (!addr) fe.crypto = "Alamat wallet crypto belum diisi. Cek konfigurasi CRYPTO_WALLETS.";
+    if (!deadline || new Date(deadline) <= new Date()) {
+      fe.deadline = "Deadline harus minimal 1 hari setelah tanggal hari ini.";
     }
 
-    // kalau ada error
-    if (Object.keys(fe).length > 0) {
-      setFieldErrors(fe);
-      setError("Ada kesalahan pada pengisian form. Silakan periksa kolom yang ditandai merah.");
-      return;
+    // VALIDASI DOMAIN khusus Web Development
+    if (selectedService === "Web Development") {
+      if (!domainMode) {
+        fe.domainMode =
+          "Pilih metode domain: domain berbayar atau subdomain gratis.";
+      }
+
+      if (domainMode === "custom") {
+        if (!sanitizeDomainBase(domainBase)) {
+          fe.domainBase =
+            "Isi nama domain (tanpa ekstensi), contoh: tokokamu";
+        }
+
+        if (!domainTld) {
+          fe.domainTld =
+            "Pilih ekstensi domain (.site/.shop/.dev/dll).";
+        }
+
+        if (!domainYears) {
+          fe.domainYears = "Pilih durasi domain (1/2/3 tahun).";
+        }
+
+        if (domainStatus === "taken") {
+          fe.domainStatus =
+            "Domain sudah dipakai. Silakan pilih domain lain.";
+        }
+
+        if (domainStatus !== "available") {
+          fe.domainStatus =
+            "Silakan cek domain dulu sampai statusnya 'Tersedia'.";
+        }
+      }
+
+      if (domainMode === "subdomain") {
+        if (!subdomainProvider) {
+          fe.subdomainProvider = "Pilih subdomain: Netlify atau Vercel.";
+        }
+
+        if (!subdomainLabel.trim()) {
+          fe.subdomainLabel =
+            "Isi nama subdomain (contoh: tokokamu.netlify.app).";
+        }
+
+        const lower = (subdomainLabel || "").trim().toLowerCase();
+        if (
+          lower &&
+          !FREE_DOMAINS.some((d) => lower.endsWith(`.${d}`) || lower === d)
+        ) {
+          fe.subdomainLabel =
+            "Subdomain harus berakhir dengan .netlify.app atau .vercel.app.";
+        }
+      }
     }
+  }
 
-    // kalau valid
-    setError("");
-    setFieldErrors({});
-    setIsSubmitting(true);
+  // VALIDASI TAMBAHAN
+  if (message.trim().length < 10) {
+    fe.message = "Pesan terlalu singkat. Tulis setidaknya 10 karakter.";
+  }
 
-    const waNumber = "6287860592111";
-    const detailService = selectedSubService === "Lainnya" ? customSubService : selectedSubService;
+  if (!paymentMethod) {
+    fe.paymentMethod = "Pilih metode pembayaran terlebih dahulu.";
+  }
 
-    const estimated = estimatedCrypto;
+  if (paymentMethod === "Crypto") {
+    const addr = getCryptoAddress();
+    if (!addr) {
+      fe.crypto =
+        "Alamat wallet crypto belum diisi. Cek konfigurasi CRYPTO_WALLETS.";
+    }
+  }
+
+  // DEBUG sementara
+  console.log("FIELD ERRORS:", fe);
+
+  if (Object.keys(fe).length > 0) {
+    setFieldErrors(fe);
+    setError(
+      "Ada kesalahan pada pengisian form. Silakan periksa kolom yang ditandai merah."
+    );
+    return;
+  }
+
+  // kalau valid
+  setError("");
+  setFieldErrors({});
+  setIsSubmitting(true);
+
+  const waNumber = "6287860592111";
+  const detailService =
+    selectedSubService === "Lainnya" ? customSubService : selectedSubService;
+
+  const estimated = estimatedCrypto;
 
 // ✅ ICON UNICODE (biar tidak rusak jadi kotak)
 const ICON = {
@@ -1114,6 +1237,8 @@ const encodedMessage = encodeURIComponent(
     `${ICON.tool} *Layanan:* ${selectedService}${detailService ? ` - ${detailService}` : ""}\n` +
     (domainText ? domainText : "") +
     `${
+
+      
       // 🍜 BASO IKAN TUNA
       selectedService === "Baso Ikan Tuna"
         ? `${ICON.pin} *Lokasi Offline:* ${detailService || "-"}\n` +
@@ -1124,6 +1249,12 @@ const encodedMessage = encodeURIComponent(
         ? `⏳ *Durasi Langganan:* ${duration}\n` +
           `${ICON.money} *Harga:* Rp ${Number(durationPrice || 0).toLocaleString("id-ID")}\n` +
           `${ICON.total} *Total:* Rp ${Number(durationPrice || 0).toLocaleString("id-ID")}\n`
+
+          : selectedService === "Editing Video"
+  ? `🎬 *Durasi Video:* ${videoMinutes} menit\n` +
+    `💸 *Harga per Menit:* Rp ${Number(videoRate || 0).toLocaleString("id-ID")}\n` +
+    `💵 *Total:* Rp ${Number(videoTotal || 0).toLocaleString("id-ID")}\n` +
+    `⏰ *Deadline:* ${deadline}\n`
 
       // 🖥 WEB DEVELOPMENT (PAKAI FEE + DOMAIN JIKA ADA)
       : selectedService === "Web Development"
@@ -1392,30 +1523,169 @@ setTimeout(() => {
                     ) : null}
                   </div>
                 )}
-{selectedService !== "Aplikasi Premium" && selectedService !== "Baso Ikan Tuna" && (
-  <>
-    {/* Budget */}
-    <div>
-      <label>Budget (Rp)</label>
-      <Input
-        type="text"
-        value={budget}
-        onChange={handleBudgetChange}
-        placeholder="Contoh: 150.000"
-        className={`mt-2 ${fieldErrors?.budget ? inputErrorClass : ""}`}
-      />
-      {fieldErrors?.budget ? (
-        <p className="mt-1 text-xs text-red-600">{fieldErrors.budget}</p>
-      ) : null}
+{selectedService !== "Aplikasi Premium" &&
+  selectedService !== "Baso Ikan Tuna" &&
+  selectedService !== "Editing Video" && (
+    <>
+      {/* Budget */}
+      <div>
+        <label>Budget (Rp)</label>
+        <Input
+          type="text"
+          value={budget}
+          onChange={handleBudgetChange}
+          placeholder="Contoh: 150.000"
+          className={`mt-2 ${fieldErrors?.budget ? inputErrorClass : ""}`}
+        />
+        {fieldErrors?.budget ? (
+          <p className="mt-1 text-xs text-red-600">{fieldErrors.budget}</p>
+        ) : null}
 
+        {selectedService === "Web Development" && (
+          <p className="mt-1 text-[11px] text-gray-500">
+            Minimal budget Web Development: Rp {formatIDR(MIN_WEBDEV_BUDGET)}
+          </p>
+        )}
+      </div>
+
+      {/* Deadline */}
+      <div>
+        <label>Deadline (kapan selesai)</label>
+        <input
+          type="date"
+          min={minDate}
+          value={deadline}
+          onChange={(e) => {
+            setDeadline(e.target.value);
+            clearFieldError("deadline");
+          }}
+          className={getClass(baseDateClass, "deadline")}
+        />
+        {fieldErrors?.deadline ? (
+          <p className="mt-1 text-xs text-red-600">{fieldErrors.deadline}</p>
+        ) : null}
+      </div>
+
+      {/* ✅ Domain Section khusus Web Development */}
       {selectedService === "Web Development" && (
-        <p className="mt-1 text-[11px] text-gray-500">
-          Minimal budget Web Development: Rp {formatIDR(MIN_WEBDEV_BUDGET)}
-        </p>
-      )}
-    </div>
+        <div className="mt-2 space-y-3">
+          <label className="font-semibold text-gray-800">Domain Website</label>
 
-    {/* Deadline */}
+          <select
+            value={domainMode}
+            onChange={(e) => {
+              setDomainMode(e.target.value);
+              setDomainBase("");
+              setDomainTld(".site");
+              setDomainYears("1");
+              setDomainStatus("");
+              setDomainAiSuggestion("");
+              setSubdomainProvider("");
+              setSubdomainLabel("");
+
+              clearFieldError("domainMode");
+              clearFieldError("domainBase");
+              clearFieldError("domainTld");
+              clearFieldError("domainYears");
+              clearFieldError("domainStatus");
+              clearFieldError("subdomainProvider");
+              clearFieldError("subdomainLabel");
+            }}
+            className={getClass(baseSelectClassBig, "domainMode")}
+          >
+            <option value="">-- Pilih Metode Domain --</option>
+            <option value="custom">
+              Domain berbayar (pilih ekstensi + durasi + cek)
+            </option>
+            <option value="subdomain">
+              Domain gratis (netlify.app / vercel.app)
+            </option>
+          </select>
+
+          {fieldErrors?.domainMode ? (
+            <p className="mt-1 text-xs text-red-600">{fieldErrors.domainMode}</p>
+          ) : null}
+        </div>
+      )}
+
+      {/* ✅ Biaya Layanan Nusantara: HANYA tampil kalau Web Development */}
+      {selectedService === "Web Development" && (
+        <div className="mt-2 w-full p-4 rounded-xl bg-gray-50 border">
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-600">Biaya Layanan Nusantara</span>
+            <span className="font-semibold text-gray-900">
+              Rp {formatIDR(NUSANTARA_FEE)}
+            </span>
+          </div>
+          <p className="mt-2 text-[11px] text-gray-400">
+            Berlaku khusus untuk operasional dan proses pengerjaan layanan
+            pembuatan website.
+          </p>
+        </div>
+      )}
+    </>
+  )}
+
+{selectedService === "Editing Video" && (
+  <>
+    {/* Durasi Video */}
+    <div>
+  <label className="font-semibold text-gray-800">Durasi Video</label>
+
+  <div className="mt-3 rounded-2xl border border-black/10 bg-white px-4 py-5 shadow-sm">
+    <div className="relative pt-6">
+      <div
+        className={`absolute -top-1 -translate-x-1/2 rounded-lg bg-black px-2 py-1 text-xs font-semibold text-white shadow transition-opacity duration-200 ${
+          videoMinutes ? "opacity-100" : "opacity-0"
+        }`}
+        style={{
+          left: `${(((Number(videoMinutes || MIN_VIDEO_MINUTES) - MIN_VIDEO_MINUTES) / (60 - MIN_VIDEO_MINUTES)) * 100)}%`,
+        }}
+      >
+        {videoMinutes || MIN_VIDEO_MINUTES} menit
+      </div>
+
+      <input
+        type="range"
+        min={MIN_VIDEO_MINUTES}
+        max={60}
+        step={1}
+        value={videoMinutes || MIN_VIDEO_MINUTES}
+        onChange={(e) => {
+          setVideoMinutes(e.target.value);
+          clearFieldError("videoMinutes");
+        }}
+        onMouseUp={() => {
+          setTimeout(() => setVideoMinutes((prev) => prev), 800);
+        }}
+        className="video-range w-full"
+      />
+
+      <div className="mt-3 flex items-center justify-between text-xs text-black/60">
+        <span>{MIN_VIDEO_MINUTES} menit</span>
+        <span>60 menit</span>
+      </div>
+    </div>
+  </div>
+
+  {fieldErrors?.videoMinutes ? (
+    <p className="mt-1 text-xs text-red-600">{fieldErrors.videoMinutes}</p>
+  ) : null}
+</div>
+
+    {/* Harga per Menit */}
+   <div>
+  <label>Harga per Menit (Rp)</label>
+  <div className="mt-2 w-full rounded-lg border bg-gray-50 px-3 py-2 text-gray-700 cursor-not-allowed">
+    Rp {formatIDR(videoRate)}
+  </div>
+
+  <p className="mt-1 text-[11px] text-gray-500">
+    Harga per menit sudah ditetapkan.
+  </p>
+</div>
+
+    {/* Deadline Editing Video */}
     <div>
       <label>Deadline (kapan selesai)</label>
       <input
@@ -1433,58 +1703,21 @@ setTimeout(() => {
       ) : null}
     </div>
 
-    {/* ✅ Domain Section khusus Web Development */}
-    {selectedService === "Web Development" && (
-      <div className="mt-2 space-y-3">
-        <label className="font-semibold text-gray-800">Domain Website</label>
+    {/* Estimasi Harga Editing Video */}
+    <div className="rounded-2xl border border-black/10 bg-white p-5 shadow-[0_14px_40px_rgba(0,0,0,0.10)]">
+      <p className="text-[11px] uppercase tracking-widest text-black/60 font-semibold">
+        Estimasi Harga Editing Video
+      </p>
 
-        <select
-          value={domainMode}
-          onChange={(e) => {
-            setDomainMode(e.target.value);
-            setDomainBase("");
-            setDomainTld(".site");
-            setDomainYears("1");
-            setDomainStatus("");
-            setDomainAiSuggestion("");
-            setSubdomainProvider("");
-            setSubdomainLabel("");
+      <p className="mt-3 text-3xl font-extrabold tracking-tight text-black">
+        Rp {Number(videoTotal || 0).toLocaleString("id-ID")}
+      </p>
 
-            clearFieldError("domainMode");
-            clearFieldError("domainBase");
-            clearFieldError("domainTld");
-            clearFieldError("domainYears");
-            clearFieldError("domainStatus");
-            clearFieldError("subdomainProvider");
-            clearFieldError("subdomainLabel");
-          }}
-          className={getClass(baseSelectClassBig, "domainMode")}
-        >
-          <option value="">-- Pilih Metode Domain --</option>
-          <option value="custom">Domain berbayar (pilih ekstensi + durasi + cek)</option>
-          <option value="subdomain">Domain gratis (netlify.app / vercel.app)</option>
-        </select>
-
-        {fieldErrors?.domainMode ? (
-          <p className="mt-1 text-xs text-red-600">{fieldErrors.domainMode}</p>
-        ) : null}
-
-        {/* ... LANJUTKAN ISI DOMAIN kamu (custom & subdomain) DI SINI ... */}
-      </div>
-    )}
-
-    {/* ✅ Biaya Layanan Nusantara: HANYA tampil kalau Web Development */}
-    {selectedService === "Web Development" && (
-      <div className="mt-2 w-full p-4 rounded-xl bg-gray-50 border">
-        <div className="flex justify-between text-sm">
-          <span className="text-gray-600">Biaya Layanan Nusantara</span>
-          <span className="font-semibold text-gray-900">Rp {formatIDR(NUSANTARA_FEE)}</span>
-        </div>
-        <p className="mt-2 text-[11px] text-gray-400">
-         Berlaku khusus untuk operasional dan proses pengerjaan layanan pembuatan website.
-        </p>
-      </div>
-    )}
+      <p className="mt-2 text-xs text-black/60">
+        {videoMinutes || MIN_VIDEO_MINUTES} menit × Rp{" "}
+        {Number(videoRate || 0).toLocaleString("id-ID")} / menit
+      </p>
+    </div>
   </>
 )}
                         {/* ✅ CUSTOM DOMAIN */}
