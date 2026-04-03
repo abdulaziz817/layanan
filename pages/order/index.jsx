@@ -1288,32 +1288,48 @@ setTimeout(() => {
       <Head>
         <title>Pesan Layanan</title>
         <style>{`
-          .snow {
-            pointer-events: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            z-index: 9999;
-          }
+         .video-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  background: #e5e7eb; /* gray-200 */
+  outline: none;
+}
 
-          .snow span {
-            position: absolute;
-            top: -10px;
-            width: 8px;
-            height: 8px;
-            background: white;
-            border-radius: 50%;
-            animation: fall linear infinite;
-            opacity: 0.8;
-          }
+/* track */
+.video-range::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+}
 
-          @keyframes fall {
-            0% { transform: translateY(0) rotate(0deg); }
-            100% { transform: translateY(110vh) rotate(360deg); }
-          }
+/* thumb */
+.video-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #4f46e5; /* indigo-600 */
+  cursor: pointer;
+  margin-top: -5px;
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+  transition: all 0.15s ease;
+}
+
+.video-range:hover::-webkit-slider-thumb {
+  box-shadow: 0 0 0 6px rgba(79, 70, 229, 0.12);
+}
+
+/* Firefox */
+.video-range::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #4f46e5;
+  border: none;
+}
         `}</style>
       </Head>
 
@@ -1632,12 +1648,12 @@ setTimeout(() => {
     <div>
   <label className="font-semibold text-gray-800">Durasi Video</label>
 
-  <div className="mt-3 rounded-2xl border border-black/10 bg-white px-4 py-5 shadow-sm">
+  <div className="mt-3 rounded-xl border border-gray-200 bg-white px-4 py-5">
     <div className="relative pt-6">
       <div
-        className={`absolute -top-1 -translate-x-1/2 rounded-lg bg-black px-2 py-1 text-xs font-semibold text-white shadow transition-opacity duration-200 ${
-          videoMinutes ? "opacity-100" : "opacity-0"
-        }`}
+        className={`absolute -top-3 -translate-x-1/2 rounded-md bg-gray-900 px-2 py-1 text-[11px] font-medium text-white shadow-sm ${
+  videoMinutes ? "opacity-100" : "opacity-0"
+}`}
         style={{
           left: `${(((Number(videoMinutes || MIN_VIDEO_MINUTES) - MIN_VIDEO_MINUTES) / (60 - MIN_VIDEO_MINUTES)) * 100)}%`,
         }}
