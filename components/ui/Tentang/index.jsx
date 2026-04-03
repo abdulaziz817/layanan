@@ -41,6 +41,19 @@ export default function Tentang() {
         "Optimasi tampilan mobile dan struktur konten.",
       ],
     },
+    {
+  title: "Digital Video Editing",
+  desc:
+    "Layanan editing video untuk kebutuhan konten digital, promosi, dan branding dengan hasil yang rapi, menarik, dan siap dipublikasikan.",
+  points: [
+    "Editing video pendek (Reels, TikTok, Shorts).",
+    "Editing video YouTube & konten panjang.",
+    "Video promosi produk & bisnis.",
+    "Video cinematic & storytelling visual.",
+    "Motion sederhana & transisi yang halus.",
+    "Penyesuaian warna (color grading) & audio.",
+  ],
+},
 
     {
       title: "Preset Fotografi",
@@ -147,24 +160,26 @@ export default function Tentang() {
           transition={{ duration: 0.5 }}
           className="mt-12 sm:mt-16"
         >
-          <div className="mx-auto max-w-3xl">
-            <div className="mt-5 space-y-4 text-gray-700 leading-relaxed">
-              <p className="text-justify" style={{ textIndent: "2rem" }}>
-                <span className="font-semibold text-indigo-600">Layanan Nusantara</span>{" "}
-                berdiri pada tahun <span className="font-semibold">2025</span> sebagai jasa kreatif yang fokus pada
-                desain grafis, pembuatan website, preset fotografi, dan solusi digital.
-                Tujuan kami: membantu klien tampil lebih profesional di ranah online melalui visual yang rapi,
-                struktur konten yang jelas, dan pengalaman pengguna yang nyaman.
-              </p>
+        <div className="mx-auto max-w-3xl">
+  <div className="mt-5 space-y-4 text-gray-700 leading-relaxed">
+    <p className="text-justify" style={{ textIndent: "2rem" }}>
+      <span className="font-semibold text-indigo-600">Layanan Nusantara</span>{" "}
+      berdiri pada tahun <span className="font-semibold">2025</span> sebagai jasa kreatif yang fokus pada
+      desain grafis, pembuatan website, digital video editing, preset fotografi, dan solusi digital.
+      Tujuan kami adalah membantu klien tampil lebih profesional di ranah online melalui visual yang rapi,
+      struktur konten yang jelas, dan pengalaman pengguna yang nyaman.
+    </p>
 
-              <p className="text-justify" style={{ textIndent: "2rem" }}>
-                Kami percaya desain yang baik bukan hanya “bagus”, tetapi juga <span className="font-medium text-gray-900">jelas</span>,
-                <span className="font-medium text-gray-900"> konsisten</span>, dan <span className="font-medium text-gray-900">terarah</span>.
-                Karena itu, proses kerja kami mengutamakan komunikasi yang rapi sejak awal: kebutuhan, timeline, revisi,
-                hingga output akhir.
-              </p>
-            </div>
-          </div>
+    <p className="text-justify" style={{ textIndent: "2rem" }}>
+      Kami percaya desain yang baik bukan hanya “bagus”, tetapi juga{" "}
+      <span className="font-medium text-gray-900">jelas</span>,
+      <span className="font-medium text-gray-900"> konsisten</span>, dan{" "}
+      <span className="font-medium text-gray-900">terarah</span>.
+      Karena itu, proses kerja kami mengutamakan komunikasi yang rapi sejak awal: kebutuhan, timeline, revisi,
+      hingga output akhir.
+    </p>
+  </div>
+</div>
         </motion.section>
 
         {/* LAYANAN (minimal card, smooth) */}

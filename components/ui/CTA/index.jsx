@@ -41,7 +41,7 @@ const CTA = () => {
                         >
                            <div className="space-y-4 text-gray-700 text-base leading-loose" style={{ wordSpacing: '0.12em' }}>
   <p className="text-justify" style={{ textIndent: '2rem' }}>
-    <span className="font-semibold text-indigo-600">Layanan Nusantara</span> didirikan pada tahun <span className="underline decoration-indigo-500">2025</span> sebagai jasa kreatif yang menyediakan <strong>desain grafis</strong>, <strong>pembuatan website</strong>, <strong>preset fotografi</strong>, dan <strong>aplikasi premium dengan harga terbaik</strong>. Dengan komitmen terhadap kualitas dan detail, kami menghadirkan solusi visual yang tidak hanya menarik secara estetika, tetapi juga mampu meningkatkan citra profesional dan daya saing brand di era digital.
+    <span className="font-semibold text-indigo-600">Layanan Nusantara</span> didirikan pada tahun <span className="underline decoration-indigo-500">2025</span> sebagai jasa kreatif yang menyediakan <strong>Desain Grafis</strong>, <strong>Pembuatan Website</strong>, <strong>Digital Video Editing</strong>, <strong>Preset Fotografi</strong>, dan <strong>Aplikasi Premium Dengan Harga Terbaik</strong>. Dengan komitmen terhadap kualitas dan detail, kami menghadirkan solusi visual yang tidak hanya menarik secara estetika, tetapi juga mampu meningkatkan citra profesional dan daya saing brand di era digital.
   </p>
 </div>
 
