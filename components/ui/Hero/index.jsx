@@ -9,7 +9,7 @@ export default function Hero() {
       "Pembuatan Website Modern",
       "Preset Fotografi Eksklusif",
       "Aplikasi Premium Harga Terbaik",
-      "Digital Video Editing & Creative Content"
+      "Digital Video Editing"
     ],
     []
   );
