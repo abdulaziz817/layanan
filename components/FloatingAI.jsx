@@ -461,7 +461,7 @@ export default function FloatingAI() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ type: "tween", duration: 0.16, ease: "easeOut" }}
-            className="fixed bottom-6 right-6 z-50 w-16 h-16 rounded-full bg-white border-4 border-indigo-600 shadow-xl flex items-center justify-center transform-gpu will-change-transform will-change-opacity"
+            className="fixed bottom-6 right-6 z-[9999] w-16 h-16 rounded-full bg-white border-4 border-indigo-600 shadow-xl flex items-center justify-center transform-gpu will-change-transform will-change-opacity"
             aria-label="Buka chat"
           >
             <div className="relative">
@@ -483,7 +483,7 @@ export default function FloatingAI() {
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="fixed bottom-6 right-6 z-50 transform-gpu will-change-transform will-change-opacity"
+            className="fixed bottom-6 right-6 z-[9999] transform-gpu will-change-transform will-change-opacity"
               onAnimationComplete={() => setSettled(true)}
             >
               <button
@@ -521,11 +521,11 @@ export default function FloatingAI() {
               initial="hidden"
               animate="visible"
               exit="exit"
-              className={`fixed bottom-6 right-6 z-50 bg-white rounded-3xl overflow-hidden flex flex-col
-                w-[92vw] max-w-[26rem] h-[70vh] max-h-[520px]
-                transform-gpu will-change-transform will-change-opacity
-                ${settled ? "shadow-2xl" : "shadow-lg"}
-              `}
+              className={`fixed bottom-6 right-6 z-[9999] relative isolate bg-white rounded-3xl overflow-hidden flex flex-col
+  w-[92vw] max-w-[26rem] h-[70vh] max-h-[520px]
+  transform-gpu will-change-transform will-change-opacity
+  ${settled ? "shadow-2xl" : "shadow-lg"}
+`}
               role="dialog"
               aria-label="Chat Nusantara AI"
               onAnimationComplete={() => setSettled(true)}
