@@ -102,7 +102,7 @@ const handleCTA = () => {
   }, [pathname])
 
   return (
-    <header className="fixed top-0 left-0 w-full bg-white z-50 shadow-md">
+  <header className="fixed top-0 left-0 w-full bg-white z-[9999] shadow-md">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900 select-none">
           Layanan Nusantara
@@ -144,9 +144,9 @@ const handleCTA = () => {
 
       {/* MOBILE DRAWER */}
       <div
-        className={`fixed inset-0 z-40 md:hidden transition ${
-          menuOpen ? 'pointer-events-auto' : 'pointer-events-none'
-        }`}
+       className={`fixed inset-0 z-[9998] md:hidden transition ${
+  menuOpen ? 'pointer-events-auto' : 'pointer-events-none'
+}`}
       >
         <div
           onClick={() => setMenuOpen(false)}

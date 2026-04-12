@@ -521,7 +521,7 @@ export default function FloatingAI() {
               initial="hidden"
               animate="visible"
               exit="exit"
-              className={`fixed bottom-6 right-6 z-[9999] relative isolate bg-white rounded-3xl overflow-hidden flex flex-col
+              className={`fixed bottom-6 right-6 z-[9999] bg-white rounded-3xl overflow-hidden flex flex-col
   w-[92vw] max-w-[26rem] h-[70vh] max-h-[520px]
   transform-gpu will-change-transform will-change-opacity
   ${settled ? "shadow-2xl" : "shadow-lg"}
