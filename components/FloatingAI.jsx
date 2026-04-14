@@ -424,128 +424,140 @@ export default function FloatingAI() {
   const chips = useMemo(() => QUICK_REPLIES, []);
 
   return (
-    <LazyMotion features={domAnimation}>
-      <>
-        {/* INTRO */}
-        <AnimatePresence initial={false}>
-          {showIntro && !open && (
-            <m.div
-              variants={popupVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              className="fixed bottom-24 right-4 z-50 transform-gpu will-change-transform will-change-opacity"
+  <LazyMotion features={domAnimation}>
+    <>
+      {/* INTRO */}
+      <AnimatePresence initial={false}>
+        {showIntro && !open && (
+          <m.div
+            variants={popupVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="fixed bottom-24 right-4 z-50"
+          >
+            <button
+              onClick={openChat}
+              className="group w-[260px] rounded-[24px] border border-white/20 bg-gradient-to-br from-indigo-600 via-indigo-500 to-violet-500 px-4 py-3 text-left text-white shadow-[0_20px_60px_rgba(79,70,229,0.35)] backdrop-blur-xl transition hover:scale-[1.02]"
             >
-              <button
-                onClick={openChat}
-                className="bg-indigo-600 text-white px-4 py-3 rounded-2xl shadow-lg text-left w-[240px] hover:brightness-110 transition"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/15">
-                    🤖
-                  </span>
-                  <div className="leading-tight">
-                    <div className="text-sm font-semibold">Chat Nusantara AI</div>
-                    <div className="text-xs opacity-90">AI Assistant • {VERSION_LABEL}</div>
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/20">
+                  <span className="text-lg">🤖</span>
+                </div>
+                <div className="leading-tight">
+                  <div className="text-sm font-semibold tracking-wide">
+                    Chat Nusantara AI
+                  </div>
+                  <div className="text-xs text-white/80">
+                    AI Assistant • {VERSION_LABEL}
                   </div>
                 </div>
-              </button>
-            </m.div>
-          )}
-        </AnimatePresence>
+              </div>
+            </button>
+          </m.div>
+        )}
+      </AnimatePresence>
 
-        {/* FLOAT BUTTON */}
-        {!open && (
-          <m.button
-            onClick={openChat}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ type: "tween", duration: 0.16, ease: "easeOut" }}
-            className="fixed bottom-6 right-6 z-[9999] w-16 h-16 rounded-full bg-white border-4 border-indigo-600 shadow-xl flex items-center justify-center transform-gpu will-change-transform will-change-opacity"
-            aria-label="Buka chat"
+      {/* FLOAT BUTTON */}
+      {!open && (
+        <m.button
+          onClick={openChat}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "tween", duration: 0.16, ease: "easeOut" }}
+          className="fixed bottom-6 right-6 z-[9999] flex h-16 w-16 items-center justify-center rounded-full border border-white/20 bg-gradient-to-br from-indigo-600 via-indigo-500 to-violet-500 text-white shadow-[0_18px_40px_rgba(79,70,229,0.45)] backdrop-blur-xl transition hover:scale-105"
+          aria-label="Buka chat"
+        >
+          <div className="relative">
+            <HiOutlineChatBubbleLeftRight className="text-[28px]" />
+            {unread > 0 && (
+              <span className="absolute -right-3 -top-3 flex h-6 min-w-[24px] items-center justify-center rounded-full bg-rose-500 px-1 text-xs font-semibold text-white ring-2 ring-white">
+                {unread > 9 ? "9+" : unread}
+              </span>
+            )}
+          </div>
+        </m.button>
+      )}
+
+      {/* MINIMIZED */}
+      <AnimatePresence initial={false}>
+        {open && minimized && (
+          <m.div
+            variants={popupVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="fixed bottom-6 right-6 z-[9999]"
+            onAnimationComplete={() => setSettled(true)}
           >
-            <div className="relative">
-              <HiOutlineChatBubbleLeftRight className="text-black text-2xl" />
+            <button
+              onClick={() => {
+                setSettled(false);
+                setMinimized(false);
+              }}
+              className={`flex items-center gap-3 rounded-full border border-white/20 bg-gradient-to-r from-indigo-600 to-violet-500 px-4 py-3 text-white backdrop-blur-xl transition hover:scale-[1.01] ${
+                settled
+                  ? "shadow-[0_16px_40px_rgba(79,70,229,0.35)]"
+                  : "shadow-lg"
+              }`}
+              aria-label="Buka kembali chat"
+            >
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/15 ring-1 ring-white/20">
+                🤖
+              </span>
+              <div className="text-left leading-tight">
+                <div className="text-sm font-semibold">Nusantara AI</div>
+                <div className="text-[11px] text-white/80">Klik untuk lanjut</div>
+              </div>
               {unread > 0 && (
-                <span className="absolute -top-3 -right-3 h-6 min-w-[24px] px-1 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
+                <span className="rounded-full bg-rose-500 px-2 py-0.5 text-xs font-medium text-white">
                   {unread > 9 ? "9+" : unread}
                 </span>
               )}
-            </div>
-          </m.button>
+            </button>
+          </m.div>
         )}
+      </AnimatePresence>
 
-        {/* MINIMIZED */}
-        <AnimatePresence initial={false}>
-          {open && minimized && (
-            <m.div
-              variants={popupVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-            className="fixed bottom-6 right-6 z-[9999] transform-gpu will-change-transform will-change-opacity"
-              onAnimationComplete={() => setSettled(true)}
-            >
-              <button
-                onClick={() => {
-                  setSettled(false);
-                  setMinimized(false);
-                }}
-                className={`flex items-center gap-2 bg-indigo-600 text-white px-4 py-3 rounded-full hover:brightness-110 transition ${
-                  settled ? "shadow-lg" : "shadow-md"
-                }`}
-                aria-label="Buka kembali chat"
-              >
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/15">
-                  🤖
-                </span>
-                <div className="text-left leading-tight">
-                  <div className="text-sm font-semibold">Nusantara AI</div>
-                  <div className="text-[11px] opacity-90">Klik untuk lanjut</div>
-                </div>
-                {unread > 0 && (
-                  <span className="ml-1 rounded-full bg-red-500 px-2 py-0.5 text-xs">
-                    {unread > 9 ? "9+" : unread}
-                  </span>
-                )}
-              </button>
-            </m.div>
-          )}
-        </AnimatePresence>
-
-        {/* CHAT BOX */}
-        <AnimatePresence initial={false}>
-          {open && !minimized && (
-            <m.div
-              variants={popupVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              className={`fixed bottom-6 right-6 z-[9999] bg-white rounded-3xl overflow-hidden flex flex-col
-  w-[92vw] max-w-[26rem] h-[70vh] max-h-[520px]
-  transform-gpu will-change-transform will-change-opacity
-  ${settled ? "shadow-2xl" : "shadow-lg"}
-`}
-              role="dialog"
-              aria-label="Chat Nusantara AI"
-              onAnimationComplete={() => setSettled(true)}
-            >
-              {/* HEADER */}
-              <div className="bg-indigo-600 text-white px-4 py-3 flex items-center justify-between">
+      {/* CHAT BOX */}
+      <AnimatePresence initial={false}>
+        {open && !minimized && (
+          <m.div
+            variants={popupVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            onAnimationComplete={() => setSettled(true)}
+            className={`fixed bottom-6 right-6 z-[9999] flex h-[72vh] max-h-[560px] w-[92vw] max-w-[26rem] flex-col overflow-hidden rounded-[28px] border border-white/20 bg-white/80 backdrop-blur-2xl ${
+              settled
+                ? "shadow-[0_30px_80px_rgba(15,23,42,0.22)]"
+                : "shadow-[0_18px_50px_rgba(15,23,42,0.18)]"
+            }`}
+            role="dialog"
+            aria-label="Chat Nusantara AI"
+          >
+            {/* HEADER */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-500 px-4 py-4 text-white">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.22),transparent_35%)]" />
+              <div className="relative flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-white/15 flex items-center justify-center text-lg">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/20">
                     🤖
                   </div>
                   <div className="leading-tight">
                     <div className="flex items-center gap-2">
-                      <p className="font-semibold text-sm">Nusantara AI</p>
-                      <span className="text-[11px] opacity-90">{VERSION_LABEL}</span>
+                      <p className="text-sm font-semibold tracking-wide">
+                        Nusantara AI
+                      </p>
+                      <span className="rounded-full bg-white/15 px-2 py-0.5 text-[10px] text-white/90 ring-1 ring-white/15">
+                        {VERSION_LABEL}
+                      </span>
                     </div>
-                    <p className="text-[11px] opacity-90 flex items-center gap-2">
-                      <span className="inline-flex items-center gap-1">
+                    <p className="mt-1 flex items-center gap-2 text-[11px] text-white/85">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2 py-1 ring-1 ring-white/10">
                         <span
-                          className={`w-2 h-2 rounded-full ${
-                            isOnline ? "bg-green-300" : "bg-yellow-300"
+                          className={`h-2 w-2 rounded-full ${
+                            isOnline ? "bg-emerald-300" : "bg-amber-300"
                           }`}
                         />
                         {isOnline ? "Online" : "Offline"}
@@ -558,7 +570,7 @@ export default function FloatingAI() {
                   <button
                     onClick={resetChat}
                     disabled={isTyping}
-                    className="hover:bg-white/15 p-2 rounded-xl transition disabled:opacity-50"
+                    className="rounded-xl p-2 transition hover:bg-white/15 disabled:opacity-50"
                     aria-label="Reset"
                     title="Reset"
                   >
@@ -567,7 +579,7 @@ export default function FloatingAI() {
                   <button
                     onClick={minimizeChat}
                     disabled={isTyping}
-                    className="hover:bg-white/15 p-2 rounded-xl transition disabled:opacity-50"
+                    className="rounded-xl p-2 transition hover:bg-white/15 disabled:opacity-50"
                     aria-label="Minimize"
                     title="Minimize"
                   >
@@ -576,7 +588,7 @@ export default function FloatingAI() {
                   <button
                     onClick={closeChat}
                     disabled={isTyping}
-                    className="hover:bg-white/15 p-2 rounded-xl transition disabled:opacity-50"
+                    className="rounded-xl p-2 transition hover:bg-white/15 disabled:opacity-50"
                     aria-label="Tutup"
                     title="Tutup"
                   >
@@ -584,131 +596,130 @@ export default function FloatingAI() {
                   </button>
                 </div>
               </div>
+            </div>
 
-              {/* CHAT AREA */}
-              <div
-                ref={scrollRef}
-                onScroll={onScroll}
-                className="flex-1 overflow-y-auto bg-gray-50 p-3 space-y-2"
-              >
-                {messages.map((mm) => (
-                  <MessageBubble key={mm.id} msg={mm} />
-                ))}
+            {/* CHAT AREA */}
+            <div
+              ref={scrollRef}
+              onScroll={onScroll}
+              className="flex-1 space-y-3 overflow-y-auto bg-gradient-to-b from-slate-50 via-white to-slate-50 px-3 py-4"
+            >
+              {messages.map((mm) => (
+                <MessageBubble key={mm.id} msg={mm} />
+              ))}
 
-                {isTyping && (
-                  <div className="mr-auto max-w-[80%]">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-white border shadow-sm">
-                      <TypingDots />
-                      <span className="text-xs text-gray-500">mengetik…</span>
-                    </div>
-                  </div>
-                )}
-
-                <div ref={endRef} />
-              </div>
-
-              {/* SCROLL TO BOTTOM */}
-              {showScrollToBottom && (
-                <div className="absolute bottom-[142px] right-4 z-50">
-                  <button
-                    onClick={scrollToBottom}
-                    className="rounded-full bg-white border shadow-md px-3 py-2 text-xs hover:bg-gray-50 transition"
-                  >
-                    Ke bawah ↓
-                  </button>
-                </div>
-              )}
-
-              {/* ERROR PANEL */}
-              {sendError && (
-                <div className="px-3 pb-2 bg-white border-t">
-                  <div className="rounded-2xl border border-red-200 bg-red-50 p-3 text-xs text-red-700 flex items-start gap-2">
-                    <FiAlertTriangle className="mt-0.5" />
-                    <div className="flex-1">
-                      <div className="font-semibold">Gagal mengirim</div>
-                      <div className="opacity-90">{sendError}</div>
-                      <button
-                        onClick={retryLast}
-                        className="mt-2 inline-flex items-center gap-2 rounded-xl bg-indigo-600 text-white px-3 py-2 text-xs hover:brightness-110 transition"
-                        disabled={isTyping}
-                      >
-                        <FiRefreshCw /> Retry
-                      </button>
-                    </div>
+              {isTyping && (
+                <div className="mr-auto max-w-[82%]">
+                  <div className="inline-flex items-center gap-2 rounded-2xl rounded-bl-md border border-slate-200 bg-white/90 px-4 py-2 shadow-sm backdrop-blur">
+                    <TypingDots />
+                    <span className="text-xs text-slate-500">mengetik…</span>
                   </div>
                 </div>
               )}
 
-              {/* QUICK REPLIES */}
-              <div className="px-3 pt-2 pb-1 bg-white border-t">
-                <div className="relative">
-                  <div className="flex gap-2 overflow-x-auto pb-2 pr-6 scrollbar-hide">
-                    {chips.map((q) => (
-                      <button
-                        key={q.question}
-                        disabled={isTyping}
-                        onClick={() => sendMessage(q.question)}
-                        className="bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-full text-[12px] whitespace-nowrap disabled:opacity-50"
-                      >
-                        {q.question}
-                      </button>
-                    ))}
+              <div ref={endRef} />
+            </div>
+
+            {/* SCROLL TO BOTTOM */}
+            {showScrollToBottom && (
+              <div className="absolute bottom-[146px] right-4 z-50">
+                <button
+                  onClick={scrollToBottom}
+                  className="rounded-full border border-slate-200 bg-white/90 px-3 py-2 text-xs font-medium text-slate-700 shadow-lg backdrop-blur transition hover:bg-white"
+                >
+                  Ke bawah ↓
+                </button>
+              </div>
+            )}
+
+            {/* ERROR PANEL */}
+            {sendError && (
+              <div className="border-t border-red-100 bg-white px-3 pb-2 pt-2">
+                <div className="flex items-start gap-2 rounded-2xl border border-red-200 bg-red-50/90 p-3 text-xs text-red-700">
+                  <FiAlertTriangle className="mt-0.5 shrink-0" />
+                  <div className="flex-1">
+                    <div className="font-semibold">Gagal mengirim</div>
+                    <div className="opacity-90">{sendError}</div>
+                    <button
+                      onClick={retryLast}
+                      className="mt-2 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-500 px-3 py-2 text-xs text-white transition hover:brightness-110"
+                      disabled={isTyping}
+                    >
+                      <FiRefreshCw />
+                      Retry
+                    </button>
                   </div>
-                  <div className="pointer-events-none absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-white to-transparent" />
                 </div>
               </div>
+            )}
 
-              {/* INPUT (compact + cursor pas) */}
-              <div className="p-2 bg-white">
-                <div className="flex items-end gap-2">
+            {/* QUICK REPLIES */}
+            <div className="border-t border-slate-100 bg-white/90 px-3 pb-1 pt-2 backdrop-blur">
+              <div className="relative">
+                <div className="flex gap-2 overflow-x-auto pb-2 pr-6 scrollbar-hide">
+                  {chips.map((q) => (
+                    <button
+                      key={q.question}
+                      disabled={isTyping}
+                      onClick={() => sendMessage(q.question)}
+                      className="whitespace-nowrap rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-[12px] font-medium text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 disabled:opacity-50"
+                    >
+                      {q.question}
+                    </button>
+                  ))}
+                </div>
+                <div className="pointer-events-none absolute right-0 top-0 h-full w-10 bg-gradient-to-l from-white to-transparent" />
+              </div>
+            </div>
+
+            {/* INPUT */}
+            <div className="border-t border-slate-100 bg-white/95 p-3 backdrop-blur">
+              <div className="flex items-end gap-2">
+                <div className="flex-1 rounded-2xl border border-slate-200 bg-slate-50/80 px-2 py-2 focus-within:border-indigo-400 focus-within:bg-white focus-within:ring-4 focus-within:ring-indigo-100">
                   <textarea
                     ref={taRef}
                     value={input}
                     disabled={isTyping}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={onKeyDown}
-                    placeholder={isTyping ? "AI sedang menjawab…" : "Tulis pertanyaan tentang layanan…"}
+                    placeholder={
+                      isTyping
+                        ? "AI sedang menjawab…"
+                        : "Tulis pertanyaan tentang layanan…"
+                    }
                     rows={1}
-                    className="
-                      flex-1
-                      min-h-[40px] max-h-[96px]
-                      resize-none
-                      border rounded-2xl
-                      px-3 pt-2.5 pb-2
-                      text-[13px] leading-5
-                      outline-none
-                      focus:ring-2 focus:ring-indigo-600
-                      disabled:opacity-60
-                      overflow-hidden
-                    "
+                    className="min-h-[24px] max-h-[96px] w-full resize-none bg-transparent px-2 text-[13px] leading-5 text-slate-700 outline-none placeholder:text-slate-400"
                   />
-                  <button
-                    disabled={isTyping || !input.trim()}
-                    onClick={() => sendMessage(input)}
-                    className="h-[40px] px-3 rounded-2xl bg-indigo-600 text-white shadow-sm disabled:opacity-50 hover:brightness-110 transition inline-flex items-center gap-2 text-[13px]"
-                  >
-                    <FiSend />
-                    Kirim
-                  </button>
                 </div>
 
-                <div className="mt-1 flex justify-between items-center">
-                  <span className="text-[11px] text-gray-400">Powered by Nusantara AI</span>
-                  <button
-                    onClick={resetChat}
-                    disabled={isTyping}
-                    className="text-[11px] text-indigo-600 hover:underline disabled:opacity-50"
-                  >
-                    Reset Chat
-                  </button>
-                </div>
+                <button
+                  disabled={isTyping || !input.trim()}
+                  onClick={() => sendMessage(input)}
+                  className="inline-flex h-[44px] items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-500 px-4 text-[13px] font-medium text-white shadow-[0_10px_24px_rgba(79,70,229,0.30)] transition hover:brightness-110 disabled:opacity-50"
+                >
+                  <FiSend />
+                </button>
               </div>
-            </m.div>
-          )}
-        </AnimatePresence>
-      </>
-    </LazyMotion>
-  );
+
+              <div className="mt-2 flex items-center justify-between">
+                <span className="text-[11px] text-slate-400">
+                  Powered by Nusantara AI
+                </span>
+                <button
+                  onClick={resetChat}
+                  disabled={isTyping}
+                  className="text-[11px] font-medium text-indigo-600 transition hover:underline disabled:opacity-50"
+                >
+                  Reset Chat
+                </button>
+              </div>
+            </div>
+          </m.div>
+        )}
+      </AnimatePresence>
+    </>
+  </LazyMotion>
+);
 }
 
 function TypingDots() {
@@ -728,27 +739,37 @@ const MessageBubble = memo(function MessageBubble({ msg }) {
 
   return (
     <div className={isUser ? "flex justify-end" : "flex justify-start"}>
-      <div className="max-w-[82%]">
+      <div className="max-w-[84%]">
+        {!isUser && (
+          <div className="mb-1 flex items-center gap-2 pl-1">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 text-[11px] text-white shadow-sm">
+              ✦
+            </div>
+            <span className="text-[11px] font-medium text-slate-500">Nusantara AI</span>
+          </div>
+        )}
+
         <div
           className={
             isUser
-              ? "px-4 py-2 rounded-2xl rounded-br-md bg-indigo-600 text-white shadow-sm"
+              ? "rounded-2xl rounded-br-md bg-gradient-to-br from-indigo-600 to-violet-500 px-4 py-2.5 text-white shadow-[0_10px_24px_rgba(79,70,229,0.22)]"
               : isError
-              ? "px-4 py-2 rounded-2xl rounded-bl-md bg-red-50 text-red-800 border border-red-200"
-              : "px-4 py-2 rounded-2xl rounded-bl-md bg-white text-gray-800 border shadow-sm"
+              ? "rounded-2xl rounded-bl-md border border-red-200 bg-red-50 px-4 py-2.5 text-red-800 shadow-sm"
+              : "rounded-2xl rounded-bl-md border border-slate-200 bg-white/95 px-4 py-2.5 text-slate-800 shadow-sm backdrop-blur"
           }
         >
           {content.split("\n").map((line, idx) => (
-            <p key={idx} className="text-sm leading-relaxed whitespace-pre-wrap">
+            <p key={idx} className="text-[13px] leading-6 whitespace-pre-wrap">
               {line || <span className="block h-2" />}
             </p>
           ))}
         </div>
+
         <div
           className={
             isUser
-              ? "mt-1 text-[10px] text-gray-500 text-right pr-1"
-              : "mt-1 text-[10px] text-gray-500 text-left pl-1"
+              ? "mt-1 pr-1 text-right text-[10px] text-slate-400"
+              : "mt-1 pl-1 text-left text-[10px] text-slate-400"
           }
         >
           {formatTime(msg.ts || Date.now())}
