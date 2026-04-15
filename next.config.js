@@ -6,20 +6,15 @@ const withPWA = require("next-pwa")({
   skipWaiting: true,
   disable: process.env.NODE_ENV === "development",
   importScripts: ["/sw-custom.js"],
+  buildExcludes: [/\/_headers$/],
 });
 
 const nextConfig = {
   reactStrictMode: true,
 
-  // ✅ Supaya deploy (Netlify) tidak gagal hanya karena ESLint warnings/errors
   eslint: {
     ignoreDuringBuilds: true,
   },
-
-  // (opsional) kalau kamu juga pernah kena error typecheck waktu build
-  // typescript: {
-  //   ignoreBuildErrors: true,
-  // },
 
   async headers() {
     return [
