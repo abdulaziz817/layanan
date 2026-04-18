@@ -36,6 +36,7 @@ useEffect(() => {
     { title: 'Tentang', path: '/#cta' },
     { title: 'Software', path: '/#toolkit' },
     { title: 'Testimoni', path: '/#testimonials' },
+     { title: 'Kelas Nusantara', path: '/kelas-nusantara' },
 
     // ✅ Blog boleh di website & PWA
     { title: 'Blog', path: '/blog' },
