@@ -12,6 +12,7 @@
     "@heroicons/react": "^2.2.0",
     "@next/font": "13.0.7",
     "@supabase/supabase-js": "^2.90.1",
+    "@tailwindcss/typography": "^0.5.19",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.36.2",
     "aos": "^2.3.4",
