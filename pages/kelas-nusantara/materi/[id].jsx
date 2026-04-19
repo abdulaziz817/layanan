@@ -5,33 +5,119 @@ function buildNarrationText(materi) {
   if (!materi) return "";
 
   return `
-${materi.judul || "Materi"}
+${materi.judul || ""}
 ${materi.deskripsi || ""}
 
-Apa itu fotografi?
-Fotografi adalah seni dan teknik menangkap cahaya menjadi gambar. Dalam dunia fotografi, kamera digunakan sebagai alat untuk merekam momen, objek, manusia, suasana, dan cerita.
+${materi.intro || ""}
 
-Inti fotografi bukan hanya memotret, tetapi belajar melihat cahaya, bentuk, warna, ekspresi, dan komposisi.
+${materi.highlight || ""}
 
-Hal pertama yang harus dipahami pemula:
-Bagi pemula, fotografi bukan hanya soal memencet shutter. Seorang fotografer belajar memperhatikan cahaya, bentuk, warna, ekspresi, dan komposisi sebelum menekan tombol.
+${materi.section1_title || ""}
+${materi.section1_content || ""}
 
-Yang akan dipelajari di materi ini:
-Pengertian fotografi.
-Fungsi kamera dalam fotografi.
-Sejarah singkat fotografi.
-Jenis-jenis fotografi.
-Pondasi sebelum masuk exposure dan komposisi.
+${materi.section2_title || ""}
+${materi.section2_content || ""}
 
-Jenis-jenis fotografi:
-Portrait, landscape, street, jurnalistik, produk, dan dokumentasi.
+${materi.section3_title || ""}
+${materi.section3_content || ""}
 
-Kesimpulan:
-Foto yang baik tidak selalu harus diambil dengan kamera mahal, tetapi harus memiliki pesan, fokus, dan susunan visual yang jelas.
+${materi.summary1 || ""}
+${materi.summary2 || ""}
+${materi.summary3 || ""}
+${materi.summary4 || ""}
   `.trim();
 }
 
-function getPracticeChallenges() {
+function getPracticeChallenges(fokus) {
+  const fokusText = String(fokus || "").toLowerCase();
+
+  if (fokusText.includes("lighting")) {
+    return [
+      {
+        id: 1,
+        title: "Natural Light",
+        description: "Ambil foto dekat jendela dengan cahaya alami.",
+        tip: "Coba ambil dari arah samping agar bayangan lebih terasa.",
+      },
+      {
+        id: 2,
+        title: "Backlight",
+        description: "Ambil subjek dengan cahaya dari belakang.",
+        tip: "Perhatikan siluet dan detail agar tidak hilang semua.",
+      },
+      {
+        id: 3,
+        title: "Soft Light",
+        description: "Cari cahaya lembut di pagi atau sore hari.",
+        tip: "Golden hour biasanya paling aman untuk latihan.",
+      },
+      {
+        id: 4,
+        title: "Indoor Light",
+        description: "Latihan memanfaatkan lampu ruangan biasa.",
+        tip: "Dekatkan subjek ke sumber cahaya agar hasil lebih bersih.",
+      },
+    ];
+  }
+
+  if (fokusText.includes("editing")) {
+    return [
+      {
+        id: 1,
+        title: "Color Tone",
+        description: "Coba buat tone warna lebih hangat atau lebih dingin.",
+        tip: "Jangan terlalu ekstrem agar foto tetap natural.",
+      },
+      {
+        id: 2,
+        title: "Brightness Fix",
+        description: "Perbaiki foto yang terlalu gelap atau terlalu terang.",
+        tip: "Naikkan pencahayaan sedikit demi sedikit.",
+      },
+      {
+        id: 3,
+        title: "Remove Noise",
+        description: "Coba perhalus foto agar terlihat lebih bersih.",
+        tip: "Kurangi noise tanpa membuat detail hilang.",
+      },
+      {
+        id: 4,
+        title: "Simple Retouch",
+        description: "Lakukan edit ringan agar objek lebih menonjol.",
+        tip: "Fokus pada kontras, warna, dan ketajaman.",
+      },
+    ];
+  }
+
+  if (fokusText.includes("komposisi")) {
+    return [
+      {
+        id: 1,
+        title: "Rule of Thirds",
+        description: "Posisikan subjek tidak pas di tengah.",
+        tip: "Aktifkan grid dan letakkan objek di titik pertemuan garis.",
+      },
+      {
+        id: 2,
+        title: "Leading Lines",
+        description: "Cari garis yang mengarahkan mata ke subjek.",
+        tip: "Gunakan jalan, pagar, meja, atau lorong.",
+      },
+      {
+        id: 3,
+        title: "Framing",
+        description: "Gunakan objek sekitar sebagai bingkai.",
+        tip: "Pintu, jendela, atau daun bisa jadi frame alami.",
+      },
+      {
+        id: 4,
+        title: "Negative Space",
+        description: "Buat ruang kosong luas di sekitar subjek.",
+        tip: "Background polos bikin hasil lebih kuat.",
+      },
+    ];
+  }
+
   return [
     {
       id: 1,
@@ -60,7 +146,7 @@ function getPracticeChallenges() {
   ];
 }
 
-function simulateAiReview({ challenge, hasImage }) {
+function simulateAiReview({ challenge, hasImage, fokus }) {
   if (!hasImage) {
     return {
       score: 0,
@@ -70,79 +156,68 @@ function simulateAiReview({ challenge, hasImage }) {
     };
   }
 
-  const commonStrengths = [
-    "Subjek sudah cukup jelas terlihat.",
-    "Komposisi awal sudah lumayan rapi untuk tahap pemula.",
-    "Kamu sudah mulai memikirkan framing, bukan sekadar memotret.",
-  ];
+  const fokusText = String(fokus || "").toLowerCase();
 
-  const challengeSpecific = {
-    "Rule of Thirds": {
+  if (fokusText.includes("lighting")) {
+    return {
+      score: 85,
+      summary: "Kontrol cahaya sudah lumayan bagus. Tinggal diperkuat arah cahaya dan keseimbangan area terang gelap.",
       strengths: [
-        "Penempatan subjek sudah mulai terasa lebih dinamis.",
-        "Foto tidak terlalu kaku karena tidak selalu di tengah.",
+        "Cahaya utama sudah cukup terasa.",
+        "Objek terlihat lebih hidup dengan permainan cahaya.",
+        "Eksperimen pencahayaan sudah mulai kelihatan.",
       ],
       improvements: [
-        "Coba pindahkan subjek lebih dekat ke titik grid 1/3.",
-        "Pastikan background tidak terlalu ramai agar fokus lebih kuat.",
+        "Coba hindari highlight yang terlalu keras.",
+        "Atur posisi objek agar bayangan lebih menarik.",
       ],
-      score: 82,
-      summary:
-        "Komposisi sudah cukup enak dilihat. Tinggal diperkuat lagi posisi subjek dan kebersihan background.",
-    },
-    "Leading Lines": {
+    };
+  }
+
+  if (fokusText.includes("editing")) {
+    return {
+      score: 83,
+      summary: "Edit sudah enak dilihat. Tinggal dijaga supaya tidak berlebihan dan tetap natural.",
       strengths: [
-        "Arah visual foto sudah mulai terbentuk.",
-        "Garis bantu membuat mata penonton lebih mudah mengikuti subjek.",
+        "Tone warna sudah mulai terbentuk.",
+        "Hasil edit membuat foto terasa lebih menarik.",
+        "Kamu sudah mulai paham arah edit yang diinginkan.",
       ],
       improvements: [
-        "Cari garis yang lebih tegas dan mengarah langsung ke objek.",
-        "Turunkan angle sedikit supaya garis terlihat lebih dramatis.",
+        "Kurangi edit berlebih agar detail tetap aman.",
+        "Perhatikan keseimbangan warna dan kontras.",
       ],
+    };
+  }
+
+  if (fokusText.includes("komposisi")) {
+    return {
       score: 84,
-      summary:
-        "Konsep leading lines sudah masuk. Supaya lebih kuat, cari garis yang lebih jelas dan arahkan ke subjek utama.",
-    },
-    "Side Light": {
+      summary: "Komposisi sudah cukup rapi. Tinggal diperkuat penempatan subjek dan arah visual.",
       strengths: [
-        "Pencahayaan samping membantu membentuk dimensi objek.",
-        "Foto terasa lebih hidup dibanding cahaya datar dari depan.",
+        "Penempatan subjek sudah cukup enak dilihat.",
+        "Framing awal sudah terasa lebih terarah.",
+        "Kamu sudah memikirkan susunan visual, bukan asal foto.",
       ],
       improvements: [
-        "Coba geser objek sedikit agar bayangan lebih menarik.",
-        "Hindari area terlalu gelap agar detail tetap kelihatan.",
+        "Coba eksplor angle yang lebih kuat.",
+        "Bersihkan background agar fokus lebih jelas.",
       ],
-      score: 86,
-      summary:
-        "Penggunaan cahaya samping sudah bagus. Tinggal seimbangkan area terang dan gelap supaya detail lebih aman.",
-    },
-    "Negative Space": {
-      strengths: [
-        "Ruang kosong membantu subjek terasa lebih menonjol.",
-        "Foto punya nuansa minimalis yang cukup enak dilihat.",
-      ],
-      improvements: [
-        "Pastikan ruang kosong tetap bersih dan tidak mengganggu.",
-        "Bisa dicoba membuat subjek sedikit lebih kecil agar efek space lebih terasa.",
-      ],
-      score: 80,
-      summary:
-        "Konsep negative space sudah terlihat. Tinggal lebih berani memberi ruang kosong yang benar-benar bersih.",
-    },
-  };
-
-  const chosen = challengeSpecific[challenge?.title] || {
-    strengths: [],
-    improvements: ["Coba eksplor angle yang lebih kuat."],
-    score: 78,
-    summary: "Foto sudah oke untuk latihan awal. Lanjutkan eksplor framing dan cahaya.",
-  };
+    };
+  }
 
   return {
-    score: chosen.score,
-    summary: chosen.summary,
-    strengths: [...commonStrengths.slice(0, 2), ...chosen.strengths].slice(0, 4),
-    improvements: chosen.improvements,
+    score: 82,
+    summary: "Latihan awal sudah bagus. Lanjutkan eksplor cahaya, framing, dan fokus subjek.",
+    strengths: [
+      "Subjek sudah cukup jelas terlihat.",
+      "Komposisi awal sudah lumayan rapi untuk tahap pemula.",
+      "Kamu sudah mulai memikirkan framing.",
+    ],
+    improvements: [
+      "Coba eksplor angle yang lebih kuat.",
+      "Pastikan background tidak terlalu ramai.",
+    ],
   };
 }
 
@@ -153,14 +228,12 @@ export default function MateriDetailPage() {
   const [materi, setMateri] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // audio
   const [voices, setVoices] = useState([]);
   const [selectedVoice, setSelectedVoice] = useState("");
   const [speechRate, setSpeechRate] = useState(1);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isPausedSpeech, setIsPausedSpeech] = useState(false);
 
-  // progress
   const [progress, setProgress] = useState({
     listened: false,
     practiced: false,
@@ -168,15 +241,8 @@ export default function MateriDetailPage() {
     completed: false,
   });
 
-  // practice
-  const challenges = useMemo(() => getPracticeChallenges(), []);
   const [selectedChallengeId, setSelectedChallengeId] = useState(1);
-  const selectedChallenge = useMemo(
-    () => challenges.find((item) => item.id === selectedChallengeId),
-    [challenges, selectedChallengeId]
-  );
 
-  // camera
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
@@ -186,8 +252,6 @@ export default function MateriDetailPage() {
   const [cameraFacingMode, setCameraFacingMode] = useState("environment");
   const [capturedImage, setCapturedImage] = useState("");
   const [cameraError, setCameraError] = useState("");
-
-  // review
   const [reviewResult, setReviewResult] = useState(null);
 
   useEffect(() => {
@@ -226,7 +290,6 @@ export default function MateriDetailPage() {
       if (!selectedVoice && allVoices.length > 0) {
         const priorityVoice =
           allVoices.find((v) => /id|indonesia/i.test(v.lang || "")) ||
-          allVoices.find((v) => /female|zira|siti|google/i.test(v.name || "")) ||
           allVoices[0];
 
         if (priorityVoice) {
@@ -249,6 +312,16 @@ export default function MateriDetailPage() {
       stopCamera();
     };
   }, []);
+
+  const challenges = useMemo(
+    () => getPracticeChallenges(materi?.fokus),
+    [materi?.fokus]
+  );
+
+  const selectedChallenge = useMemo(
+    () => challenges.find((item) => item.id === selectedChallengeId) || challenges[0],
+    [challenges, selectedChallengeId]
+  );
 
   const narrationText = useMemo(() => buildNarrationText(materi), [materi]);
 
@@ -401,6 +474,7 @@ export default function MateriDetailPage() {
     const result = simulateAiReview({
       challenge: selectedChallenge,
       hasImage: Boolean(capturedImage),
+      fokus: materi?.fokus,
     });
 
     setReviewResult(result);
@@ -415,7 +489,7 @@ export default function MateriDetailPage() {
   }
 
   function goNextMateri() {
-    router.push("/materi");
+    router.push("/kelas-nusantara");
   }
 
   if (loading) {
@@ -455,14 +529,17 @@ export default function MateriDetailPage() {
         <div className="overflow-hidden rounded-[32px] border border-gray-100 bg-white shadow-sm">
           <div className="relative h-[260px] w-full overflow-hidden bg-gray-200">
             <img
-              src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1400&q=80"
+              src={
+                materi.cover_image ||
+                "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1400&q=80"
+              }
               alt="Cover materi"
               className="h-full w-full object-cover"
             />
             <div className="absolute inset-0 bg-black/35" />
             <div className="absolute bottom-0 left-0 p-8 text-white">
               <p className="mb-2 inline-block rounded-full bg-white/20 px-3 py-1 text-xs font-semibold backdrop-blur">
-                Fotografi Dasar
+                {materi.badge || "Materi"}
               </p>
               <h1 className="text-3xl font-bold md:text-5xl">{materi.judul}</h1>
               <p className="mt-3 max-w-2xl text-sm text-white/90 md:text-base">
@@ -478,21 +555,27 @@ export default function MateriDetailPage() {
                   <p className="text-xs font-semibold uppercase tracking-wide text-indigo-500">
                     Level
                   </p>
-                  <p className="mt-2 text-sm font-semibold text-gray-800">Pemula</p>
+                  <p className="mt-2 text-sm font-semibold text-gray-800">
+                    {materi.level || "Beginner"}
+                  </p>
                 </div>
 
                 <div className="rounded-2xl bg-orange-50 p-4">
                   <p className="text-xs font-semibold uppercase tracking-wide text-orange-500">
                     Durasi
                   </p>
-                  <p className="mt-2 text-sm font-semibold text-gray-800">8 menit baca</p>
+                  <p className="mt-2 text-sm font-semibold text-gray-800">
+                    {materi.durasi || "5 menit"}
+                  </p>
                 </div>
 
                 <div className="rounded-2xl bg-emerald-50 p-4">
                   <p className="text-xs font-semibold uppercase tracking-wide text-emerald-500">
                     Fokus
                   </p>
-                  <p className="mt-2 text-sm font-semibold text-gray-800">Dasar Fotografi</p>
+                  <p className="mt-2 text-sm font-semibold text-gray-800">
+                    {materi.fokus || "Pembelajaran"}
+                  </p>
                 </div>
 
                 <div className="rounded-2xl bg-violet-50 p-4">
@@ -598,100 +681,98 @@ export default function MateriDetailPage() {
 
               <div className="rounded-3xl border border-gray-100 bg-white p-6">
                 <div className="max-w-none text-gray-700">
-                  <h2 className="text-2xl font-bold text-gray-900">Apa itu fotografi?</h2>
-                  <p className="mt-3 leading-7">
-                    Fotografi adalah seni dan teknik menangkap cahaya menjadi gambar.
-                    Dalam dunia fotografi, kamera digunakan sebagai alat untuk merekam
-                    momen, objek, manusia, suasana, dan cerita.
-                  </p>
+                  {materi.intro ? (
+                    <p className="leading-7">{materi.intro}</p>
+                  ) : null}
 
-                  <div className="my-6 rounded-2xl border-l-4 border-indigo-500 bg-indigo-50 p-5">
-                    <p className="m-0 text-sm font-medium text-indigo-900">
-                      Inti fotografi bukan hanya memotret, tetapi belajar melihat cahaya,
-                      bentuk, warna, ekspresi, dan komposisi.
-                    </p>
-                  </div>
+                  {materi.highlight ? (
+                    <div className="my-6 rounded-2xl border-l-4 border-indigo-500 bg-indigo-50 p-5">
+                      <p className="m-0 text-sm font-medium text-indigo-900">
+                        {materi.highlight}
+                      </p>
+                    </div>
+                  ) : null}
 
-                  <h2 className="text-2xl font-bold text-gray-900">
-                    Hal pertama yang harus dipahami pemula
-                  </h2>
-                  <p className="mt-3 leading-7">
-                    Bagi pemula, fotografi bukan hanya soal memencet shutter. Seorang
-                    fotografer belajar memperhatikan cahaya, bentuk, warna, ekspresi, dan
-                    komposisi sebelum menekan tombol.
-                  </p>
+                  {materi.section1_title ? (
+                    <>
+                      <h2 className="text-2xl font-bold text-gray-900">
+                        {materi.section1_title}
+                      </h2>
+                      <p className="mt-3 leading-7">{materi.section1_content}</p>
+                    </>
+                  ) : null}
 
-                  <img
-                    src="https://images.unsplash.com/photo-1502920917128-1aa500764cbd?auto=format&fit=crop&w=1200&q=80"
-                    alt="Fotografi"
-                    className="my-6 rounded-2xl"
-                  />
+                  {materi.image1 ? (
+                    <img
+                      src={materi.image1}
+                      alt={materi.judul}
+                      className="my-6 rounded-2xl"
+                    />
+                  ) : null}
 
-                  <h2 className="text-2xl font-bold text-gray-900">
-                    Yang akan dipelajari di materi ini
-                  </h2>
-                  <ul className="mt-3 list-disc space-y-2 pl-5 leading-7">
-                    <li>Pengertian fotografi</li>
-                    <li>Fungsi kamera dalam fotografi</li>
-                    <li>Sejarah singkat fotografi</li>
-                    <li>Jenis-jenis fotografi</li>
-                    <li>Pondasi sebelum masuk exposure dan komposisi</li>
-                  </ul>
+                  {materi.section2_title ? (
+                    <>
+                      <h2 className="mt-6 text-2xl font-bold text-gray-900">
+                        {materi.section2_title}
+                      </h2>
+                      <p className="mt-3 leading-7">{materi.section2_content}</p>
+                    </>
+                  ) : null}
 
-                  <h2 className="mt-6 text-2xl font-bold text-gray-900">
-                    Jenis-jenis fotografi
-                  </h2>
-                  <p className="mt-3 leading-7">
-                    Materi awal ini mengenalkan beberapa jenis fotografi seperti portrait,
-                    landscape, street, jurnalistik, produk, dan dokumentasi.
-                  </p>
+                  {materi.section3_title ? (
+                    <>
+                      <h2 className="mt-6 text-2xl font-bold text-gray-900">
+                        {materi.section3_title}
+                      </h2>
+                      <p className="mt-3 leading-7">{materi.section3_content}</p>
+                    </>
+                  ) : null}
 
                   <div className="my-6 grid gap-4 sm:grid-cols-2">
-                    <div className="rounded-2xl bg-gray-50 p-5">
-                      <h3 className="text-lg font-semibold text-gray-900">Portrait</h3>
-                      <p className="mt-2 text-sm text-gray-600">
-                        Fokus pada ekspresi, karakter, dan emosi subjek manusia.
-                      </p>
-                    </div>
+                    {materi.card1_title ? (
+                      <div className="rounded-2xl bg-gray-50 p-5">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {materi.card1_title}
+                        </h3>
+                        <p className="mt-2 text-sm text-gray-600">{materi.card1_desc}</p>
+                      </div>
+                    ) : null}
 
-                    <div className="rounded-2xl bg-gray-50 p-5">
-                      <h3 className="text-lg font-semibold text-gray-900">Landscape</h3>
-                      <p className="mt-2 text-sm text-gray-600">
-                        Menangkap keindahan alam, ruang, dan suasana lingkungan.
-                      </p>
-                    </div>
+                    {materi.card2_title ? (
+                      <div className="rounded-2xl bg-gray-50 p-5">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {materi.card2_title}
+                        </h3>
+                        <p className="mt-2 text-sm text-gray-600">{materi.card2_desc}</p>
+                      </div>
+                    ) : null}
 
-                    <div className="rounded-2xl bg-gray-50 p-5">
-                      <h3 className="text-lg font-semibold text-gray-900">Street</h3>
-                      <p className="mt-2 text-sm text-gray-600">
-                        Merekam momen spontan dan cerita di ruang publik.
-                      </p>
-                    </div>
+                    {materi.card3_title ? (
+                      <div className="rounded-2xl bg-gray-50 p-5">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {materi.card3_title}
+                        </h3>
+                        <p className="mt-2 text-sm text-gray-600">{materi.card3_desc}</p>
+                      </div>
+                    ) : null}
 
-                    <div className="rounded-2xl bg-gray-50 p-5">
-                      <h3 className="text-lg font-semibold text-gray-900">Produk</h3>
-                      <p className="mt-2 text-sm text-gray-600">
-                        Menampilkan detail dan daya tarik visual suatu barang.
-                      </p>
-                    </div>
+                    {materi.card4_title ? (
+                      <div className="rounded-2xl bg-gray-50 p-5">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {materi.card4_title}
+                        </h3>
+                        <p className="mt-2 text-sm text-gray-600">{materi.card4_desc}</p>
+                      </div>
+                    ) : null}
                   </div>
-
-                  <h2 className="text-2xl font-bold text-gray-900">Kesimpulan</h2>
-                  <p className="mt-3 leading-7">
-                    Foto yang baik tidak selalu harus diambil dengan kamera mahal, tetapi
-                    harus memiliki pesan, fokus, dan susunan visual yang jelas. Materi ini
-                    cocok sebagai pondasi awal sebelum masuk ke teknik exposure, fokus, dan
-                    komposisi.
-                  </p>
                 </div>
               </div>
 
               <div className="rounded-3xl border border-gray-100 bg-white p-5">
                 <div className="mb-5">
-                  <h2 className="text-xl font-bold text-gray-900">Mode Praktik Kamera</h2>
+                  <h2 className="text-xl font-bold text-gray-900">Mode Praktik</h2>
                   <p className="mt-1 text-sm text-gray-600">
-                    Praktik langsung pakai kamera smartphone atau upload hasil foto dari
-                    galeri.
+                    Praktik langsung sesuai fokus materi ini.
                   </p>
                 </div>
 
@@ -725,18 +806,20 @@ export default function MateriDetailPage() {
                   </div>
 
                   <div className="space-y-4">
-                    <div className="rounded-2xl border border-gray-200 bg-white p-4">
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        {selectedChallenge.title}
-                      </h3>
-                      <p className="mt-2 text-sm text-gray-600">
-                        {selectedChallenge.description}
-                      </p>
+                    {selectedChallenge ? (
+                      <div className="rounded-2xl border border-gray-200 bg-white p-4">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {selectedChallenge.title}
+                        </h3>
+                        <p className="mt-2 text-sm text-gray-600">
+                          {selectedChallenge.description}
+                        </p>
 
-                      <div className="mt-3 rounded-2xl bg-amber-50 p-4 text-sm text-amber-900">
-                        <span className="font-semibold">Tip:</span> {selectedChallenge.tip}
+                        <div className="mt-3 rounded-2xl bg-amber-50 p-4 text-sm text-amber-900">
+                          <span className="font-semibold">Tip:</span> {selectedChallenge.tip}
+                        </div>
                       </div>
-                    </div>
+                    ) : null}
 
                     <div className="flex flex-wrap gap-3">
                       <button
@@ -886,10 +969,10 @@ export default function MateriDetailPage() {
               <div className="rounded-3xl border border-gray-100 bg-gray-50 p-5">
                 <h3 className="text-lg font-semibold text-gray-900">Ringkasan Cepat</h3>
                 <ul className="mt-4 space-y-3 text-sm text-gray-600">
-                  <li>• Fotografi adalah seni menangkap cahaya</li>
-                  <li>• Pemula harus belajar melihat, bukan sekadar memotret</li>
-                  <li>• Kenali jenis fotografi sejak awal</li>
-                  <li>• Pondasi untuk materi exposure & komposisi</li>
+                  {materi.summary1 ? <li>• {materi.summary1}</li> : null}
+                  {materi.summary2 ? <li>• {materi.summary2}</li> : null}
+                  {materi.summary3 ? <li>• {materi.summary3}</li> : null}
+                  {materi.summary4 ? <li>• {materi.summary4}</li> : null}
                 </ul>
               </div>
 
@@ -912,7 +995,7 @@ export default function MateriDetailPage() {
                     <span>{progress.listened ? "✅" : "⏳"}</span>
                   </div>
                   <div className="flex items-center justify-between rounded-2xl bg-gray-50 px-4 py-3">
-                    <span>Praktik kamera</span>
+                    <span>Praktik materi</span>
                     <span>{progress.practiced ? "✅" : "⏳"}</span>
                   </div>
                   <div className="flex items-center justify-between rounded-2xl bg-gray-50 px-4 py-3">
@@ -956,7 +1039,7 @@ export default function MateriDetailPage() {
                     onClick={() => startCamera(cameraFacingMode)}
                     className="rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
                   >
-                    Mulai Praktik Kamera
+                    Mulai Praktik
                   </button>
 
                   <button
@@ -977,20 +1060,9 @@ export default function MateriDetailPage() {
                     onClick={goNextMateri}
                     className="rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
                   >
-                    Lanjut Materi Berikutnya
+                    Kembali ke Daftar Kelas
                   </button>
                 </div>
-              </div>
-
-              <div className="rounded-3xl border border-gray-100 bg-gradient-to-br from-indigo-50 to-violet-50 p-5">
-                <h3 className="text-lg font-semibold text-gray-900">Ide Upgrade Lanjutan</h3>
-                <ul className="mt-4 space-y-3 text-sm text-gray-700">
-                  <li>• Simpan hasil foto ke backend</li>
-                  <li>• AI review sungguhan via API vision</li>
-                  <li>• Quiz visual per materi</li>
-                  <li>• Leaderboard challenge mingguan</li>
-                  <li>• Mode AR / objek 3D untuk latihan produk</li>
-                </ul>
               </div>
             </aside>
           </div>
