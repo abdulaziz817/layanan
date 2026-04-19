@@ -1,5 +1,6 @@
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useRef, useState } from "react";
+import Webcam from "react-webcam";
 
 function buildNarrationText(materi) {
   if (!materi) return "";
@@ -57,9 +58,7 @@ export default function MateriDetailPage() {
     completed: false,
   });
 
-  const videoRef = useRef(null);
-  const canvasRef = useRef(null);
-  const streamRef = useRef(null);
+  const webcamRef = useRef(null);
   const fileInputRef = useRef(null);
 
   const [cameraOpen, setCameraOpen] = useState(false);
@@ -125,7 +124,6 @@ export default function MateriDetailPage() {
   useEffect(() => {
     return () => {
       stopSpeaking();
-      stopCamera();
     };
   }, []);
 
@@ -193,73 +191,63 @@ export default function MateriDetailPage() {
     setIsPausedSpeech(false);
   }
 
-  async function startCamera(nextFacingMode = cameraFacingMode) {
+  function openCamera() {
     setCameraError("");
-
-    if (!navigator.mediaDevices?.getUserMedia) {
-      setCameraError("Browser tidak mendukung akses kamera.");
-      return;
-    }
-
-    try {
-      stopCamera();
-
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: { ideal: nextFacingMode },
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-        },
-        audio: false,
-      });
-
-      streamRef.current = stream;
-      setCameraOpen(true);
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-      }
-    } catch (error) {
-      console.error(error);
-      setCameraError(
-        "Kamera gagal dibuka. Pastikan izin kamera sudah diizinkan, atau coba pakai HTTPS / localhost."
-      );
-    }
+    setCameraOpen(true);
   }
 
   function stopCamera() {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
-    }
+    setCameraOpen(false);
   }
 
-  async function toggleCameraFacingMode() {
-    const nextMode = cameraFacingMode === "environment" ? "user" : "environment";
-    setCameraFacingMode(nextMode);
-    if (cameraOpen) {
-      await startCamera(nextMode);
+  function toggleCameraFacingMode() {
+    setCameraError("");
+    setCameraFacingMode((prev) =>
+      prev === "environment" ? "user" : "environment"
+    );
+  }
+
+  function handleCameraError(error) {
+    console.error("Webcam error:", error);
+
+    let message = "Kamera gagal dibuka.";
+
+    const errName = error?.name || error?.toString?.() || "";
+
+    if (String(errName).includes("NotAllowedError")) {
+      message = "Izin kamera ditolak. Izinkan kamera di browser untuk situs ini.";
+    } else if (String(errName).includes("NotFoundError")) {
+      message = "Kamera tidak ditemukan di perangkat ini.";
+    } else if (String(errName).includes("NotReadableError")) {
+      message = "Kamera sedang dipakai aplikasi lain. Tutup aplikasi lain lalu coba lagi.";
+    } else if (String(errName).includes("OverconstrainedError")) {
+      message = "Mode kamera ini tidak didukung. Coba ganti kamera.";
+    } else if (
+      typeof window !== "undefined" &&
+      window.location.protocol !== "https:" &&
+      window.location.hostname !== "localhost"
+    ) {
+      message = "Kamera hanya bisa dipakai di HTTPS atau localhost.";
     }
+
+    setCameraError(message);
+    setCameraOpen(false);
   }
 
   function capturePhoto() {
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
+    if (!webcamRef.current) {
+      alert("Kamera belum siap.");
+      return;
+    }
 
-    if (!video || !canvas) return;
+    const imageSrc = webcamRef.current.getScreenshot();
 
-    const width = video.videoWidth || 1280;
-    const height = video.videoHeight || 720;
+    if (!imageSrc) {
+      alert("Gagal mengambil foto. Tunggu sebentar lalu coba lagi.");
+      return;
+    }
 
-    canvas.width = width;
-    canvas.height = height;
-
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(video, 0, 0, width, height);
-
-    const imageData = canvas.toDataURL("image/jpeg", 0.92);
-    setCapturedImage(imageData);
+    setCapturedImage(imageSrc);
     setProgress((prev) => ({ ...prev, uploaded: true }));
   }
 
@@ -330,6 +318,12 @@ export default function MateriDetailPage() {
   function goBackToClass() {
     router.push(`/kelas-nusantara/${materi?.kelas_slug || ""}`);
   }
+
+  const videoConstraints = {
+    width: 1280,
+    height: 720,
+    facingMode: cameraFacingMode,
+  };
 
   if (loading) {
     return <div className="p-6">Memuat materi...</div>;
@@ -600,7 +594,7 @@ export default function MateriDetailPage() {
 
                 <div className="flex flex-wrap gap-3">
                   <button
-                    onClick={() => startCamera(cameraFacingMode)}
+                    onClick={openCamera}
                     className="rounded-2xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-700"
                   >
                     Buka Kamera
@@ -645,12 +639,18 @@ export default function MateriDetailPage() {
                 <div className="mt-4 overflow-hidden rounded-3xl border border-gray-200 bg-black">
                   <div className="relative aspect-video w-full">
                     {cameraOpen ? (
-                      <video
-                        ref={videoRef}
+                      <Webcam
+                        ref={webcamRef}
+                        audio={false}
+                        mirrored={cameraFacingMode === "user"}
+                        screenshotFormat="image/jpeg"
+                        screenshotQuality={0.92}
+                        videoConstraints={videoConstraints}
+                        onUserMedia={() => {
+                          setCameraError("");
+                        }}
+                        onUserMediaError={handleCameraError}
                         className="h-full w-full object-cover"
-                        autoPlay
-                        muted
-                        playsInline
                       />
                     ) : (
                       <div className="flex h-full items-center justify-center px-6 text-center text-sm text-white/80">
@@ -676,8 +676,6 @@ export default function MateriDetailPage() {
                     {reviewLoading ? "Mereview..." : "Review dengan AI"}
                   </button>
                 </div>
-
-                <canvas ref={canvasRef} className="hidden" />
 
                 {capturedImage ? (
                   <div className="mt-4 rounded-3xl border border-gray-200 bg-white p-4">
