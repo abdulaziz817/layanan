@@ -14,6 +14,7 @@ exports.handler = async function (event) {
       };
     }
 
+    // ✅ ambil private key langsung (tanpa base64)
     const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n");
 
     if (!privateKey) {
@@ -43,7 +44,7 @@ exports.handler = async function (event) {
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEETS_ID_KELAS,
-      range: "materi!A2:F",
+      range: "materi!A2:AE",
     });
 
     const rows = response.data.values || [];
@@ -54,14 +55,21 @@ exports.handler = async function (event) {
         kelas_slug: row[1] || "",
         judul: row[2] || "",
         deskripsi: row[3] || "",
-        content: row[4] || "",
-        pdf_url: row[5] || "",
+        cover_image: row[4] || "",
+        badge: row[5] || "",
+        level: row[6] || "",
+        durasi: row[7] || "",
+        fokus: row[8] || "",
+        pdf_url: row[30] || "",
       }))
       .filter((item) => item.kelas_slug === kelas_slug);
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ ok: true, data }),
+      body: JSON.stringify({
+        ok: true,
+        data,
+      }),
     };
   } catch (err) {
     return {
