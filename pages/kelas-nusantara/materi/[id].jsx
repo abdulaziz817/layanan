@@ -28,196 +28,12 @@ ${materi.summary4 || ""}
   `.trim();
 }
 
-function getPracticeChallenges(fokus) {
-  const fokusText = String(fokus || "").toLowerCase();
-
-  if (fokusText.includes("lighting")) {
-    return [
-      {
-        id: 1,
-        title: "Natural Light",
-        description: "Ambil foto dekat jendela dengan cahaya alami.",
-        tip: "Coba ambil dari arah samping agar bayangan lebih terasa.",
-      },
-      {
-        id: 2,
-        title: "Backlight",
-        description: "Ambil subjek dengan cahaya dari belakang.",
-        tip: "Perhatikan siluet dan detail agar tidak hilang semua.",
-      },
-      {
-        id: 3,
-        title: "Soft Light",
-        description: "Cari cahaya lembut di pagi atau sore hari.",
-        tip: "Golden hour biasanya paling aman untuk latihan.",
-      },
-      {
-        id: 4,
-        title: "Indoor Light",
-        description: "Latihan memanfaatkan lampu ruangan biasa.",
-        tip: "Dekatkan subjek ke sumber cahaya agar hasil lebih bersih.",
-      },
-    ];
-  }
-
-  if (fokusText.includes("editing")) {
-    return [
-      {
-        id: 1,
-        title: "Color Tone",
-        description: "Coba buat tone warna lebih hangat atau lebih dingin.",
-        tip: "Jangan terlalu ekstrem agar foto tetap natural.",
-      },
-      {
-        id: 2,
-        title: "Brightness Fix",
-        description: "Perbaiki foto yang terlalu gelap atau terlalu terang.",
-        tip: "Naikkan pencahayaan sedikit demi sedikit.",
-      },
-      {
-        id: 3,
-        title: "Remove Noise",
-        description: "Coba perhalus foto agar terlihat lebih bersih.",
-        tip: "Kurangi noise tanpa membuat detail hilang.",
-      },
-      {
-        id: 4,
-        title: "Simple Retouch",
-        description: "Lakukan edit ringan agar objek lebih menonjol.",
-        tip: "Fokus pada kontras, warna, dan ketajaman.",
-      },
-    ];
-  }
-
-  if (fokusText.includes("komposisi")) {
-    return [
-      {
-        id: 1,
-        title: "Rule of Thirds",
-        description: "Posisikan subjek tidak pas di tengah.",
-        tip: "Aktifkan grid dan letakkan objek di titik pertemuan garis.",
-      },
-      {
-        id: 2,
-        title: "Leading Lines",
-        description: "Cari garis yang mengarahkan mata ke subjek.",
-        tip: "Gunakan jalan, pagar, meja, atau lorong.",
-      },
-      {
-        id: 3,
-        title: "Framing",
-        description: "Gunakan objek sekitar sebagai bingkai.",
-        tip: "Pintu, jendela, atau daun bisa jadi frame alami.",
-      },
-      {
-        id: 4,
-        title: "Negative Space",
-        description: "Buat ruang kosong luas di sekitar subjek.",
-        tip: "Background polos bikin hasil lebih kuat.",
-      },
-    ];
-  }
-
-  return [
-    {
-      id: 1,
-      title: "Rule of Thirds",
-      description: "Ambil foto objek utama dan posisikan tidak pas di tengah.",
-      tip: "Aktifkan grid dan letakkan objek di titik pertemuan garis.",
-    },
-    {
-      id: 2,
-      title: "Leading Lines",
-      description: "Cari garis jalan, meja, pagar, atau lorong yang mengarahkan mata ke subjek.",
-      tip: "Gunakan garis alami di sekitar untuk memimpin fokus.",
-    },
-    {
-      id: 3,
-      title: "Side Light",
-      description: "Foto objek dengan cahaya datang dari samping.",
-      tip: "Dekat jendela biasanya paling gampang untuk latihan ini.",
-    },
-    {
-      id: 4,
-      title: "Negative Space",
-      description: "Buat subjek kecil dengan ruang kosong yang luas di sekelilingnya.",
-      tip: "Background polos bikin hasil lebih kuat.",
-    },
-  ];
-}
-
-function simulateAiReview({ challenge, hasImage, fokus }) {
-  if (!hasImage) {
-    return {
-      score: 0,
-      summary: "Belum ada foto untuk direview.",
-      strengths: [],
-      improvements: ["Ambil atau upload foto dulu untuk mendapatkan review."],
-    };
-  }
-
-  const fokusText = String(fokus || "").toLowerCase();
-
-  if (fokusText.includes("lighting")) {
-    return {
-      score: 85,
-      summary: "Kontrol cahaya sudah lumayan bagus. Tinggal diperkuat arah cahaya dan keseimbangan area terang gelap.",
-      strengths: [
-        "Cahaya utama sudah cukup terasa.",
-        "Objek terlihat lebih hidup dengan permainan cahaya.",
-        "Eksperimen pencahayaan sudah mulai kelihatan.",
-      ],
-      improvements: [
-        "Coba hindari highlight yang terlalu keras.",
-        "Atur posisi objek agar bayangan lebih menarik.",
-      ],
-    };
-  }
-
-  if (fokusText.includes("editing")) {
-    return {
-      score: 83,
-      summary: "Edit sudah enak dilihat. Tinggal dijaga supaya tidak berlebihan dan tetap natural.",
-      strengths: [
-        "Tone warna sudah mulai terbentuk.",
-        "Hasil edit membuat foto terasa lebih menarik.",
-        "Kamu sudah mulai paham arah edit yang diinginkan.",
-      ],
-      improvements: [
-        "Kurangi edit berlebih agar detail tetap aman.",
-        "Perhatikan keseimbangan warna dan kontras.",
-      ],
-    };
-  }
-
-  if (fokusText.includes("komposisi")) {
-    return {
-      score: 84,
-      summary: "Komposisi sudah cukup rapi. Tinggal diperkuat penempatan subjek dan arah visual.",
-      strengths: [
-        "Penempatan subjek sudah cukup enak dilihat.",
-        "Framing awal sudah terasa lebih terarah.",
-        "Kamu sudah memikirkan susunan visual, bukan asal foto.",
-      ],
-      improvements: [
-        "Coba eksplor angle yang lebih kuat.",
-        "Bersihkan background agar fokus lebih jelas.",
-      ],
-    };
-  }
-
+function dataUrlToParts(dataUrl) {
+  const match = dataUrl.match(/^data:(.+);base64,(.+)$/);
+  if (!match) return null;
   return {
-    score: 82,
-    summary: "Latihan awal sudah bagus. Lanjutkan eksplor cahaya, framing, dan fokus subjek.",
-    strengths: [
-      "Subjek sudah cukup jelas terlihat.",
-      "Komposisi awal sudah lumayan rapi untuk tahap pemula.",
-      "Kamu sudah mulai memikirkan framing.",
-    ],
-    improvements: [
-      "Coba eksplor angle yang lebih kuat.",
-      "Pastikan background tidak terlalu ramai.",
-    ],
+    mimeType: match[1],
+    imageBase64: match[2],
   };
 }
 
@@ -236,12 +52,10 @@ export default function MateriDetailPage() {
 
   const [progress, setProgress] = useState({
     listened: false,
-    practiced: false,
+    uploaded: false,
     reviewed: false,
     completed: false,
   });
-
-  const [selectedChallengeId, setSelectedChallengeId] = useState(1);
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -252,6 +66,8 @@ export default function MateriDetailPage() {
   const [cameraFacingMode, setCameraFacingMode] = useState("environment");
   const [capturedImage, setCapturedImage] = useState("");
   const [cameraError, setCameraError] = useState("");
+
+  const [reviewLoading, setReviewLoading] = useState(false);
   const [reviewResult, setReviewResult] = useState(null);
 
   useEffect(() => {
@@ -312,16 +128,6 @@ export default function MateriDetailPage() {
       stopCamera();
     };
   }, []);
-
-  const challenges = useMemo(
-    () => getPracticeChallenges(materi?.fokus),
-    [materi?.fokus]
-  );
-
-  const selectedChallenge = useMemo(
-    () => challenges.find((item) => item.id === selectedChallengeId) || challenges[0],
-    [challenges, selectedChallengeId]
-  );
 
   const narrationText = useMemo(() => buildNarrationText(materi), [materi]);
 
@@ -414,8 +220,6 @@ export default function MateriDetailPage() {
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
       }
-
-      setProgress((prev) => ({ ...prev, practiced: true }));
     } catch (error) {
       console.error(error);
       setCameraError(
@@ -456,31 +260,66 @@ export default function MateriDetailPage() {
 
     const imageData = canvas.toDataURL("image/jpeg", 0.92);
     setCapturedImage(imageData);
+    setProgress((prev) => ({ ...prev, uploaded: true }));
   }
 
   function handleUploadImage(event) {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    if (!file.type.startsWith("image/")) {
+      alert("File harus berupa gambar, misalnya JPG, PNG, WEBP, atau format image lainnya.");
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = () => {
       setCapturedImage(reader.result?.toString() || "");
-      setProgress((prev) => ({ ...prev, practiced: true }));
+      setProgress((prev) => ({ ...prev, uploaded: true }));
     };
     reader.readAsDataURL(file);
   }
 
-  function runAiReview() {
-    const result = simulateAiReview({
-      challenge: selectedChallenge,
-      hasImage: Boolean(capturedImage),
-      fokus: materi?.fokus,
-    });
+  async function runAiReview() {
+    if (!capturedImage) {
+      alert("Upload gambar atau ambil foto dulu.");
+      return;
+    }
 
-    setReviewResult(result);
+    const parts = dataUrlToParts(capturedImage);
+    if (!parts) {
+      alert("Format gambar tidak valid.");
+      return;
+    }
 
-    if (capturedImage) {
+    try {
+      setReviewLoading(true);
+      setReviewResult(null);
+
+      const res = await fetch("/.netlify/functions/ai-review", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          imageBase64: parts.imageBase64,
+          mimeType: parts.mimeType,
+          materi,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.ok) {
+        throw new Error(data.error || "Gagal mereview gambar");
+      }
+
+      setReviewResult(data.data);
       setProgress((prev) => ({ ...prev, reviewed: true }));
+    } catch (err) {
+      alert(err.message || "Gagal mereview gambar");
+    } finally {
+      setReviewLoading(false);
     }
   }
 
@@ -488,8 +327,8 @@ export default function MateriDetailPage() {
     setProgress((prev) => ({ ...prev, completed: true }));
   }
 
-  function goNextMateri() {
-    router.push("/kelas-nusantara");
+  function goBackToClass() {
+    router.push(`/kelas-nusantara/${materi?.kelas_slug || ""}`);
   }
 
   if (loading) {
@@ -556,7 +395,7 @@ export default function MateriDetailPage() {
                     Level
                   </p>
                   <p className="mt-2 text-sm font-semibold text-gray-800">
-                    {materi.level || "Beginner"}
+                    {materi.level || "-"}
                   </p>
                 </div>
 
@@ -565,7 +404,7 @@ export default function MateriDetailPage() {
                     Durasi
                   </p>
                   <p className="mt-2 text-sm font-semibold text-gray-800">
-                    {materi.durasi || "5 menit"}
+                    {materi.durasi || "-"}
                   </p>
                 </div>
 
@@ -574,7 +413,7 @@ export default function MateriDetailPage() {
                     Fokus
                   </p>
                   <p className="mt-2 text-sm font-semibold text-gray-800">
-                    {materi.fokus || "Pembelajaran"}
+                    {materi.fokus || "-"}
                   </p>
                 </div>
 
@@ -589,16 +428,12 @@ export default function MateriDetailPage() {
               </div>
 
               <div className="rounded-3xl border border-gray-100 bg-white p-5">
-                <div className="mb-4 flex items-center justify-between gap-4">
-                  <div>
-                    <h2 className="text-xl font-bold text-gray-900">Audio AI Reader</h2>
-                    <p className="mt-1 text-sm text-gray-600">
-                      Dengarkan materi dibacakan langsung dari browser.
-                    </p>
-                  </div>
-                </div>
+                <h2 className="text-xl font-bold text-gray-900">Audio Reader</h2>
+                <p className="mt-1 text-sm text-gray-600">
+                  Dengarkan isi materi yang diambil dari spreadsheet.
+                </p>
 
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="mt-4 grid gap-4 md:grid-cols-2">
                   <div>
                     <label className="mb-2 block text-sm font-semibold text-gray-700">
                       Pilih Suara
@@ -666,24 +501,11 @@ export default function MateriDetailPage() {
                     ⏹ Stop
                   </button>
                 </div>
-
-                <div className="mt-4 rounded-2xl bg-gray-50 p-4 text-sm text-gray-600">
-                  Status:
-                  <span className="ml-2 font-semibold text-gray-800">
-                    {isSpeaking
-                      ? "Sedang membacakan materi"
-                      : isPausedSpeech
-                      ? "Audio dijeda"
-                      : "Belum diputar / sudah selesai"}
-                  </span>
-                </div>
               </div>
 
               <div className="rounded-3xl border border-gray-100 bg-white p-6">
                 <div className="max-w-none text-gray-700">
-                  {materi.intro ? (
-                    <p className="leading-7">{materi.intro}</p>
-                  ) : null}
+                  {materi.intro ? <p className="leading-7">{materi.intro}</p> : null}
 
                   {materi.highlight ? (
                     <div className="my-6 rounded-2xl border-l-4 border-indigo-500 bg-indigo-50 p-5">
@@ -770,198 +592,150 @@ export default function MateriDetailPage() {
 
               <div className="rounded-3xl border border-gray-100 bg-white p-5">
                 <div className="mb-5">
-                  <h2 className="text-xl font-bold text-gray-900">Mode Praktik</h2>
+                  <h2 className="text-xl font-bold text-gray-900">Upload Karya untuk Direview AI</h2>
                   <p className="mt-1 text-sm text-gray-600">
-                    Praktik langsung sesuai fokus materi ini.
+                    Upload JPG, PNG, hasil desain, poster, layout, atau ambil foto langsung. AI akan mereview sesuai isi materi dari spreadsheet.
                   </p>
                 </div>
 
-                <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
-                  <div className="rounded-2xl bg-gray-50 p-4">
-                    <p className="text-sm font-semibold text-gray-800">Pilih Tantangan</p>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    onClick={() => startCamera(cameraFacingMode)}
+                    className="rounded-2xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-700"
+                  >
+                    Buka Kamera
+                  </button>
 
-                    <div className="mt-3 space-y-3">
-                      {challenges.map((challenge) => {
-                        const active = challenge.id === selectedChallengeId;
-                        return (
-                          <button
-                            key={challenge.id}
-                            onClick={() => setSelectedChallengeId(challenge.id)}
-                            className={`w-full rounded-2xl border p-4 text-left transition ${
-                              active
-                                ? "border-indigo-500 bg-indigo-50"
-                                : "border-gray-200 bg-white hover:bg-gray-50"
-                            }`}
-                          >
-                            <p className="text-sm font-semibold text-gray-900">
-                              {challenge.title}
-                            </p>
-                            <p className="mt-1 text-xs text-gray-600">
-                              {challenge.description}
-                            </p>
-                          </button>
-                        );
-                      })}
-                    </div>
+                  <button
+                    onClick={toggleCameraFacingMode}
+                    className="rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                  >
+                    Ganti Kamera
+                  </button>
+
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                  >
+                    Upload Gambar / PNG
+                  </button>
+
+                  <button
+                    onClick={stopCamera}
+                    className="rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                  >
+                    Tutup Kamera
+                  </button>
+
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleUploadImage}
+                  />
+                </div>
+
+                {cameraError ? (
+                  <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                    {cameraError}
                   </div>
+                ) : null}
 
-                  <div className="space-y-4">
-                    {selectedChallenge ? (
-                      <div className="rounded-2xl border border-gray-200 bg-white p-4">
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          {selectedChallenge.title}
-                        </h3>
-                        <p className="mt-2 text-sm text-gray-600">
-                          {selectedChallenge.description}
-                        </p>
-
-                        <div className="mt-3 rounded-2xl bg-amber-50 p-4 text-sm text-amber-900">
-                          <span className="font-semibold">Tip:</span> {selectedChallenge.tip}
-                        </div>
-                      </div>
-                    ) : null}
-
-                    <div className="flex flex-wrap gap-3">
-                      <button
-                        onClick={() => startCamera(cameraFacingMode)}
-                        className="rounded-2xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-700"
-                      >
-                        Buka Kamera
-                      </button>
-
-                      <button
-                        onClick={toggleCameraFacingMode}
-                        className="rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
-                      >
-                        Ganti Kamera
-                      </button>
-
-                      <button
-                        onClick={() => fileInputRef.current?.click()}
-                        className="rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
-                      >
-                        Upload dari Galeri
-                      </button>
-
-                      <button
-                        onClick={stopCamera}
-                        className="rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
-                      >
-                        Tutup Kamera
-                      </button>
-
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleUploadImage}
+                <div className="mt-4 overflow-hidden rounded-3xl border border-gray-200 bg-black">
+                  <div className="relative aspect-video w-full">
+                    {cameraOpen ? (
+                      <video
+                        ref={videoRef}
+                        className="h-full w-full object-cover"
+                        autoPlay
+                        muted
+                        playsInline
                       />
-                    </div>
-
-                    {cameraError ? (
-                      <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                        {cameraError}
+                    ) : (
+                      <div className="flex h-full items-center justify-center px-6 text-center text-sm text-white/80">
+                        Kamera belum aktif. Kamu juga bisa upload PNG/JPG dari galeri atau hasil desain.
                       </div>
-                    ) : null}
-
-                    <div className="overflow-hidden rounded-3xl border border-gray-200 bg-black">
-                      <div className="relative aspect-video w-full">
-                        {cameraOpen ? (
-                          <>
-                            <video
-                              ref={videoRef}
-                              className="h-full w-full object-cover"
-                              autoPlay
-                              muted
-                              playsInline
-                            />
-
-                            <div className="pointer-events-none absolute inset-0">
-                              <div className="absolute left-1/3 top-0 h-full w-px bg-white/40" />
-                              <div className="absolute left-2/3 top-0 h-full w-px bg-white/40" />
-                              <div className="absolute top-1/3 left-0 h-px w-full bg-white/40" />
-                              <div className="absolute top-2/3 left-0 h-px w-full bg-white/40" />
-                            </div>
-                          </>
-                        ) : (
-                          <div className="flex h-full items-center justify-center px-6 text-center text-sm text-white/80">
-                            Kamera belum aktif. Tekan tombol <b className="mx-1">Buka Kamera</b>
-                            untuk mulai praktik.
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex flex-wrap gap-3">
-                      <button
-                        onClick={capturePhoto}
-                        className="rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700"
-                      >
-                        Ambil Foto
-                      </button>
-
-                      <button
-                        onClick={runAiReview}
-                        className="rounded-2xl bg-violet-600 px-4 py-3 text-sm font-semibold text-white hover:bg-violet-700"
-                      >
-                        Review dengan AI
-                      </button>
-                    </div>
-
-                    <canvas ref={canvasRef} className="hidden" />
-
-                    {capturedImage ? (
-                      <div className="rounded-3xl border border-gray-200 bg-white p-4">
-                        <p className="mb-3 text-sm font-semibold text-gray-800">
-                          Hasil Foto / Upload
-                        </p>
-                        <img
-                          src={capturedImage}
-                          alt="Hasil capture"
-                          className="w-full rounded-2xl object-cover"
-                        />
-                      </div>
-                    ) : null}
-
-                    {reviewResult ? (
-                      <div className="rounded-3xl border border-violet-100 bg-violet-50 p-5">
-                        <div className="flex flex-wrap items-center justify-between gap-3">
-                          <h3 className="text-lg font-bold text-gray-900">AI Review</h3>
-                          <div className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-violet-700">
-                            Skor: {reviewResult.score}/100
-                          </div>
-                        </div>
-
-                        <p className="mt-3 text-sm text-gray-700">{reviewResult.summary}</p>
-
-                        <div className="mt-4 grid gap-4 md:grid-cols-2">
-                          <div className="rounded-2xl bg-white p-4">
-                            <p className="text-sm font-semibold text-emerald-700">
-                              Kelebihan
-                            </p>
-                            <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-gray-700">
-                              {reviewResult.strengths.map((item, index) => (
-                                <li key={index}>{item}</li>
-                              ))}
-                            </ul>
-                          </div>
-
-                          <div className="rounded-2xl bg-white p-4">
-                            <p className="text-sm font-semibold text-amber-700">
-                              Saran Perbaikan
-                            </p>
-                            <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-gray-700">
-                              {reviewResult.improvements.map((item, index) => (
-                                <li key={index}>{item}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-                    ) : null}
+                    )}
                   </div>
                 </div>
+
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <button
+                    onClick={capturePhoto}
+                    className="rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700"
+                  >
+                    Ambil Foto
+                  </button>
+
+                  <button
+                    onClick={runAiReview}
+                    disabled={reviewLoading}
+                    className="rounded-2xl bg-violet-600 px-4 py-3 text-sm font-semibold text-white hover:bg-violet-700 disabled:opacity-60"
+                  >
+                    {reviewLoading ? "Mereview..." : "Review dengan AI"}
+                  </button>
+                </div>
+
+                <canvas ref={canvasRef} className="hidden" />
+
+                {capturedImage ? (
+                  <div className="mt-4 rounded-3xl border border-gray-200 bg-white p-4">
+                    <p className="mb-3 text-sm font-semibold text-gray-800">
+                      Hasil Upload / Capture
+                    </p>
+                    <img
+                      src={capturedImage}
+                      alt="Hasil upload"
+                      className="w-full rounded-2xl object-cover"
+                    />
+                  </div>
+                ) : null}
+
+                {reviewResult ? (
+                  <div className="mt-4 rounded-3xl border border-violet-100 bg-violet-50 p-5">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <h3 className="text-lg font-bold text-gray-900">AI Review</h3>
+                      <div className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-violet-700">
+                        Skor: {reviewResult.score}/100
+                      </div>
+                    </div>
+
+                    <p className="mt-3 text-sm text-gray-700">
+                      Jenis terdeteksi: {reviewResult.detected_type || "-"}
+                    </p>
+
+                    <p className="mt-2 text-sm text-gray-700">{reviewResult.summary}</p>
+
+                    <p className="mt-2 text-sm font-medium text-gray-700">
+                      Relevan dengan materi: {reviewResult.relevant_to_material ? "Ya" : "Tidak"}
+                    </p>
+
+                    <div className="mt-4 grid gap-4 md:grid-cols-2">
+                      <div className="rounded-2xl bg-white p-4">
+                        <p className="text-sm font-semibold text-emerald-700">
+                          Kelebihan
+                        </p>
+                        <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-gray-700">
+                          {(reviewResult.strengths || []).map((item, index) => (
+                            <li key={index}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div className="rounded-2xl bg-white p-4">
+                        <p className="text-sm font-semibold text-amber-700">
+                          Saran Perbaikan
+                        </p>
+                        <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-gray-700">
+                          {(reviewResult.improvements || []).map((item, index) => (
+                            <li key={index}>{item}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
               </div>
             </div>
 
@@ -995,8 +769,8 @@ export default function MateriDetailPage() {
                     <span>{progress.listened ? "✅" : "⏳"}</span>
                   </div>
                   <div className="flex items-center justify-between rounded-2xl bg-gray-50 px-4 py-3">
-                    <span>Praktik materi</span>
-                    <span>{progress.practiced ? "✅" : "⏳"}</span>
+                    <span>Upload karya</span>
+                    <span>{progress.uploaded ? "✅" : "⏳"}</span>
                   </div>
                   <div className="flex items-center justify-between rounded-2xl bg-gray-50 px-4 py-3">
                     <span>Review AI</span>
@@ -1022,11 +796,7 @@ export default function MateriDetailPage() {
                     >
                       Download PDF
                     </a>
-                  ) : (
-                    <button className="rounded-2xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-700">
-                      Download PDF
-                    </button>
-                  )}
+                  ) : null}
 
                   <button
                     onClick={startSpeaking}
@@ -1036,17 +806,17 @@ export default function MateriDetailPage() {
                   </button>
 
                   <button
-                    onClick={() => startCamera(cameraFacingMode)}
+                    onClick={() => fileInputRef.current?.click()}
                     className="rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
                   >
-                    Mulai Praktik
+                    Upload Karya
                   </button>
 
                   <button
                     onClick={runAiReview}
                     className="rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
                   >
-                    Minta Review AI
+                    Review AI
                   </button>
 
                   <button
@@ -1057,10 +827,10 @@ export default function MateriDetailPage() {
                   </button>
 
                   <button
-                    onClick={goNextMateri}
+                    onClick={goBackToClass}
                     className="rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
                   >
-                    Kembali ke Daftar Kelas
+                    Kembali ke Kelas
                   </button>
                 </div>
               </div>
