@@ -2,10 +2,19 @@ const { google } = require("googleapis");
 
 exports.handler = async function () {
   try {
-    const privateKey = Buffer.from(
-      process.env.GOOGLE_PRIVATE_KEY_BASE64,
-      "base64"
-    ).toString("utf8");
+    const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n");
+
+    if (!privateKey) {
+      throw new Error("GOOGLE_PRIVATE_KEY tidak ditemukan");
+    }
+
+    if (!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL) {
+      throw new Error("GOOGLE_SERVICE_ACCOUNT_EMAIL tidak ditemukan");
+    }
+
+    if (!process.env.GOOGLE_SHEETS_ID_KELAS) {
+      throw new Error("GOOGLE_SHEETS_ID_KELAS tidak ditemukan");
+    }
 
     const auth = new google.auth.JWT({
       email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
