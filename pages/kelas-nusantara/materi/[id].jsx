@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Webcam from "react-webcam";
-
+import { jsPDF } from "jspdf";
 function buildNarrationText(materi) {
   if (!materi) return "";
 
@@ -85,6 +85,416 @@ async function compressImageFile(file, maxSize = 960, quality = 0.72) {
     reader.readAsDataURL(blob);
   });
 }
+
+
+
+
+
+function formatTanggalIndonesia(date = new Date()) {
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+}
+
+function sanitizeFileName(text) {
+  return String(text || "materi-layanan-nusantara")
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "-");
+}
+
+function generateProfessionalPdf(materi) {
+  if (!materi) {
+    alert("Materi belum tersedia.");
+    return;
+  }
+
+  const doc = new jsPDF({
+    orientation: "p",
+    unit: "mm",
+    format: "a4",
+  });
+
+  const PAGE_WIDTH = 210;
+  const PAGE_HEIGHT = 297;
+  const MARGIN_LEFT = 20;
+  const MARGIN_RIGHT = 20;
+  const MARGIN_TOP = 18;
+  const MARGIN_BOTTOM = 18;
+  const CONTENT_WIDTH = PAGE_WIDTH - MARGIN_LEFT - MARGIN_RIGHT;
+
+  const BRAND = "Layanan Nusantara";
+  const DATE_TEXT = formatTanggalIndonesia();
+
+  let y = MARGIN_TOP;
+
+  function pageFooter() {
+    const pageCount = doc.getNumberOfPages();
+    doc.setDrawColor(220);
+    doc.line(MARGIN_LEFT, PAGE_HEIGHT - 12, PAGE_WIDTH - MARGIN_RIGHT, PAGE_HEIGHT - 12);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(110);
+    doc.text(BRAND, MARGIN_LEFT, PAGE_HEIGHT - 7);
+    doc.text(`Halaman ${pageCount}`, PAGE_WIDTH - MARGIN_RIGHT, PAGE_HEIGHT - 7, {
+      align: "right",
+    });
+  }
+
+  function newPage() {
+    pageFooter();
+    doc.addPage();
+    y = MARGIN_TOP;
+  }
+
+  function ensureSpace(heightNeeded = 10) {
+    if (y + heightNeeded > PAGE_HEIGHT - MARGIN_BOTTOM - 10) {
+      newPage();
+    }
+  }
+
+  function textBlock(text, options = {}) {
+    if (!text) return;
+
+    const {
+      fontSize = 11,
+      lineHeight = 6,
+      bold = false,
+      color = 50,
+      gapAfter = 4,
+    } = options;
+
+    doc.setFont("helvetica", bold ? "bold" : "normal");
+    doc.setFontSize(fontSize);
+    doc.setTextColor(color);
+
+    const lines = doc.splitTextToSize(String(text), CONTENT_WIDTH);
+    const blockHeight = lines.length * lineHeight;
+
+    ensureSpace(blockHeight + gapAfter);
+    doc.text(lines, MARGIN_LEFT, y);
+    y += blockHeight + gapAfter;
+  }
+
+  function titleBlock(text) {
+    if (!text) return;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+    doc.setTextColor(20);
+
+    const lines = doc.splitTextToSize(String(text), CONTENT_WIDTH);
+    const h = lines.length * 9;
+
+    ensureSpace(h + 8);
+    doc.text(lines, MARGIN_LEFT, y);
+    y += h + 4;
+  }
+
+  function sectionHeading(text) {
+    if (!text) return;
+    ensureSpace(16);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.setTextColor(20);
+    doc.text(String(text), MARGIN_LEFT, y);
+    y += 4;
+
+    doc.setDrawColor(140);
+    doc.line(MARGIN_LEFT, y, MARGIN_LEFT + 40, y);
+    y += 7;
+  }
+
+  function metaGrid(items) {
+    const boxGap = 6;
+    const boxWidth = (CONTENT_WIDTH - boxGap) / 2;
+    const boxHeight = 18;
+
+    for (let i = 0; i < items.length; i += 2) {
+      ensureSpace(boxHeight + 4);
+
+      const row = [items[i], items[i + 1]].filter(Boolean);
+
+      row.forEach((item, index) => {
+        const x = MARGIN_LEFT + index * (boxWidth + boxGap);
+        doc.setDrawColor(225);
+        doc.roundedRect(x, y, boxWidth, boxHeight, 3, 3);
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(8);
+        doc.setTextColor(120);
+        doc.text(item.label.toUpperCase(), x + 4, y + 6);
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(10.5);
+        doc.setTextColor(35);
+        doc.text(String(item.value || "-"), x + 4, y + 13);
+      });
+
+      y += boxHeight + 4;
+    }
+
+    y += 2;
+  }
+
+  function infoBox(title, body) {
+    if (!title && !body) return;
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(13);
+    const titleLines = doc.splitTextToSize(String(title || ""), CONTENT_WIDTH - 10);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10.5);
+    const bodyLines = doc.splitTextToSize(String(body || ""), CONTENT_WIDTH - 10);
+
+    const height =
+      8 +
+      (titleLines.length ? titleLines.length * 6 : 0) +
+      (bodyLines.length ? bodyLines.length * 5.2 : 0) +
+      8;
+
+    ensureSpace(height + 4);
+
+    doc.setDrawColor(220);
+    doc.roundedRect(MARGIN_LEFT, y, CONTENT_WIDTH, height, 3, 3);
+
+    let innerY = y + 7;
+
+    if (titleLines.length) {
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(13);
+      doc.setTextColor(20);
+      doc.text(titleLines, MARGIN_LEFT + 5, innerY);
+      innerY += titleLines.length * 6 + 1;
+    }
+
+    if (bodyLines.length) {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10.5);
+      doc.setTextColor(70);
+      doc.text(bodyLines, MARGIN_LEFT + 5, innerY);
+    }
+
+    y += height + 6;
+  }
+
+  function bulletSummary(title, items) {
+    const filtered = (items || []).filter(Boolean);
+    if (!filtered.length) return;
+
+    sectionHeading(title);
+
+    filtered.forEach((item, index) => {
+      textBlock(`${index + 1}. ${item}`, {
+        fontSize: 11,
+        lineHeight: 6,
+        color: 55,
+        gapAfter: 2,
+      });
+    });
+
+    y += 2;
+  }
+
+  function simpleCard(title, desc) {
+    if (!title && !desc) return;
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    const titleLines = doc.splitTextToSize(String(title || "Poin Materi"), CONTENT_WIDTH - 10);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10.5);
+    const descLines = doc.splitTextToSize(String(desc || "-"), CONTENT_WIDTH - 10);
+
+    const height = 8 + titleLines.length * 5.5 + descLines.length * 5 + 8;
+
+    ensureSpace(height + 4);
+
+    doc.setDrawColor(225);
+    doc.roundedRect(MARGIN_LEFT, y, CONTENT_WIDTH, height, 3, 3);
+
+    let innerY = y + 7;
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.setTextColor(20);
+    doc.text(titleLines, MARGIN_LEFT + 5, innerY);
+    innerY += titleLines.length * 5.5 + 2;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10.5);
+    doc.setTextColor(75);
+    doc.text(descLines, MARGIN_LEFT + 5, innerY);
+
+    y += height + 5;
+  }
+
+  // COVER
+  doc.setFillColor(248, 249, 251);
+  doc.rect(0, 0, PAGE_WIDTH, PAGE_HEIGHT, "F");
+
+  y = 24;
+  textBlock(BRAND, {
+    fontSize: 18,
+    bold: true,
+    color: 20,
+    lineHeight: 7,
+    gapAfter: 1,
+  });
+
+  textBlock("Dokumen Resmi Materi Pembelajaran", {
+    fontSize: 10,
+    color: 120,
+    lineHeight: 5,
+    gapAfter: 6,
+  });
+
+  doc.setDrawColor(210);
+  doc.line(MARGIN_LEFT, y, PAGE_WIDTH - MARGIN_RIGHT, y);
+  y += 12;
+
+  if (materi.badge) {
+    doc.setFillColor(238, 242, 255);
+    doc.roundedRect(MARGIN_LEFT, y, 30, 9, 4, 4, "F");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8);
+    doc.setTextColor(67, 56, 202);
+    doc.text(String(materi.badge), MARGIN_LEFT + 15, y + 5.8, { align: "center" });
+    y += 14;
+  }
+
+  titleBlock(materi.judul || "Materi Pembelajaran");
+
+  textBlock(materi.deskripsi || "Dokumen materi pembelajaran.", {
+    fontSize: 11.5,
+    lineHeight: 6.5,
+    color: 70,
+    gapAfter: 8,
+  });
+
+  metaGrid([
+    { label: "Level", value: materi.level || "-" },
+    { label: "Durasi", value: materi.durasi || "-" },
+    { label: "Fokus", value: materi.fokus || "-" },
+    { label: "Tanggal Dibuat", value: DATE_TEXT },
+  ]);
+
+  y = 238;
+
+  infoBox(
+    "Lisensi Layanan Nusantara",
+    "Hak cipta tata letak dokumen, identitas penerbit, serta penyusunan ulang isi menjadi format PDF berada dalam konteks layanan pembelajaran Layanan Nusantara. Gunakan dokumen ini secara bijak untuk kebutuhan belajar, arsip, atau distribusi yang sesuai dengan tujuan edukasi."
+  );
+
+  // PAGE 2
+  newPage();
+
+  textBlock("MATERI LENGKAP", {
+    fontSize: 9,
+    bold: true,
+    color: 120,
+    lineHeight: 4,
+    gapAfter: 3,
+  });
+
+  titleBlock(materi.judul || "Materi Pembelajaran");
+
+  if (materi.intro) {
+    sectionHeading("Pendahuluan");
+    textBlock(materi.intro, {
+      fontSize: 11,
+      lineHeight: 6.2,
+      color: 45,
+      gapAfter: 7,
+    });
+  }
+
+  if (materi.highlight) {
+    sectionHeading("Highlight Materi");
+    infoBox("", materi.highlight);
+  }
+
+  if (materi.section1_title || materi.section1_content) {
+    sectionHeading(materi.section1_title || "Bagian 1");
+    textBlock(materi.section1_content || "-", {
+      fontSize: 11,
+      lineHeight: 6.2,
+      color: 45,
+      gapAfter: 7,
+    });
+  }
+
+  if (materi.section2_title || materi.section2_content) {
+    sectionHeading(materi.section2_title || "Bagian 2");
+    textBlock(materi.section2_content || "-", {
+      fontSize: 11,
+      lineHeight: 6.2,
+      color: 45,
+      gapAfter: 7,
+    });
+  }
+
+  if (materi.section3_title || materi.section3_content) {
+    sectionHeading(materi.section3_title || "Bagian 3");
+    textBlock(materi.section3_content || "-", {
+      fontSize: 11,
+      lineHeight: 6.2,
+      color: 45,
+      gapAfter: 7,
+    });
+  }
+
+  const cards = [
+    { title: materi.card1_title, desc: materi.card1_desc },
+    { title: materi.card2_title, desc: materi.card2_desc },
+    { title: materi.card3_title, desc: materi.card3_desc },
+    { title: materi.card4_title, desc: materi.card4_desc },
+  ].filter((item) => item.title || item.desc);
+
+  if (cards.length) {
+    sectionHeading("Poin Tambahan Materi");
+    cards.forEach((item) => simpleCard(item.title, item.desc));
+  }
+
+  bulletSummary("Ringkasan Lengkap", [
+    materi.summary1,
+    materi.summary2,
+    materi.summary3,
+    materi.summary4,
+  ]);
+
+  sectionHeading("Penutup");
+  textBlock(
+    `Dokumen ini disusun agar seluruh isi materi dapat dibaca secara utuh, lengkap, dan profesional dalam format PDF. Materi yang tersedia telah ditampilkan dari awal hingga akhir tanpa diringkas, sehingga tetap nyaman dijadikan arsip, bahan belajar, maupun dokumen pendamping kelas di platform ${BRAND}.`,
+    {
+      fontSize: 11,
+      lineHeight: 6.2,
+      color: 55,
+      gapAfter: 8,
+    }
+  );
+
+  infoBox(
+    "Catatan Penggunaan",
+    "Dokumen ini dibuat otomatis dari data materi di sistem. Format disusun agar stabil ketika diunduh, dicetak, dan dibaca ulang sebagai modul pembelajaran."
+  );
+
+  pageFooter();
+
+  const fileName = `${sanitizeFileName(materi.judul || "materi")}-layanan-nusantara.pdf`;
+  doc.save(fileName);
+}
+
+
+
+
+
+
 
 export default function MateriDetailPage() {
   const router = useRouter();
@@ -857,16 +1267,12 @@ export default function MateriDetailPage() {
                 <h3 className="text-lg font-semibold text-gray-900">Aksi Materi</h3>
 
                 <div className="mt-4 flex flex-col gap-3">
-                  {materi.pdf_url ? (
-                    <a
-                      href={materi.pdf_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="rounded-2xl bg-indigo-600 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-indigo-700"
-                    >
-                      Download PDF
-                    </a>
-                  ) : null}
+                <button
+  onClick={() => generateProfessionalPdf(materi)}
+  className="rounded-2xl bg-indigo-600 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-indigo-700"
+>
+  Download PDF
+</button>
 
                   <button
                     onClick={startSpeaking}
