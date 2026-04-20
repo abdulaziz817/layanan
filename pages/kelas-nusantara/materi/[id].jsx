@@ -38,6 +38,54 @@ function dataUrlToParts(dataUrl) {
   };
 }
 
+function estimateBase64SizeInBytes(base64String) {
+  const padding = (base64String.match(/=*$/)?.[0]?.length || 0);
+  return Math.floor((base64String.length * 3) / 4) - padding;
+}
+
+async function compressImageFile(file, maxSize = 960, quality = 0.72) {
+  const img = await createImageBitmap(file);
+
+  let { width, height } = img;
+
+  if (width > height && width > maxSize) {
+    height = Math.round((height * maxSize) / width);
+    width = maxSize;
+  } else if (height >= width && height > maxSize) {
+    width = Math.round((width * maxSize) / height);
+    height = maxSize;
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    throw new Error("Canvas context tidak tersedia");
+  }
+
+  ctx.drawImage(img, 0, 0, width, height);
+
+  const blob = await new Promise((resolve) => {
+    canvas.toBlob(resolve, "image/jpeg", quality);
+  });
+
+  return new Promise((resolve, reject) => {
+    if (!blob) {
+      reject(new Error("Gagal mengompres gambar"));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      resolve(reader.result?.toString() || "");
+    };
+    reader.onerror = () => reject(new Error("Gagal membaca hasil kompres"));
+    reader.readAsDataURL(blob);
+  });
+}
+
 export default function MateriDetailPage() {
   const router = useRouter();
   const { id } = router.query;
@@ -234,7 +282,7 @@ export default function MateriDetailPage() {
     setCameraOpen(false);
   }
 
-  function capturePhoto() {
+  async function capturePhoto() {
     if (!webcamRef.current) {
       alert("Kamera belum siap.");
       return;
@@ -247,11 +295,22 @@ export default function MateriDetailPage() {
       return;
     }
 
-    setCapturedImage(imageSrc);
-    setProgress((prev) => ({ ...prev, uploaded: true }));
+    try {
+      const response = await fetch(imageSrc);
+      const blob = await response.blob();
+      const file = new File([blob], "capture.jpg", { type: "image/jpeg" });
+
+      const compressedDataUrl = await compressImageFile(file, 960, 0.72);
+
+      setCapturedImage(compressedDataUrl);
+      setReviewResult(null);
+      setProgress((prev) => ({ ...prev, uploaded: true }));
+    } catch (err) {
+      alert(err.message || "Gagal memproses hasil foto");
+    }
   }
 
-  function handleUploadImage(event) {
+  async function handleUploadImage(event) {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -260,12 +319,16 @@ export default function MateriDetailPage() {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      setCapturedImage(reader.result?.toString() || "");
+    try {
+      const compressedDataUrl = await compressImageFile(file, 960, 0.72);
+      setCapturedImage(compressedDataUrl);
+      setReviewResult(null);
       setProgress((prev) => ({ ...prev, uploaded: true }));
-    };
-    reader.readAsDataURL(file);
+    } catch (err) {
+      alert(err.message || "Gagal memproses gambar");
+    } finally {
+      event.target.value = "";
+    }
   }
 
   async function runAiReview() {
@@ -277,6 +340,13 @@ export default function MateriDetailPage() {
     const parts = dataUrlToParts(capturedImage);
     if (!parts) {
       alert("Format gambar tidak valid.");
+      return;
+    }
+
+    const estimatedBytes = estimateBase64SizeInBytes(parts.imageBase64);
+
+    if (estimatedBytes > 900 * 1024) {
+      alert("Ukuran gambar masih terlalu besar. Coba foto ulang atau upload gambar yang lebih kecil.");
       return;
     }
 
@@ -320,8 +390,8 @@ export default function MateriDetailPage() {
   }
 
   const videoConstraints = {
-    width: 1280,
-    height: 720,
+    width: 960,
+    height: 540,
     facingMode: cameraFacingMode,
   };
 
@@ -644,7 +714,7 @@ export default function MateriDetailPage() {
                         audio={false}
                         mirrored={cameraFacingMode === "user"}
                         screenshotFormat="image/jpeg"
-                        screenshotQuality={0.92}
+                        screenshotQuality={0.72}
                         videoConstraints={videoConstraints}
                         onUserMedia={() => {
                           setCameraError("");
@@ -703,7 +773,9 @@ export default function MateriDetailPage() {
                       Jenis terdeteksi: {reviewResult.detected_type || "-"}
                     </p>
 
-                    <p className="mt-2 text-sm text-gray-700">{reviewResult.summary}</p>
+                    <p className="mt-2 text-sm text-gray-700 whitespace-pre-line">
+                      {reviewResult.summary}
+                    </p>
 
                     <p className="mt-2 text-sm font-medium text-gray-700">
                       Relevan dengan materi: {reviewResult.relevant_to_material ? "Ya" : "Tidak"}
