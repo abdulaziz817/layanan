@@ -673,7 +673,7 @@ export default function MateriDetailPage() {
     const errName = error?.name || error?.toString?.() || "";
 
     if (String(errName).includes("NotAllowedError")) {
-      message = "Izin kamera ditolak. Izinkan kamera di browser untuk situs ini.";
+      message = "Fitur ini sedang di perbaiki. Silahkan coba lagi nanti .";
     } else if (String(errName).includes("NotFoundError")) {
       message = "Kamera tidak ditemukan di perangkat ini.";
     } else if (String(errName).includes("NotReadableError")) {

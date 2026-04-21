@@ -32,21 +32,18 @@ const VERSION_LABEL = "v2.3";
 const popupVariants = {
   hidden: {
     opacity: 0,
-    y: 14,
-    scale: 0.995,
-    transition: { type: "tween", duration: 0.12, ease: "easeOut" },
+    y: 10,
+    transition: { duration: 0.1, ease: "easeOut" },
   },
   visible: {
     opacity: 1,
     y: 0,
-    scale: 1,
-    transition: { type: "tween", duration: 0.18, ease: "easeOut" },
+    transition: { duration: 0.14, ease: "easeOut" },
   },
   exit: {
     opacity: 0,
-    y: 14,
-    scale: 0.995,
-    transition: { type: "tween", duration: 0.12, ease: "easeIn" },
+    y: 8,
+    transition: { duration: 0.1, ease: "easeIn" },
   },
 };
 
@@ -162,6 +159,11 @@ export default function FloatingAI() {
   const [minimized, setMinimized] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
 
+useEffect(() => {
+  const t = setTimeout(() => setShowIntro(false), 3200);
+  return () => clearTimeout(t);
+}, []);
+
   const [isTyping, setIsTyping] = useState(false);
   const [messages, setMessages] = useState(DEFAULT_MESSAGES);
   const [input, setInput] = useState("");
@@ -274,7 +276,7 @@ export default function FloatingAI() {
 
     const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 220;
     if (nearBottom) {
-      endRef.current?.scrollIntoView({ behavior: "smooth" });
+     endRef.current?.scrollIntoView({ behavior: "auto" });
       setShowScrollToBottom(false);
     } else {
       setShowScrollToBottom(true);
@@ -417,7 +419,7 @@ export default function FloatingAI() {
   }, [isTyping]);
 
   const scrollToBottom = useCallback(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth" });
+   endRef.current?.scrollIntoView({ behavior: "auto" });
     setShowScrollToBottom(false);
   }, []);
 
@@ -465,7 +467,7 @@ export default function FloatingAI() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ type: "tween", duration: 0.16, ease: "easeOut" }}
-          className="fixed bottom-6 right-6 z-[9999] flex h-16 w-16 items-center justify-center rounded-full border border-white/20 bg-gradient-to-br from-indigo-600 via-indigo-500 to-violet-500 text-white shadow-[0_18px_40px_rgba(79,70,229,0.45)] backdrop-blur-xl transition hover:scale-105"
+         className="fixed bottom-6 right-6 z-[9999] flex h-14 w-14 items-center justify-center rounded-full bg-indigo-600 text-white shadow-md transition active:scale-95"
           aria-label="Buka chat"
         >
           <div className="relative">
@@ -495,11 +497,9 @@ export default function FloatingAI() {
                 setSettled(false);
                 setMinimized(false);
               }}
-              className={`flex items-center gap-3 rounded-full border border-white/20 bg-gradient-to-r from-indigo-600 to-violet-500 px-4 py-3 text-white backdrop-blur-xl transition hover:scale-[1.01] ${
-                settled
-                  ? "shadow-[0_16px_40px_rgba(79,70,229,0.35)]"
-                  : "shadow-lg"
-              }`}
+          className={`flex items-center gap-3 rounded-full border border-slate-200 bg-white px-4 py-3 text-slate-800 transition ${
+  settled ? "shadow-md" : "shadow-sm"
+}`}
               aria-label="Buka kembali chat"
             >
               <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/15 ring-1 ring-white/20">
@@ -528,17 +528,14 @@ export default function FloatingAI() {
             animate="visible"
             exit="exit"
             onAnimationComplete={() => setSettled(true)}
-            className={`fixed bottom-6 right-6 z-[9999] flex h-[72vh] max-h-[560px] w-[92vw] max-w-[26rem] flex-col overflow-hidden rounded-[28px] border border-white/20 bg-white/80 backdrop-blur-2xl ${
-              settled
-                ? "shadow-[0_30px_80px_rgba(15,23,42,0.22)]"
-                : "shadow-[0_18px_50px_rgba(15,23,42,0.18)]"
-            }`}
+         className={`fixed bottom-6 right-6 z-[9999] flex h-[72vh] max-h-[560px] w-[92vw] max-w-[26rem] flex-col overflow-hidden rounded-[24px] border border-slate-200 bg-white ${
+  settled ? "shadow-lg" : "shadow-md"
+}`}
             role="dialog"
             aria-label="Chat Nusantara AI"
           >
             {/* HEADER */}
-            <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-500 px-4 py-4 text-white">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.22),transparent_35%)]" />
+          <div className="bg-indigo-600 px-4 py-4 text-white">
               <div className="relative flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/20">
@@ -602,7 +599,7 @@ export default function FloatingAI() {
             <div
               ref={scrollRef}
               onScroll={onScroll}
-              className="flex-1 space-y-3 overflow-y-auto bg-gradient-to-b from-slate-50 via-white to-slate-50 px-3 py-4"
+             className="flex-1 space-y-3 overflow-y-auto bg-slate-50 px-3 py-4"
             >
               {messages.map((mm) => (
                 <MessageBubble key={mm.id} msg={mm} />
@@ -725,13 +722,12 @@ export default function FloatingAI() {
 function TypingDots() {
   return (
     <div className="flex gap-1 items-center" aria-hidden="true">
-      <span className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" />
-      <span className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce [animation-delay:120ms]" />
-      <span className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce [animation-delay:240ms]" />
+      <span className="w-1.5 h-1.5 rounded-full bg-gray-400 opacity-70" />
+      <span className="w-1.5 h-1.5 rounded-full bg-gray-400 opacity-85" />
+      <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
     </div>
   );
 }
-
 const MessageBubble = memo(function MessageBubble({ msg }) {
   const isUser = msg.role === "user";
   const isError = !!msg?.meta?.isError;
@@ -752,10 +748,10 @@ const MessageBubble = memo(function MessageBubble({ msg }) {
         <div
           className={
             isUser
-              ? "rounded-2xl rounded-br-md bg-gradient-to-br from-indigo-600 to-violet-500 px-4 py-2.5 text-white shadow-[0_10px_24px_rgba(79,70,229,0.22)]"
+              ?"rounded-2xl rounded-br-md bg-indigo-600 px-4 py-2.5 text-white shadow-sm"
               : isError
               ? "rounded-2xl rounded-bl-md border border-red-200 bg-red-50 px-4 py-2.5 text-red-800 shadow-sm"
-              : "rounded-2xl rounded-bl-md border border-slate-200 bg-white/95 px-4 py-2.5 text-slate-800 shadow-sm backdrop-blur"
+              : "rounded-2xl rounded-bl-md border border-slate-200 bg-white px-4 py-2.5 text-slate-800"
           }
         >
           {content.split("\n").map((line, idx) => (
