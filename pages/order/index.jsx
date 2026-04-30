@@ -419,8 +419,7 @@ GetContact: {
     Spotify: {
       "1 Bulan · Pribadi · Garansi": "37000",
       "1 Bulan · Keluarga · Garansi": "32000",
-      "1 Bulan · Pelajar · Garansi": "28000",
-      "1 Bulan · Pelajar · Non Garansi": "15000",
+      "1 Bulan · Pelajar · Garansi": "29000",
     },
 
     "Canva Pro": {
