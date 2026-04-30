@@ -417,8 +417,8 @@ GetContact: {
     },
 
     Spotify: {
-      "1 Bulan · Pribadi · Garansi": "37000",
-      "1 Bulan · Keluarga · Garansi": "32000",
+      "3 Bulan · Pribadi · Garansi": "53000",
+      "2 Bulan · Keluarga · Garansi": "36000",
       "1 Bulan · Pelajar · Garansi": "29000",
     },
 
