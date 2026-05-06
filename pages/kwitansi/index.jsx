@@ -43,6 +43,7 @@ export default function KwitansiPage() {
 
   const [noKwitansi, setNoKwitansi] = useState("-");
   const [verifyCode, setVerifyCode] = useState("-");
+  const [isLunas, setIsLunas] = useState(true);
 
   useEffect(() => {
     setNoKwitansi(makeNoKwitansi());
@@ -226,6 +227,8 @@ export default function KwitansiPage() {
         }
 
         .kw-header {
+         position: relative;
+  z-index: 3;
           text-align: center;
           padding-bottom: 12px;
           border-bottom: 1px solid #eef2f7;
@@ -245,6 +248,8 @@ export default function KwitansiPage() {
         .kw-meta b { color:#111827; }
 
         .kv {
+          position: relative;
+  z-index: 3;
           margin-top: 14px;
           display: grid;
           gap: 10px;
@@ -310,6 +315,21 @@ export default function KwitansiPage() {
   color:#9ca3af;
   text-align: center;
   pointer-events: none;
+}
+.kw-stamp {
+  position: absolute;
+  top: 58%; /* turunin dikit dari tengah */
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-20deg);
+  font-size: 56px; /* kecilin dikit */
+  font-weight: 900;
+  color: rgba(220, 38, 38, 0.18); /* lebih soft */
+  border: 3px solid rgba(220, 38, 38, 0.18);
+  padding: 8px 22px;
+  border-radius: 12px;
+  letter-spacing: 4px;
+  pointer-events: none;
+  z-index: 1; /* penting: jangan lebih tinggi dari header */
 }
 
       `}</style>
@@ -449,6 +469,7 @@ export default function KwitansiPage() {
         {/* PREVIEW */}
         <div ref={kwitansiRef} className="kw-wrap no-select">
           <div className="kw-watermark">LAYANAN NUSANTARA</div>
+         {isLunas && <div className="kw-stamp">LUNAS</div>}
           <div className="kw-watermark-code">
             No: <b style={{ color: "#6b7280" }}>{noKwitansi}</b> • Kode:{" "}
             <b style={{ color: "#6b7280" }}>{verifyCode}</b>
