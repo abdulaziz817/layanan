@@ -482,7 +482,7 @@ useEffect(() => {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ type: "tween", duration: 0.16, ease: "easeOut" }}
-         className="fixed bottom-28 right-5 z-[9999] flex h-14 w-14 items-center justify-center rounded-full bg-indigo-600 text-white shadow-md transition active:scale-95"
+         className="fixed bottom-6 right-6 md:bottom-6 md:right-6 max-md:bottom-28 max-md:right-5 z-[9999] flex h-14 w-14 items-center justify-center rounded-full bg-indigo-600 text-white shadow-md transition active:scale-95"
           aria-label="Buka chat"
         >
           <div className="relative">
@@ -504,7 +504,7 @@ useEffect(() => {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="fixed bottom-28 right-5 z-[9999]"
+            className="fixed bottom-6 right-6 md:bottom-6 md:right-6 max-md:bottom-28 max-md:right-5 z-[9999]"
             onAnimationComplete={() => setSettled(true)}
           >
             <button
@@ -543,7 +543,7 @@ useEffect(() => {
             animate="visible"
             exit="exit"
             onAnimationComplete={() => setSettled(true)}
-         className={`fixed bottom-28 right-5 z-[9999] flex h-[72vh] max-h-[560px] w-[92vw] max-w-[26rem] flex-col overflow-hidden rounded-[24px] border border-slate-200 bg-white ${
+        className={`fixed bottom-6 right-6 max-md:bottom-28 max-md:right-4 z-[9999] flex h-[72vh] max-h-[560px] w-[92vw] max-w-[26rem] flex-col overflow-hidden rounded-[24px] border border-slate-200 bg-white ${
   settled ? "shadow-lg" : "shadow-md"
 }`}
             role="dialog"

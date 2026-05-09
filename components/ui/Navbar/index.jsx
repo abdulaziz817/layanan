@@ -378,34 +378,43 @@ export default function Navbar() {
                 </button>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                {pwaMoreMenu.map((item, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => {
-                      if (item.action === 'ai') {
-                        openAI()
-                        return
-                      }
+          <div className="space-y-3">
+  {pwaMoreMenu.map((item, idx) => (
+    <button
+      key={idx}
+      onClick={() => {
+        if (item.action === 'ai') {
+          openAI()
+          return
+        }
 
-                      handleNavClick(item.path)
-                    }}
-                    className="text-left rounded-2xl border border-gray-200 bg-white p-4 shadow-sm active:scale-[0.98] transition"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center mb-3 text-sm">
-                      {item.icon}
-                    </div>
+        handleNavClick(item.path)
+      }}
+      className="w-full flex items-center gap-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm active:scale-[0.98] transition hover:bg-gray-50"
+    >
+      {/* ICON */}
+      <div className="w-11 h-11 rounded-2xl bg-black text-white flex items-center justify-center text-sm shrink-0">
+        {item.icon}
+      </div>
 
-                    <div className="text-sm font-semibold text-gray-900">
-                      {item.title}
-                    </div>
+      {/* TEXT */}
+      <div className="flex-1 text-left">
+        <div className="text-sm font-semibold text-gray-900">
+          {item.title}
+        </div>
 
-                    <div className="text-[11px] text-gray-500 mt-1 leading-4">
-                      {item.desc}
-                    </div>
-                  </button>
-                ))}
-              </div>
+        <div className="text-[12px] text-gray-500 mt-0.5 leading-4">
+          {item.desc}
+        </div>
+      </div>
+
+      {/* ARROW */}
+      <span className="text-gray-300 text-xl">
+        ›
+      </span>
+    </button>
+  ))}
+</div>
             </div>
           </div>
         </>

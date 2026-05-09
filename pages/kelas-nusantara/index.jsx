@@ -6,31 +6,41 @@ export default function KelasPage() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  useEffect(() => {
-    let isMounted = true;
+ useEffect(() => {
+  let isMounted = true;
 
-    fetch("/.netlify/functions/kelas-list")
-      .then((res) => res.json())
-      .then((data) => {
-        if (!isMounted) return;
-        if (data.ok && Array.isArray(data.data)) {
-          setKelas(data.data);
-        } else {
-          setKelas([]);
-        }
-      })
-      .catch(() => {
-        if (isMounted) setKelas([]);
-      })
-      .finally(() => {
-        if (isMounted) setLoading(false);
-      });
+  // maksimal loading 1.2 detik
+  const maxLoading = setTimeout(() => {
+    if (isMounted) setLoading(false);
+  }, 1200);
 
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  fetch("/.netlify/functions/kelas-list")
+    .then((res) => res.json())
+    .then((data) => {
+      if (!isMounted) return;
 
+      if (data.ok && Array.isArray(data.data)) {
+        setKelas(data.data);
+      } else {
+        setKelas([]);
+      }
+    })
+    .catch(() => {
+      if (isMounted) setKelas([]);
+    })
+    .finally(() => {
+      clearTimeout(maxLoading);
+
+      if (isMounted) {
+        setLoading(false);
+      }
+    });
+
+  return () => {
+    isMounted = false;
+    clearTimeout(maxLoading);
+  };
+}, []);
   const handleOpenClass = (item) => {
     if (!item.status_buka) return;
     router.push(`/kelas-nusantara/${item.slug}`);
