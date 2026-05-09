@@ -10,28 +10,23 @@ export default function Navbar() {
 
   const [menuOpen, setMenuOpen] = useState(false)
   const [pwa, setPwa] = useState(false)
-
-  // ✅ PROMO: Diskon aktif hanya di tanggal ini
+  const [moreOpen, setMoreOpen] = useState(false)
   const [isDiskonEvent, setIsDiskonEvent] = useState(false)
 
   useEffect(() => {
     setPwa(isPWA())
   }, [])
 
-  // ✅ Auto update status promo
   useEffect(() => {
     const check = () => {
       const now = new Date()
       const start = new Date('2026-03-20T00:00:00')
       const end = new Date('2026-03-22T23:59:59')
-
       setIsDiskonEvent(now >= start && now <= end)
     }
 
     check()
-
     const timer = setInterval(check, 30_000)
-
     return () => clearInterval(timer)
   }, [])
 
@@ -41,12 +36,17 @@ export default function Navbar() {
     { title: 'Testimoni', path: '/#testimonials' },
     { title: 'Kelas Nusantara', path: '/kelas-nusantara' },
     { title: 'Blog', path: '/blog' },
-
-    ...(pwa && isDiskonEvent
-      ? [{ title: 'Diskon', path: '/order/diskon' }]
-      : []),
-
+    ...(pwa && isDiskonEvent ? [{ title: 'Diskon', path: '/order/diskon' }] : []),
     ...(pwa ? [{ title: 'Reward', path: '/reward' }] : []),
+  ]
+
+  const pwaMoreMenu = [
+    { title: 'Tentang', desc: 'Lihat profil layanan', path: '/#cta', icon: 'ⓘ' },
+    { title: 'Software', desc: 'Tools yang digunakan', path: '/#toolkit', icon: '⌘' },
+    { title: 'Testimoni', desc: 'Review pengguna', path: '/#testimonials', icon: '★' },
+    ...(isDiskonEvent ? [{ title: 'Diskon', desc: 'Promo khusus aplikasi', path: '/order/diskon', icon: '%' }] : []),
+    { title: 'Reward', desc: 'Hadiah dan benefit', path: '/reward', icon: '🎁' },
+    { title: 'Nusantara AI', desc: 'Buka asisten AI', action: 'ai', icon: '✦' },
   ]
 
   const scrollToAnchor = (id) => {
@@ -64,6 +64,7 @@ export default function Navbar() {
 
   const handleNavClick = (path) => {
     setMenuOpen(false)
+    setMoreOpen(false)
 
     const pwaOnlyPaths = [
       '/order',
@@ -92,7 +93,13 @@ export default function Navbar() {
 
   const handleCTA = () => {
     setMenuOpen(false)
+    setMoreOpen(false)
     router.push('/order')
+  }
+
+  const openAI = () => {
+    setMoreOpen(false)
+    window.dispatchEvent(new Event('open-nusantara-ai'))
   }
 
   useEffect(() => {
@@ -137,7 +144,7 @@ export default function Navbar() {
             </button>
           </nav>
 
-          {/* MOBILE BUTTON - MUNCUL DI BROWSER, HILANG DI PWA */}
+          {/* MOBILE BUTTON - BROWSER SAJA */}
           {!pwa && (
             <button
               onClick={() => setMenuOpen(true)}
@@ -161,7 +168,7 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* MOBILE DRAWER - KHUSUS MOBILE BROWSER */}
+        {/* MOBILE DRAWER - BROWSER SAJA */}
         {!pwa && (
           <div
             className={`fixed inset-0 z-[9998] md:hidden transition ${
@@ -242,104 +249,166 @@ export default function Navbar() {
         `}</style>
       </header>
 
-      {/* PWA BOTTOM NAVBAR - KHUSUS APK / PWA */}
+      {/* PWA BOTTOM NAVBAR */}
       {pwa && (
-        <nav className="fixed bottom-5 left-1/2 -translate-x-1/2 z-[9999] md:hidden w-[92%] max-w-[430px] bg-white/95 backdrop-blur-xl rounded-[30px] border border-gray-200 shadow-[0_10px_40px_rgba(0,0,0,0.12)] px-6 py-3 flex items-center justify-between">
-          {/* HOME */}
-          <button
-            onClick={() => handleNavClick('/')}
-            className="flex flex-col items-center gap-1 text-black active:scale-95 transition"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="currentColor"
-              viewBox="0 0 24 24"
+        <>
+          <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[9999] md:hidden w-[92%] max-w-[430px] h-[72px] bg-white/95 backdrop-blur-xl rounded-[28px] border border-gray-200 shadow-[0_12px_35px_rgba(0,0,0,0.13)] px-5 flex items-center justify-between">
+            {/* HOME */}
+            <button
+              onClick={() => handleNavClick('/')}
+              className="w-[56px] flex flex-col items-center justify-center gap-1 text-black active:scale-95 transition"
             >
-              <path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z" />
-            </svg>
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z" />
+              </svg>
+              <span className="text-[11px] font-semibold">
+                Home
+              </span>
+            </button>
 
-            <span className="text-[11px] font-semibold">
-              Home
-            </span>
-          </button>
-
-          {/* KELAS NUSANTARA */}
-          <button
-            onClick={() => handleNavClick('/kelas-nusantara')}
-            className="flex flex-col items-center gap-1 text-gray-400 active:scale-95 transition"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              viewBox="0 0 24 24"
+            {/* KELAS */}
+            <button
+              onClick={() => handleNavClick('/kelas-nusantara')}
+              className="w-[56px] flex flex-col items-center justify-center gap-1 text-gray-400 active:scale-95 transition"
             >
-              <path d="M12 6 3 10l9 4 9-4-9-4Z" />
-              <path d="M3 10v4l9 4 9-4v-4" />
-            </svg>
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                viewBox="0 0 24 24"
+              >
+                <path d="M12 6 3 10l9 4 9-4-9-4Z" />
+                <path d="M3 10v4l9 4 9-4v-4" />
+              </svg>
+              <span className="text-[11px] font-medium">
+                Kelas
+              </span>
+            </button>
 
-            <span className="text-[11px] font-medium">
-              Kelas
-            </span>
-          </button>
-
-          {/* TOMBOL TENGAH PESAN */}
-          <button
-            onClick={handleCTA}
-            aria-label="Pesan Sekarang"
-            className="absolute left-1/2 -translate-x-1/2 -top-8 w-[78px] h-[78px] rounded-full bg-black text-white flex flex-col items-center justify-center shadow-[0_15px_40px_rgba(0,0,0,0.35)] border-[7px] border-white active:scale-95 transition-all"
-          >
-            <span className="text-[28px] leading-none">
-              ✦
-            </span>
-
-            <span className="text-[10px] font-semibold mt-1">
-              Pesan
-            </span>
-          </button>
-
-          {/* BLOG */}
-          <button
-            onClick={() => handleNavClick('/blog')}
-            className="flex flex-col items-center gap-1 text-gray-400 active:scale-95 transition"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              viewBox="0 0 24 24"
+            {/* CENTER PESAN */}
+            <button
+              onClick={handleCTA}
+              aria-label="Pesan Sekarang"
+              className="absolute left-1/2 -translate-x-1/2 -top-7 w-[70px] h-[70px] rounded-full bg-black text-white flex flex-col items-center justify-center shadow-[0_12px_30px_rgba(0,0,0,0.35)] border-[6px] border-white active:scale-95 transition-all"
             >
-              <path d="M5 5h14v14H5z" />
-              <path d="M8 9h8M8 13h5" />
-            </svg>
+              <span className="text-[26px] leading-none">✦</span>
+              <span className="text-[10px] font-semibold mt-1">
+                Pesan
+              </span>
+            </button>
 
-            <span className="text-[11px] font-medium">
-              Blog
-            </span>
-          </button>
+            <div className="w-[70px]" />
 
-          {/* REWARD */}
-          <button
-            onClick={() => handleNavClick('/reward')}
-            className="flex flex-col items-center gap-1 text-gray-400 active:scale-95 transition"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              viewBox="0 0 24 24"
+            {/* BLOG */}
+            <button
+              onClick={() => handleNavClick('/blog')}
+              className="w-[56px] flex flex-col items-center justify-center gap-1 text-gray-400 active:scale-95 transition"
             >
-              <path d="M12 17l-5 3 1-6-4-4 6-.9L12 3l2 5.1 6 .9-4 4 1 6z" />
-            </svg>
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                viewBox="0 0 24 24"
+              >
+                <path d="M5 5h14v14H5z" />
+                <path d="M8 9h8M8 13h5" />
+              </svg>
+              <span className="text-[11px] font-medium">
+                Blog
+              </span>
+            </button>
 
-            <span className="text-[11px] font-medium">
-              Reward
-            </span>
-          </button>
-        </nav>
+            {/* MENU */}
+            <button
+              onClick={() => setMoreOpen(true)}
+              className="w-[56px] flex flex-col items-center justify-center gap-1 text-gray-400 active:scale-95 transition"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path d="M4 7h16M4 12h16M4 17h16" strokeLinecap="round" />
+              </svg>
+              <span className="text-[11px] font-medium">
+                Menu
+              </span>
+            </button>
+          </nav>
+
+          {/* PWA MORE SHEET */}
+          <div
+            className={`fixed inset-0 z-[9998] md:hidden transition ${
+              moreOpen ? 'pointer-events-auto' : 'pointer-events-none'
+            }`}
+          >
+            <div
+              onClick={() => setMoreOpen(false)}
+              className={`absolute inset-0 bg-black/30 backdrop-blur-[2px] transition-opacity duration-300 ${
+                moreOpen ? 'opacity-100' : 'opacity-0'
+              }`}
+            />
+
+            <div
+              className={`absolute left-0 right-0 bottom-0 bg-white rounded-t-[30px] shadow-[0_-12px_40px_rgba(0,0,0,0.18)] px-5 pt-4 pb-28 transition-transform duration-300 ease-out ${
+                moreOpen ? 'translate-y-0' : 'translate-y-full'
+              }`}
+            >
+              <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-gray-300" />
+
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-lg font-bold text-gray-900">
+                    Menu Lainnya
+                  </h2>
+                  <p className="text-xs text-gray-500">
+                    Akses fitur tambahan aplikasi
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => setMoreOpen(false)}
+                  className="w-9 h-9 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center active:scale-95 transition"
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                {pwaMoreMenu.map((item, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => {
+                      if (item.action === 'ai') {
+                        openAI()
+                        return
+                      }
+
+                      handleNavClick(item.path)
+                    }}
+                    className="text-left rounded-2xl border border-gray-200 bg-white p-4 shadow-sm active:scale-[0.98] transition"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center mb-3 text-sm">
+                      {item.icon}
+                    </div>
+
+                    <div className="text-sm font-semibold text-gray-900">
+                      {item.title}
+                    </div>
+
+                    <div className="text-[11px] text-gray-500 mt-1 leading-4">
+                      {item.desc}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </>
       )}
     </>
   )
