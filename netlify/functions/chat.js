@@ -432,13 +432,89 @@ if (!askAboutAziz && detectedProduct) {
 if (!askAboutAziz && !detectedProduct && includesAny(message, ["layanan nusantara"])) {
   try {
     const clean = await fetchCleanText("https://layanannusantara.store/");
-    userPrompt = buildGeneralPrompt(clean, message);
+
+    // ✅ fallback kalau buildGeneralPrompt belum ada
+    if (typeof buildGeneralPrompt === "function") {
+      userPrompt = buildGeneralPrompt(clean, message);
+    } else {
+      userPrompt = `
+Kamu adalah asisten resmi Layanan Nusantara.
+
+Sumber website:
+${clean}
+
+Jawab pertanyaan user dengan ringkas, jelas, natural, dan jangan mengarang.
+Pertanyaan user:
+${message}
+      `.trim();
+    }
   } catch {
     userPrompt = `Jawab pertanyaan user tentang Layanan Nusantara secara ringkas dan jelas.\nPertanyaan user: ${message}`;
   }
 }
-    // ====== KIRIM KE GROQ ======
- const geminiRes = await fetchWithTimeout(
+
+// ====== MODE MULTI FITUR AI ======
+const mode = body?.mode || "chat";
+
+let modeInstruction = "";
+
+if (mode === "chat") {
+  modeInstruction =
+    "Jawab sebagai AI assistant umum: tanya jawab, belajar, ide, bisnis, teknologi, dan obrolan natural.";
+}
+
+if (mode === "coding") {
+  modeInstruction =
+    "Fokus membantu coding, debugging, membuat website, memperbaiki error, dan menjelaskan kode dengan mudah dipahami.";
+}
+
+if (mode === "rewrite") {
+  modeInstruction =
+    "Fokus translate, rewrite, caption, artikel, copywriting, dan membuat teks lebih profesional atau menarik.";
+}
+
+if (mode === "vision") {
+  modeInstruction =
+    "Fokus menganalisis gambar, PDF, screenshot, dokumen, atau file yang diupload user.";
+}
+
+if (mode === "camera") {
+  modeInstruction =
+    "Fokus menganalisis hasil camera atau screen capture user.";
+}
+
+const parts = [];
+
+parts.push({
+  text: `
+${systemPrompt()}
+
+Mode aktif:
+${mode}
+
+Instruksi mode:
+${modeInstruction}
+
+Riwayat chat:
+${history.map((h) => `${h.role}: ${h.content}`).join("\n")}
+
+Pertanyaan / perintah user:
+${userPrompt}
+`.trim(),
+});
+
+// ✅ Support upload gambar / PDF / dokumen dari frontend baru
+if (body?.fileBase64 && body?.mimeType) {
+  parts.push({
+    inlineData: {
+      mimeType: body.mimeType,
+      data: body.fileBase64,
+    },
+  });
+}
+
+// ====== KIRIM KE GEMINI ======
+const geminiRes = await fetchWithTimeout(
   "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
   {
     method: "POST",
@@ -450,26 +526,16 @@ if (!askAboutAziz && !detectedProduct && includesAny(message, ["layanan nusantar
       contents: [
         {
           role: "user",
-          parts: [
-            {
-              text: `
-${systemPrompt()}
-
-${history.map((h) => `${h.role}: ${h.content}`).join("\n")}
-
-user: ${userPrompt}
-              `,
-            },
-          ],
+          parts,
         },
       ],
       generationConfig: {
         temperature: 0.65,
-        maxOutputTokens: 700,
+        maxOutputTokens: 1200,
       },
     }),
   },
-  12000
+  20000
 );
 
 const rawText = await geminiRes.text();
@@ -489,12 +555,14 @@ if (!geminiRes.ok) {
 }
 
 const reply =
-  data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-  "Baik, ada yang bisa saya bantu?";
+  data?.candidates?.[0]?.content?.parts
+    ?.map((p) => p.text || "")
+    .join("")
+    .trim() || "Baik, ada yang bisa saya bantu?";
 
-    await delay(50);
+await delay(50);
 
-    return json(200, { content: reply }, CORS);
+return json(200, { content: reply }, CORS);
   } catch (err) {
     console.error("ERROR DETAIL:", err);
     return json(500, { content: "Server error" }, CORS);

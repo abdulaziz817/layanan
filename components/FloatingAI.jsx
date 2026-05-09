@@ -8,9 +8,18 @@ import React, {
   useCallback,
 } from "react";
 import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion";
-import { FiX, FiMinus, FiRefreshCw, FiSend, FiAlertTriangle } from "react-icons/fi";
+import {
+  FiX,
+  FiMinus,
+  FiRefreshCw,
+  FiSend,
+  FiAlertTriangle,
+  FiImage,
+  FiMic,
+  FiUpload,
+} from "react-icons/fi";
 import { HiOutlineChatBubbleLeftRight } from "react-icons/hi2";
-
+import Link from "next/link";
 /**
  * FloatingAI.jsx (Simple + clean) - FIXED
  * - Animasi popup mulus (HP lemah)
@@ -24,6 +33,7 @@ import { HiOutlineChatBubbleLeftRight } from "react-icons/hi2";
 
 // ✅ GANTI INI sesuai backend kamu:
 const CHAT_ENDPOINT = "/.netlify/functions/chat"; // Netlify Functions
+const IMAGE_ENDPOINT = "/.netlify/functions/ai-image";
 
 const STORAGE_KEY = "nusantara_ai_chat_simple_v1";
 const VERSION_LABEL = "v2.3";
@@ -168,6 +178,8 @@ useEffect(() => {
   const [isTyping, setIsTyping] = useState(false);
   const [messages, setMessages] = useState(DEFAULT_MESSAGES);
   const [input, setInput] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
+const fileInputRef = useRef(null);
 
   const [unread, setUnread] = useState(0);
   const [isOnline, setIsOnline] = useState(true);
@@ -343,10 +355,16 @@ useEffect(() => {
       const matched = findQuickReply(raw);
       if (matched) {
         setTimeout(() => {
-          setMessages((p) => [
-            ...p,
-            { id: uid(), role: "assistant", content: matched.answer, ts: Date.now() },
-          ]);
+       setMessages((p) => [
+  ...p,
+  {
+    id: uid(),
+    role: "assistant",
+    content: answer,
+    image: data?.image || null,
+    ts: Date.now(),
+  },
+]);
           setIsTyping(false);
         }, 350);
         return;
@@ -358,14 +376,51 @@ useEffect(() => {
         return;
       }
 
-      try {
-        const res = await fetch(CHAT_ENDPOINT, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: raw.trim() }),
-        });
+try {
 
-        const txt = await res.text();
+  const lowerMsg = raw.toLowerCase();
+
+  const isImagePrompt =
+    lowerMsg.includes("gambar") ||
+    lowerMsg.includes("buatkan gambar") ||
+    lowerMsg.includes("generate image") ||
+    lowerMsg.includes("png") ||
+    lowerMsg.includes("foto");
+
+  const endpoint = isImagePrompt
+    ? IMAGE_ENDPOINT
+    : CHAT_ENDPOINT;
+
+  const payload = {
+    message: raw.trim(),
+    history: messages.slice(-10),
+    mode: isImagePrompt ? "image" : "chat",
+  };
+
+  if (selectedFile) {
+    const base64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        const result = reader.result?.toString() || "";
+        resolve(result.split(",")[1]);
+      };
+
+      reader.onerror = reject;
+      reader.readAsDataURL(selectedFile);
+    });
+
+    payload.fileBase64 = base64;
+    payload.mimeType = selectedFile.type;
+  }
+
+  const res = await fetch(endpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  const txt = await res.text();
 
         if (!res.ok) {
           throw new Error(friendlyErrorMessage(res, txt));
@@ -383,10 +438,16 @@ useEffect(() => {
           throw new Error("Server tidak mengirim field 'content'. Cek response backend kamu.");
         }
 
-        setMessages((p) => [
-          ...p,
-          { id: uid(), role: "assistant", content: answer, ts: Date.now() },
-        ]);
+       setMessages((p) => [
+  ...p,
+  {
+    id: uid(),
+    role: "assistant",
+    content: answer,
+    image: data?.image || null,
+    ts: Date.now(),
+  },
+]);
       } catch (err) {
         const msg =
           (err?.message || "").toString() || "⚠️ Terjadi kesalahan saat menghubungi server.";
@@ -686,6 +747,68 @@ useEffect(() => {
 
             {/* INPUT */}
             <div className="border-t border-slate-100 bg-white/95 p-3 backdrop-blur">
+            <div className="flex gap-2 px-1 pb-2">
+  <button
+    type="button"
+    onClick={() =>
+      setInput((p) => `${p} buatkan gambar `)
+    }
+    className="flex items-center gap-1 rounded-xl bg-slate-100 px-3 py-2 text-xs text-slate-700"
+  >
+    <FiImage />
+    Image
+  </button>
+
+  <button
+    type="button"
+    onClick={() => fileInputRef.current?.click()}
+    className="flex items-center gap-1 rounded-xl bg-slate-100 px-3 py-2 text-xs text-slate-700"
+  >
+    <FiUpload />
+    Upload
+  </button>
+
+  <button
+    type="button"
+    onClick={() => {
+      const SpeechRecognition =
+        window.SpeechRecognition ||
+        window.webkitSpeechRecognition;
+
+      if (!SpeechRecognition) {
+        alert("Browser belum support voice.");
+        return;
+      }
+
+      const rec = new SpeechRecognition();
+
+      rec.lang = "id-ID";
+
+      rec.onresult = (e) => {
+        const text =
+          e.results?.[0]?.[0]?.transcript || "";
+
+        setInput((p) => `${p} ${text}`);
+      };
+
+      rec.start();
+    }}
+    className="flex items-center gap-1 rounded-xl bg-slate-100 px-3 py-2 text-xs text-slate-700"
+  >
+    <FiMic />
+    Voice
+  </button>
+
+  <input
+    ref={fileInputRef}
+    type="file"
+    className="hidden"
+    accept="image/*,.pdf,.txt"
+    onChange={(e) =>
+      setSelectedFile(e.target.files?.[0] || null)
+    }
+  />
+</div>
               <div className="flex items-end gap-2">
                 <div className="flex-1 rounded-2xl border border-slate-200 bg-slate-50/80 px-2 py-2 focus-within:border-indigo-400 focus-within:bg-white focus-within:ring-4 focus-within:ring-indigo-100">
                   <textarea
@@ -769,6 +892,13 @@ const MessageBubble = memo(function MessageBubble({ msg }) {
               : "rounded-2xl rounded-bl-md border border-slate-200 bg-white px-4 py-2.5 text-slate-800"
           }
         >
+          {msg.image && (
+  <img
+    src={msg.image}
+    alt="AI Generated"
+    className="mb-3 max-w-full rounded-2xl border border-slate-200"
+  />
+)}
           {content.split("\n").map((line, idx) => (
             <p key={idx} className="text-[13px] leading-6 whitespace-pre-wrap">
               {line || <span className="block h-2" />}
