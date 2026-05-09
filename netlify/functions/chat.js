@@ -350,9 +350,9 @@ exports.handler = async (event) => {
     }
 
     // ✅ cek key
-    if (!process.env.GROQ_API_KEY) {
-      return json(500, { content: "API KEY GROQ tidak ada" }, CORS);
-    }
+   if (!process.env.GEMINI_API_KEY) {
+  return json(500, { content: "API KEY GEMINI tidak ada" }, CORS);
+}
 
     const body = safeParse(event.body || "{}", {});
     const message = body?.message;
@@ -438,49 +438,59 @@ if (!askAboutAziz && !detectedProduct && includesAny(message, ["layanan nusantar
   }
 }
     // ====== KIRIM KE GROQ ======
-    const groqRes = await fetchWithTimeout(
-      "https://api.groq.com/openai/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-        },
-        body: JSON.stringify({
-         model: "llama-3.1-8b-instant",
-temperature: 0.65,
-max_tokens: 700,
-          messages: [
-            { role: "system", content: systemPrompt() },
-            ...history,
-            { role: "user", content: userPrompt },
+ const geminiRes = await fetchWithTimeout(
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-goog-api-key": process.env.GEMINI_API_KEY,
+    },
+    body: JSON.stringify({
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              text: `
+${systemPrompt()}
+
+${history.map((h) => `${h.role}: ${h.content}`).join("\n")}
+
+user: ${userPrompt}
+              `,
+            },
           ],
-        }),
+        },
+      ],
+      generationConfig: {
+        temperature: 0.65,
+        maxOutputTokens: 700,
       },
-      12000
-    );
+    }),
+  },
+  12000
+);
 
-    const rawText = await groqRes.text();
-    const data = safeParse(rawText, null);
+const rawText = await geminiRes.text();
+const data = safeParse(rawText, null);
 
-    if (!groqRes.ok) {
-      const detail =
-        data?.error?.message ||
-        data?.message ||
-        (rawText ? rawText.slice(0, 300) : "") ||
-        `Groq error: HTTP ${groqRes.status}`;
+if (!geminiRes.ok) {
+  const detail =
+    data?.error?.message ||
+    rawText?.slice(0, 300) ||
+    `Gemini error: HTTP ${geminiRes.status}`;
 
-      // ✅ status 502 supaya frontend tahu ini error server upstream
-      return json(
-        502,
-        { content: `⚠️ Server AI sedang bermasalah.\nDetail: ${detail}` },
-        CORS
-      );
-    }
+  return json(
+    502,
+    { content: `⚠️ Server AI sedang bermasalah.\nDetail: ${detail}` },
+    CORS
+  );
+}
 
-    const reply =
-      data?.choices?.[0]?.message?.content ||
-      "Baik, ada yang bisa saya bantu?";
+const reply =
+  data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+  "Baik, ada yang bisa saya bantu?";
 
     await delay(50);
 
