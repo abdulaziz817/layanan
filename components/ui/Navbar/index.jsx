@@ -41,13 +41,18 @@ export default function Navbar() {
   ]
 
   const pwaMoreMenu = [
+    { title: 'Kelas Nusantara', desc: 'Belajar materi digital', path: '/kelas-nusantara', icon: '🎓' },
     { title: 'Tentang', desc: 'Lihat profil layanan', path: '/#cta', icon: 'ⓘ' },
     { title: 'Software', desc: 'Tools yang digunakan', path: '/#toolkit', icon: '⌘' },
     { title: 'Testimoni', desc: 'Review pengguna', path: '/#testimonials', icon: '★' },
     ...(isDiskonEvent ? [{ title: 'Diskon', desc: 'Promo khusus aplikasi', path: '/order/diskon', icon: '%' }] : []),
-    { title: 'Reward', desc: 'Hadiah dan benefit', path: '/reward', icon: '🎁' },
     { title: 'Nusantara AI', desc: 'Buka asisten AI', action: 'ai', icon: '✦' },
   ]
+
+  const isActive = (path) => {
+    if (path === '/') return pathname === '/'
+    return pathname === path || pathname.startsWith(`${path}/`)
+  }
 
   const scrollToAnchor = (id) => {
     const el = document.getElementById(id)
@@ -55,11 +60,7 @@ export default function Navbar() {
 
     const yOffset = -80
     const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset
-
-    window.scrollTo({
-      top: y,
-      behavior: 'smooth',
-    })
+    window.scrollTo({ top: y, behavior: 'smooth' })
   }
 
   const handleNavClick = (path) => {
@@ -151,18 +152,8 @@ export default function Navbar() {
               aria-label="Toggle menu"
               className="md:hidden p-3 rounded-md text-gray-700 hover:text-black transition"
             >
-              <svg
-                className="w-7 h-7"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                strokeWidth="2"
-              >
-                <path
-                  d="M4 6h16M4 12h16M4 18h16"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
+              <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
           )}
@@ -170,45 +161,23 @@ export default function Navbar() {
 
         {/* MOBILE DRAWER - BROWSER SAJA */}
         {!pwa && (
-          <div
-            className={`fixed inset-0 z-[9998] md:hidden transition ${
-              menuOpen ? 'pointer-events-auto' : 'pointer-events-none'
-            }`}
-          >
+          <div className={`fixed inset-0 z-[9998] md:hidden transition ${menuOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
             <div
               onClick={() => setMenuOpen(false)}
-              className={`absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity ${
-                menuOpen ? 'opacity-100' : 'opacity-0'
-              }`}
+              className={`absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity ${menuOpen ? 'opacity-100' : 'opacity-0'}`}
             />
 
-            <aside
-              className={`absolute right-0 top-0 h-full w-[280px] bg-white rounded-l-2xl shadow-2xl transform transition-transform duration-500 ${
-                menuOpen ? 'translate-x-0' : 'translate-x-full'
-              }`}
-            >
+            <aside className={`absolute right-0 top-0 h-full w-[280px] bg-white rounded-l-2xl shadow-2xl transform transition-transform duration-500 ${menuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
               <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b">
-                <span className="text-lg font-semibold text-gray-800">
-                  Menu
-                </span>
+                <span className="text-lg font-semibold text-gray-800">Menu</span>
 
                 <button
                   onClick={() => setMenuOpen(false)}
                   aria-label="Close menu"
                   className="p-2 rounded-full text-gray-500 hover:bg-gray-100 hover:text-black transition"
                 >
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    strokeWidth="2"
-                  >
-                    <path
-                      d="M6 18L18 6M6 6l12 12"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                    <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </button>
               </div>
@@ -253,49 +222,63 @@ export default function Navbar() {
       {pwa && (
         <>
           <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[9999] md:hidden w-[92%] max-w-[430px] h-[72px] bg-white/95 backdrop-blur-xl rounded-[28px] border border-gray-200 shadow-[0_12px_35px_rgba(0,0,0,0.13)] px-5 flex items-center justify-between">
+
             {/* HOME */}
             <button
               onClick={() => handleNavClick('/')}
-              className="w-[56px] flex flex-col items-center justify-center gap-1 text-black active:scale-95 transition"
+              className={`relative w-[56px] flex flex-col items-center justify-center gap-1 active:scale-95 transition-all duration-300 ${
+                isActive('/') ? 'text-black -translate-y-1' : 'text-gray-400'
+              }`}
             >
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z" />
               </svg>
-              <span className="text-[11px] font-semibold">
-                Home
-              </span>
+
+              <span className="text-[11px] font-semibold">Home</span>
+
+              {isActive('/') && (
+                <span className="absolute -bottom-2 h-1 w-5 rounded-full bg-black transition-all" />
+              )}
             </button>
 
-            {/* KELAS */}
+            {/* REWARD */}
             <button
-              onClick={() => handleNavClick('/kelas-nusantara')}
-              className="w-[56px] flex flex-col items-center justify-center gap-1 text-gray-400 active:scale-95 transition"
+              onClick={() => handleNavClick('/reward')}
+              className={`relative w-[56px] flex flex-col items-center justify-center gap-1 active:scale-95 transition-all duration-300 ${
+                isActive('/reward') ? 'text-black -translate-y-1' : 'text-gray-400'
+              }`}
             >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                viewBox="0 0 24 24"
-              >
-                <path d="M12 6 3 10l9 4 9-4-9-4Z" />
-                <path d="M3 10v4l9 4 9-4v-4" />
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+                <path d="M20 12v8H4v-8" />
+                <path d="M2 7h20v5H2z" />
+                <path d="M12 22V7" />
+                <path d="M12 7H8.5a2.5 2.5 0 1 1 2.2-3.7C11.3 4.4 12 7 12 7z" />
+                <path d="M12 7h3.5a2.5 2.5 0 1 0-2.2-3.7C12.7 4.4 12 7 12 7z" />
               </svg>
-              <span className="text-[11px] font-medium">
-                Kelas
-              </span>
+
+              <span className="text-[11px] font-medium">Reward</span>
+
+              {isActive('/reward') && (
+                <span className="absolute -bottom-2 h-1 w-5 rounded-full bg-black transition-all" />
+              )}
             </button>
 
             {/* CENTER PESAN */}
             <button
               onClick={handleCTA}
               aria-label="Pesan Sekarang"
-              className="absolute left-1/2 -translate-x-1/2 -top-7 w-[70px] h-[70px] rounded-full bg-black text-white flex flex-col items-center justify-center shadow-[0_12px_30px_rgba(0,0,0,0.35)] border-[6px] border-white active:scale-95 transition-all"
+              className={`absolute left-1/2 -translate-x-1/2 -top-7 w-[70px] h-[70px] rounded-full flex flex-col items-center justify-center border-[6px] border-white active:scale-95 transition-all duration-300 ${
+                isActive('/order')
+                  ? 'bg-black text-white shadow-[0_14px_36px_rgba(0,0,0,0.42)] -translate-y-1'
+                  : 'bg-black text-white shadow-[0_12px_30px_rgba(0,0,0,0.35)]'
+              }`}
             >
-              <span className="text-[26px] leading-none">✦</span>
-              <span className="text-[10px] font-semibold mt-1">
-                Pesan
-              </span>
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path d="M6 8h12l-1 13H7L6 8z" />
+                <path d="M9 8a3 3 0 0 1 6 0" />
+              </svg>
+
+              <span className="text-[10px] font-semibold mt-1">Pesan</span>
             </button>
 
             <div className="w-[70px]" />
@@ -303,49 +286,43 @@ export default function Navbar() {
             {/* BLOG */}
             <button
               onClick={() => handleNavClick('/blog')}
-              className="w-[56px] flex flex-col items-center justify-center gap-1 text-gray-400 active:scale-95 transition"
+              className={`relative w-[56px] flex flex-col items-center justify-center gap-1 active:scale-95 transition-all duration-300 ${
+                isActive('/blog') ? 'text-black -translate-y-1' : 'text-gray-400'
+              }`}
             >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                viewBox="0 0 24 24"
-              >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
                 <path d="M5 5h14v14H5z" />
                 <path d="M8 9h8M8 13h5" />
               </svg>
-              <span className="text-[11px] font-medium">
-                Blog
-              </span>
+
+              <span className="text-[11px] font-medium">Blog</span>
+
+              {isActive('/blog') && (
+                <span className="absolute -bottom-2 h-1 w-5 rounded-full bg-black transition-all" />
+              )}
             </button>
 
             {/* MENU */}
             <button
               onClick={() => setMoreOpen(true)}
-              className="w-[56px] flex flex-col items-center justify-center gap-1 text-gray-400 active:scale-95 transition"
+              className={`relative w-[56px] flex flex-col items-center justify-center gap-1 active:scale-95 transition-all duration-300 ${
+                moreOpen ? 'text-black -translate-y-1' : 'text-gray-400'
+              }`}
             >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path d="M4 7h16M4 12h16M4 17h16" strokeLinecap="round" />
               </svg>
-              <span className="text-[11px] font-medium">
-                Menu
-              </span>
+
+              <span className="text-[11px] font-medium">Menu</span>
+
+              {moreOpen && (
+                <span className="absolute -bottom-2 h-1 w-5 rounded-full bg-black transition-all" />
+              )}
             </button>
           </nav>
 
           {/* PWA MORE SHEET */}
-          <div
-            className={`fixed inset-0 z-[9998] md:hidden transition ${
-              moreOpen ? 'pointer-events-auto' : 'pointer-events-none'
-            }`}
-          >
+          <div className={`fixed inset-0 z-[9998] md:hidden transition ${moreOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
             <div
               onClick={() => setMoreOpen(false)}
               className={`absolute inset-0 bg-black/30 backdrop-blur-[2px] transition-opacity duration-300 ${
@@ -378,43 +355,38 @@ export default function Navbar() {
                 </button>
               </div>
 
-          <div className="space-y-3">
-  {pwaMoreMenu.map((item, idx) => (
-    <button
-      key={idx}
-      onClick={() => {
-        if (item.action === 'ai') {
-          openAI()
-          return
-        }
+              <div className="space-y-3">
+                {pwaMoreMenu.map((item, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => {
+                      if (item.action === 'ai') {
+                        openAI()
+                        return
+                      }
 
-        handleNavClick(item.path)
-      }}
-      className="w-full flex items-center gap-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm active:scale-[0.98] transition hover:bg-gray-50"
-    >
-      {/* ICON */}
-      <div className="w-11 h-11 rounded-2xl bg-black text-white flex items-center justify-center text-sm shrink-0">
-        {item.icon}
-      </div>
+                      handleNavClick(item.path)
+                    }}
+                    className="w-full flex items-center gap-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm active:scale-[0.98] transition hover:bg-gray-50"
+                  >
+                    <div className="w-11 h-11 rounded-2xl bg-black text-white flex items-center justify-center text-sm shrink-0">
+                      {item.icon}
+                    </div>
 
-      {/* TEXT */}
-      <div className="flex-1 text-left">
-        <div className="text-sm font-semibold text-gray-900">
-          {item.title}
-        </div>
+                    <div className="flex-1 text-left">
+                      <div className="text-sm font-semibold text-gray-900">
+                        {item.title}
+                      </div>
 
-        <div className="text-[12px] text-gray-500 mt-0.5 leading-4">
-          {item.desc}
-        </div>
-      </div>
+                      <div className="text-[12px] text-gray-500 mt-0.5 leading-4">
+                        {item.desc}
+                      </div>
+                    </div>
 
-      {/* ARROW */}
-      <span className="text-gray-300 text-xl">
-        ›
-      </span>
-    </button>
-  ))}
-</div>
+                    <span className="text-gray-300 text-xl">›</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </>
