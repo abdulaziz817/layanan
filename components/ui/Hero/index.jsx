@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-html-link-for-pages */
 import { useEffect, useMemo, useState } from "react";
+import { Download, MessageCircle, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 export default function Hero() {
@@ -139,32 +140,75 @@ export default function Hero() {
           Kami menyediakan layanan berkualitas tinggi untuk kebutuhan teknologi dan kreativitas Anda.
         </p>
 
-        <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-8">
-          <Link
-            href="/order"
-            className="px-6 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition text-center"
-          >
-            Pesan Layanan
-          </Link>
+      <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-5">
+  <Link
+    href="/order"
+    className="
+      group
+      inline-flex items-center justify-center gap-2
+      px-7 py-3.5
+      rounded-2xl
+      bg-gradient-to-r from-indigo-600 to-indigo-500
+      text-white font-semibold
+      shadow-[0_10px_30px_rgba(79,70,229,0.35)]
+      hover:shadow-[0_16px_40px_rgba(79,70,229,0.45)]
+      hover:-translate-y-0.5
+      transition-all duration-300
+      text-center
+    "
+  >
+    Pesan Layanan
 
-          {isInstalled ? (
-            <a
-              href="https://wa.me/6287860592111"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-6 py-3 border-2 border-indigo-600 text-indigo-600 rounded-md hover:bg-indigo-50 transition text-center"
-            >
-              Chat Sekarang
-            </a>
-          ) : canInstall && deferredPrompt ? (
-            <button
-              onClick={installApp}
-              className="px-6 py-3 border-2 border-indigo-600 text-indigo-600 rounded-md hover:bg-indigo-50 transition text-center"
-            >
-              Unduh Aplikasi
-            </button>
-          ) : null}
-        </div>
+    <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
+  </Link>
+
+  {isInstalled ? (
+    <a
+      href="https://wa.me/6287860592111"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="
+        inline-flex items-center justify-center gap-2
+        px-7 py-3.5
+        rounded-2xl
+        border border-indigo-200
+        bg-white/90
+        backdrop-blur-md
+        text-indigo-700 font-semibold
+        hover:bg-indigo-50
+        hover:border-indigo-300
+        hover:-translate-y-0.5
+        transition-all duration-300
+        shadow-sm
+      "
+    >
+      <MessageCircle className="w-4 h-4" />
+      Chat Sekarang
+    </a>
+  ) : canInstall && deferredPrompt ? (
+    <button
+      onClick={installApp}
+      className="
+        group
+        inline-flex items-center justify-center gap-2
+        px-7 py-3.5
+        rounded-2xl
+        border border-indigo-200
+        bg-white/90
+        backdrop-blur-md
+        text-indigo-700 font-semibold
+        hover:bg-indigo-50
+        hover:border-indigo-300
+        hover:-translate-y-0.5
+        transition-all duration-300
+        shadow-sm
+      "
+    >
+      <Download className="w-4 h-4 transition-transform duration-300 group-hover:-translate-y-0.5" />
+      Unduh Aplikasi
+    </button>
+  ) : null}
+</div>
       </div>
     </section>
   );
