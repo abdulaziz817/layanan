@@ -287,6 +287,12 @@ GetContact: {
       "1 Bulan · Private · Garansi": "32000",
       "3 Bulan · Sharing · Garansi": "56000",
     },
+     "Claude AI": {
+      "1 Bulan · Full Private · Garansi": "200000",
+    },
+         "Groq AI": {
+      "1 Bulan · Private · Garansi": "25000",
+    },
 
     "YouTube Premium": {
       "1 Bulan · Pribadi · Garansi": "35000",
