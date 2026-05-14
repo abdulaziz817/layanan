@@ -59,144 +59,241 @@ const isDiskonEvent = useMemo(() => {
   const discountMultiplier = 0.7; // 30% off
   const discountLabel = "30% OFF";
 
-
- const IdulAdhaDecor = () => {
-  const stars = Array.from({ length: 18 });
+const IdulAdhaDecor = () => {
+  const stars = Array.from({ length: 35 });
+  const floating = Array.from({ length: 12 });
 
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
-      {/* blur background */}
-      <div className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl" />
-      <div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-yellow-100/40 blur-3xl" />
 
-      {/* bulan */}
+      {/* BACKGROUND GRADIENT */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#f5fff8] via-[#fcfffd] to-[#fffdf7]" />
+
+      {/* BLUR */}
+      <div className="absolute -top-40 -right-32 w-[420px] h-[420px] rounded-full bg-emerald-300/30 blur-3xl" />
+      <div className="absolute top-32 -left-32 w-[300px] h-[300px] rounded-full bg-yellow-200/30 blur-3xl" />
+      <div className="absolute bottom-0 right-0 w-[260px] h-[260px] rounded-full bg-orange-200/20 blur-3xl" />
+
+      {/* ISLAMIC PATTERN */}
+      <div className="absolute inset-0 opacity-[0.03]">
+        <div className="absolute inset-0 bg-[radial-gradient(circle,black_1px,transparent_1px)] bg-[size:28px_28px]" />
+      </div>
+
+      {/* TOP HERO */}
       <motion.div
-        initial={{ opacity: 0, y: -10 }}
+        initial={{ opacity: 0, y: -25 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7 }}
-        className="absolute top-4 right-4"
+        transition={{ duration: 0.9 }}
+        className="absolute top-0 left-0 right-0 h-[320px]"
       >
-        <div className="relative">
-          <svg width="130" height="130" viewBox="0 0 130 130" fill="none">
-            <circle
-              cx="65"
-              cy="65"
-              r="42"
-              stroke="rgba(16,185,129,0.25)"
-              strokeWidth="3"
-            />
-            <circle cx="82" cy="55" r="42" fill="white" />
-            <circle
-              cx="82"
-              cy="55"
-              r="42"
-              stroke="rgba(16,185,129,0.12)"
-              strokeWidth="3"
-            />
-          </svg>
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-600 via-emerald-500 to-yellow-500 rounded-b-[60px] shadow-[0_25px_80px_rgba(16,185,129,0.35)] overflow-hidden">
 
-          {/* bintang */}
+          {/* overlay */}
+          <div className="absolute inset-0 bg-black/[0.03]" />
+
+          {/* decorative circles */}
+          <div className="absolute -top-16 -right-16 w-72 h-72 rounded-full border border-white/10" />
+          <div className="absolute -top-28 -right-28 w-96 h-96 rounded-full border border-white/10" />
+          <div className="absolute bottom-0 left-0 w-52 h-52 rounded-full bg-white/10 blur-3xl" />
+
+          {/* moon */}
           <motion.div
             animate={{
-              scale: [1, 1.2, 1],
-              opacity: [0.7, 1, 0.7],
+              y: [0, 8, 0],
             }}
             transition={{
-              duration: 2,
+              duration: 5,
               repeat: Infinity,
+              ease: "easeInOut",
             }}
-            className="absolute top-7 left-4 text-yellow-400 text-xl"
+            className="absolute right-8 top-10"
           >
-            ✦
+            <div className="relative">
+              <svg width="170" height="170" viewBox="0 0 170 170" fill="none">
+                <circle
+                  cx="85"
+                  cy="85"
+                  r="58"
+                  stroke="rgba(255,255,255,0.22)"
+                  strokeWidth="4"
+                />
+                <circle cx="108" cy="72" r="58" fill="white" />
+                <circle
+                  cx="108"
+                  cy="72"
+                  r="58"
+                  stroke="rgba(255,255,255,0.12)"
+                  strokeWidth="4"
+                />
+              </svg>
+
+              {/* stars */}
+              <motion.div
+                animate={{
+                  scale: [1, 1.4, 1],
+                  opacity: [0.5, 1, 0.5],
+                }}
+                transition={{
+                  duration: 2.5,
+                  repeat: Infinity,
+                }}
+                className="absolute left-3 top-6 text-yellow-300 text-2xl"
+              >
+                ✦
+              </motion.div>
+
+              <motion.div
+                animate={{
+                  scale: [1, 1.3, 1],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                }}
+                className="absolute left-10 bottom-8 text-white/80 text-lg"
+              >
+                ✦
+              </motion.div>
+            </div>
           </motion.div>
+
+          {/* TEXT */}
+          <div className="relative z-10 px-6 pt-10">
+
+            <motion.div
+              initial={{ opacity: 0, x: -15 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+              className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 backdrop-blur-md px-4 py-2"
+            >
+              <span className="w-2 h-2 rounded-full bg-yellow-300 animate-pulse" />
+              <span className="text-[11px] font-bold uppercase tracking-[0.3em] text-white">
+                Event Hari Raya
+              </span>
+            </motion.div>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="mt-5 text-[52px] leading-none font-black text-white drop-shadow-lg"
+            >
+              Idul Adha
+            </motion.h1>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.45 }}
+              className="mt-3 flex items-center gap-3"
+            >
+              <span className="text-yellow-200 text-2xl font-black tracking-wide">
+                1447 H
+              </span>
+
+              <span className="px-4 py-1.5 rounded-full bg-red-500 text-white text-xs font-black shadow-2xl animate-pulse">
+                🔥 30% OFF
+              </span>
+            </motion.div>
+
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.55 }}
+              className="mt-5 max-w-[280px] text-sm leading-relaxed text-white/90"
+            >
+              Nikmati promo spesial Hari Raya Idul Adha
+              untuk berbagai premium apps favoritmu ✨
+            </motion.p>
+
+            {/* floating badges */}
+            <div className="mt-7 flex items-center gap-3">
+
+              <div className="rounded-2xl bg-white/15 border border-white/15 backdrop-blur-xl px-4 py-3 shadow-lg">
+                <p className="text-[10px] uppercase text-white/70">
+                  Event
+                </p>
+                <p className="text-sm font-bold text-white">
+                  14 - 17 Mei
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-white text-emerald-700 px-4 py-3 shadow-[0_10px_30px_rgba(255,255,255,0.3)]">
+                <p className="text-[10px] uppercase font-bold">
+                  Hemat
+                </p>
+                <p className="text-lg font-black">
+                  30%
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-yellow-300 text-gray-900 px-4 py-3 shadow-xl">
+                <p className="text-[10px] uppercase font-bold">
+                  Special
+                </p>
+                <p className="text-lg">
+                  🐄🐐
+                </p>
+              </div>
+
+            </div>
+          </div>
         </div>
       </motion.div>
 
-      {/* tulisan event */}
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="absolute top-8 left-6"
-      >
-        <div className="bg-white/90 backdrop-blur-md border border-emerald-100 rounded-2xl px-5 py-3 shadow-lg">
-          <p className="text-[11px] font-semibold tracking-[0.2em] text-emerald-600 uppercase">
-            Event Hari Raya
-          </p>
+      {/* FLOATING ICONS */}
+      {floating.map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute text-xl opacity-[0.08]"
+          style={{
+            left: `${(i * 9) % 100}%`,
+            top: `${20 + ((i * 13) % 70)}%`,
+          }}
+          animate={{
+            y: [0, -14, 0],
+            rotate: [0, 8, -8, 0],
+          }}
+          transition={{
+            duration: 4 + i,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        >
+          {i % 2 === 0 ? "🐐" : "🐄"}
+        </motion.div>
+      ))}
 
-          <h2 className="text-2xl font-black text-gray-900 leading-tight">
-            Idul Adha
-          </h2>
-
-          <p className="text-sm font-semibold text-yellow-600">
-            1447 H 🐐
-          </p>
-        </div>
-      </motion.div>
-
-      {/* icon kambing */}
-      <motion.div
-        animate={{ y: [0, -6, 0] }}
-        transition={{
-          duration: 3,
-          repeat: Infinity,
-        }}
-        className="absolute bottom-10 right-10 text-6xl opacity-10"
-      >
-        🐐
-      </motion.div>
-
-      {/* icon sapi */}
-      <motion.div
-        animate={{ y: [0, 5, 0] }}
-        transition={{
-          duration: 4,
-          repeat: Infinity,
-        }}
-        className="absolute bottom-16 left-10 text-7xl opacity-10"
-      >
-        🐄
-      </motion.div>
-
-      {/* ketupat */}
-      <motion.div
-        animate={{ rotate: [0, 8, -8, 0] }}
-        transition={{
-          duration: 5,
-          repeat: Infinity,
-        }}
-        className="absolute top-44 right-20 text-3xl opacity-20"
-      >
-        ✨
-      </motion.div>
-
-      {/* bintang kecil */}
+      {/* PARTICLES */}
       {stars.map((_, i) => (
         <motion.span
           key={i}
           className="absolute inline-block rounded-full bg-emerald-400"
           style={{
-            width: `${2 + (i % 3)}px`,
-            height: `${2 + (i % 3)}px`,
-            left: `${5 + i * 5}%`,
-            top: `${8 + (i % 6) * 12}%`,
+            width: `${2 + (i % 4)}px`,
+            height: `${2 + (i % 4)}px`,
+            left: `${(i * 7) % 100}%`,
+            top: `${(i * 11) % 100}%`,
             opacity: 0.18,
           }}
           animate={{
-            opacity: [0.15, 0.45, 0.15],
-            scale: [1, 1.5, 1],
+            opacity: [0.1, 0.5, 0.1],
+            scale: [1, 1.8, 1],
+            y: [0, -8, 0],
           }}
           transition={{
-            duration: 2 + (i % 3),
+            duration: 2 + (i % 5),
             repeat: Infinity,
-            delay: i * 0.1,
+            delay: i * 0.08,
           }}
         />
       ))}
+
+      {/* BOTTOM GLOW */}
+      <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-yellow-100/30 to-transparent" />
     </div>
   );
 };
-
   // ✅ GATE PALING AWAL: PWA + event
   useEffect(() => {
  const DISABLE_PWA_DISKON = true;
@@ -601,10 +698,12 @@ if (!DISABLE_PWA_DISKON && !isPWA()) {
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <h1 className="text-2xl font-bold text-gray-900">Diskon Idul Fitri</h1>
+               <h1 className="text-2xl font-black text-gray-900">
+  Event Idul Adha 🐐
+</h1>
                 <p className="text-sm text-gray-500 mt-1">
-                  Diskon <b>{discountLabel}</b> aktif <b>20 – 22 Mar 2026</b>.
-                </p>
+  Promo spesial Hari Raya Idul Adha 1447 H ✨
+</p>
               </div>
 
               <Link
