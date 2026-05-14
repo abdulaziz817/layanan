@@ -1,4 +1,5 @@
 "use client"
+
 import { useEffect, useState } from "react"
 import Head from "next/head"
 import Footer from "./ui/Footer"
@@ -7,14 +8,20 @@ import AOS from "aos"
 import "aos/dist/aos.css"
 import "swiper/css"
 import SplashScreen from "./SplashScreen"
+import { isPWA } from "../utils/isPWA"
 
 const Layout = ({ children }) => {
   const [showSplash, setShowSplash] = useState(true)
+  const [pwaMode, setPwaMode] = useState(false)
 
   useEffect(() => {
     AOS.init({ duration: 1000, once: true })
 
+    // cek mode PWA
+    setPwaMode(isPWA())
+
     const hasShown = localStorage.getItem("splashShown")
+
     if (hasShown) {
       setShowSplash(false)
     } else {
@@ -22,14 +29,26 @@ const Layout = ({ children }) => {
       localStorage.setItem("splashShown", "true")
     }
 
-    // 🔥 register service worker
+    // register service worker
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js")
     }
 
+    // disable klik kanan khusus PWA
+    const preventMenu = (e) => {
+      if (isPWA()) {
+        e.preventDefault()
+      }
+    }
+
+    document.addEventListener("contextmenu", preventMenu)
+
+    return () => {
+      document.removeEventListener("contextmenu", preventMenu)
+    }
   }, [])
 
-  // 🔥 PUSH FUNCTION
+  // PUSH FUNCTION
   async function enablePush() {
     if (!("serviceWorker" in navigator)) {
       alert("Browser tidak support notifikasi.")
@@ -39,6 +58,7 @@ const Layout = ({ children }) => {
     const reg = await navigator.serviceWorker.ready
 
     const perm = await Notification.requestPermission()
+
     if (perm !== "granted") {
       alert("Izin notifikasi ditolak.")
       return
@@ -53,7 +73,9 @@ const Layout = ({ children }) => {
 
     await fetch("/.netlify/functions/subscribe", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify(sub),
     })
 
@@ -62,12 +84,19 @@ const Layout = ({ children }) => {
 
   function urlBase64ToUint8Array(base64String) {
     const padding = "=".repeat((4 - (base64String.length % 4)) % 4)
+
     const base64 = (base64String + padding)
       .replace(/-/g, "+")
       .replace(/_/g, "/")
+
     const raw = atob(base64)
+
     const out = new Uint8Array(raw.length)
-    for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i)
+
+    for (let i = 0; i < raw.length; i++) {
+      out[i] = raw.charCodeAt(i)
+    }
+
     return out
   }
 
@@ -75,31 +104,50 @@ const Layout = ({ children }) => {
     <>
       <Head>
         <title>Layanan Nusantara</title>
-        <meta name="description" content="Layanan Nusantara menyediakan jasa desain grafis, website profesional, preset fotografi, dan aplikasi premium dengan harga terbaik." />
-  <meta
-  name="viewport"
-  content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
-/>
+
+        <meta
+          name="description"
+          content="Layanan Nusantara menyediakan jasa desain grafis, website profesional, preset fotografi, dan aplikasi premium dengan harga terbaik."
+        />
+
+        {/* viewport khusus PWA */}
+        <meta
+          name="viewport"
+          content={
+            pwaMode
+              ? "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+              : "width=device-width, initial-scale=1"
+          }
+        />
+
         <meta name="theme-color" content="#ffffff" />
+
         <link rel="manifest" href="/manifest.json" />
       </Head>
 
-      {showSplash && <SplashScreen onFinish={() => setShowSplash(false)} />}
+      {showSplash && (
+        <SplashScreen onFinish={() => setShowSplash(false)} />
+      )}
 
-      <Navbar />
+      <div className={pwaMode ? "pwa-lock" : ""}>
+        <Navbar />
 
-      {/* 🔥 Tombol aktifkan notif */}
-      <div className="text-center py-4">
-        <button
-          onClick={enablePush}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-lg"
-        >
-          Aktifkan Notifikasi Promo 🔔
-        </button>
+        {/* tombol notif */}
+        <div className="text-center py-4">
+          <button
+            onClick={enablePush}
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg"
+          >
+            Aktifkan Notifikasi Promo 🔔
+          </button>
+        </div>
+
+        <main className="min-h-screen">
+          {children}
+        </main>
+
+        <Footer />
       </div>
-
-      <main className="min-h-screen">{children}</main>
-      <Footer />
     </>
   )
 }
