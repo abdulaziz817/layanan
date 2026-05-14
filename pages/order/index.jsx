@@ -694,6 +694,8 @@ const servicesItems = [
   "ChatGPT",
   "Google Gemini",
   "Perplexity AI",
+  "Groq AI",
+  "Claude AI",
 
   "🎨 Desain & Editing",
   "Canva Pro",
