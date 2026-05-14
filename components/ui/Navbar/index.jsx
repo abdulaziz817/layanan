@@ -20,8 +20,8 @@ export default function Navbar() {
   useEffect(() => {
     const check = () => {
       const now = new Date()
-      const start = new Date('2026-03-20T00:00:00')
-      const end = new Date('2026-03-22T23:59:59')
+   const start = new Date('2026-05-14T00:00:00')
+const end = new Date('2026-05-17T23:59:59')
       setIsDiskonEvent(now >= start && now <= end)
     }
 
@@ -36,7 +36,8 @@ export default function Navbar() {
     { title: 'Testimoni', path: '/#testimonials' },
     { title: 'Kelas Nusantara', path: '/kelas-nusantara' },
     { title: 'Blog', path: '/blog' },
-    ...(pwa && isDiskonEvent ? [{ title: 'Diskon', path: '/order/diskon' }] : []),
+    // ...(pwa && isDiskonEvent ? [{ title: 'Diskon', path: '/order/diskon' }] : []),
+    ...(isDiskonEvent ? [{ title: 'Diskon', path: '/order/diskon' }] : []),
     ...(pwa ? [{ title: 'Reward', path: '/reward' }] : []),
   ]
 
@@ -67,25 +68,24 @@ export default function Navbar() {
     setMenuOpen(false)
     setMoreOpen(false)
 
-    const pwaOnlyPaths = [
-      '/order',
-      '/order/diskon',
-      '/reward',
-      '/login',
-      '/register',
-      '/reset-password',
-      '/profil',
-    ]
+const pwaOnlyPaths = [
+  '/order',
+  '/order/diskon',
+  '/reward',
+  '/login',
+  '/register',
+  '/reset-password',
+  '/profil',
+]
 
-    if (!pwa && pwaOnlyPaths.includes(path)) {
-      router.push('/#cta')
-      return
-    }
-
-    if (path.startsWith('/#')) {
-      router.push(path)
-      return
-    }
+if (
+  !pwa &&
+  pwaOnlyPaths.includes(path) &&
+  path !== '/order/diskon'
+) {
+  router.push('/#cta')
+  return
+}
 
     if (pathname !== path) {
       router.push(path)

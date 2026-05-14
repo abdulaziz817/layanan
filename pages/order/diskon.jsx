@@ -44,12 +44,17 @@ export default function OrderDiskonPage() {
   const [cryptoLoading, setCryptoLoading] = useState(false);
   const [cryptoError, setCryptoError] = useState("");
 
-  const isDiskonEvent = useMemo(() => {
-    const now = new Date();
-    const start = new Date("2026-03-20T00:00:00");
-    const end = new Date("2026-03-22T23:59:59");
-    return now >= start && now <= end;
-  }, []);
+const isDiskonEvent = useMemo(() => {
+  const now = new Date();
+
+  // mulai 14 Mei 2026
+  const start = new Date("2026-05-14T00:00:00");
+
+  // selesai 17 Mei 2026
+  const end = new Date("2026-05-17T23:59:59");
+
+  return now >= start && now <= end;
+}, []);
 
   const discountMultiplier = 0.7; // 30% off
   const discountLabel = "30% OFF";
@@ -113,12 +118,13 @@ export default function OrderDiskonPage() {
 
   // ✅ GATE PALING AWAL: PWA + event
   useEffect(() => {
-    // wajib PWA
-    if (!isPWA()) {
-      router.replace("/");
-      return;
-    }
+ const DISABLE_PWA_DISKON = true;
 
+// wajib PWA
+if (!DISABLE_PWA_DISKON && !isPWA()) {
+  router.replace("/");
+  return;
+}
     // wajib event diskon aktif
     if (!isDiskonEvent) {
       router.replace("/");
