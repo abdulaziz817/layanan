@@ -185,7 +185,7 @@ export default function Hero() {
       <MessageCircle className="w-4 h-4" />
       Chat Sekarang
     </a>
-  ) : canInstall && deferredPrompt ? (
+  ) : canInstall && deferreddoPrompt ? (
     <button
       onClick={installApp}
       className="

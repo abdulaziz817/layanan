@@ -76,7 +76,10 @@ const Layout = ({ children }) => {
       <Head>
         <title>Layanan Nusantara</title>
         <meta name="description" content="Layanan Nusantara menyediakan jasa desain grafis, website profesional, preset fotografi, dan aplikasi premium dengan harga terbaik." />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta
+  name="viewport"
+  content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+/>
         <meta name="theme-color" content="#ffffff" />
         <link rel="manifest" href="/manifest.json" />
       </Head>
