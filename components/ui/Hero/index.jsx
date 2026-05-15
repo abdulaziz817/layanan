@@ -128,14 +128,25 @@ export default function Hero() {
           Solusi Jasa Layanan Terpercaya
         </h1>
 
-        <div className="relative min-h-[72px] sm:min-h-[96px] mb-6 flex items-center justify-center">
-          <h2
-            className={`px-3 text-center text-2xl sm:text-4xl font-semibold text-indigo-600 transition-all duration-700 ease-in-out transform ${fadeClass}`}
-          >
-            {services[index]}
-          </h2>
-        </div>
-
+      <div className="relative h-[110px] sm:h-[130px] mb-6 flex items-center justify-center overflow-hidden">
+  <h2
+    className={`
+      absolute
+      w-full
+      px-4
+      text-center
+      text-2xl sm:text-4xl
+      leading-snug
+      font-semibold
+      text-indigo-600
+      transition-all duration-700 ease-in-out
+      transform
+      ${fadeClass}
+    `}
+  >
+    {services[index]}
+  </h2>
+</div>
         <p className="text-base sm:text-lg text-gray-600 max-w-xl mx-auto mb-10">
           Kami menyediakan layanan berkualitas tinggi untuk kebutuhan teknologi dan kreativitas Anda.
         </p>
@@ -185,7 +196,7 @@ export default function Hero() {
       <MessageCircle className="w-4 h-4" />
       Chat Sekarang
     </a>
-  ) : canInstall && deferreddoPrompt ? (
+) : canInstall && deferredPrompt ? (
     <button
       onClick={installApp}
       className="
