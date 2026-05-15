@@ -122,21 +122,19 @@ export default function Hero() {
       : "opacity-0 translate-y-4 scale-95";
 
   return (
-    <section className="bg-white px-6 py-20 sm:py-28 min-h-screen flex items-center justify-center">
-      <div className="max-w-3xl mx-auto text-center text-gray-800 mt-8">
+   <section className="bg-white px-6 pt-24 pb-40 sm:pt-28 sm:pb-32 min-h-screen flex items-start justify-center">
+     <div className="max-w-3xl mx-auto text-center text-gray-800 w-full">
         <h1 className="text-3xl sm:text-5xl font-extrabold mb-8">
           Solusi Jasa Layanan Terpercaya
         </h1>
 
-      <div className="relative h-[110px] sm:h-[130px] mb-6 flex items-center justify-center overflow-hidden">
+  <div className="relative min-h-[80px] sm:min-h-[100px] mb-6 flex items-center justify-center">
   <h2
     className={`
-      absolute
-      w-full
       px-4
       text-center
       text-2xl sm:text-4xl
-      leading-snug
+      leading-tight
       font-semibold
       text-indigo-600
       transition-all duration-700 ease-in-out
