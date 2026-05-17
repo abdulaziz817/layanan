@@ -899,7 +899,7 @@ GetContact: {
 
                 <div>
                   <p className="font-semibold text-gray-900">{user?.name || "-"}</p>
-                  <p className="text-xs text-gray-500">{user?.phone || "-"}</p>
+                  <p className="text-xs text-white">{user?.phone || "-"}</p>
                 </div>
               </div>
 
@@ -930,7 +930,7 @@ GetContact: {
               </div>
 
               <div>
-                <label className="text-sm text-gray-700">Pilih Durasi</label>
+                <label className="text-sm text-white">Pilih Durasi</label>
                 <select
                   value={duration}
                   onChange={(e) => {
@@ -985,7 +985,7 @@ GetContact: {
               </div>
 
               <div>
-                <label className="text-sm text-gray-700">Pesan Tambahan</label>
+                <label className="text-sm text-white">Pesan Tambahan</label>
                 <textarea
                   className={getClass(
                     "mt-2 w-full h-28 border rounded-lg p-3 focus:ring-2 focus:ring-indigo-600",
@@ -1004,7 +1004,7 @@ GetContact: {
               </div>
 
               <div>
-                <label className="text-sm text-gray-700">Metode Pembayaran</label>
+                <label className="text-sm text-white">Metode Pembayaran</label>
                 <select
                   className={getClass(
                     "mt-2 w-full border rounded-lg p-3 focus:ring-2 focus:ring-indigo-600",
@@ -1107,7 +1107,7 @@ GetContact: {
 
               {showCrypto && (
                 <div className="border rounded-2xl p-4">
-                  <p className="font-semibold text-gray-900">Crypto</p>
+                  <p className="font-semibold text-white">Crypto</p>
                   {fieldErrors?.crypto ? (
                     <div className="mt-3 bg-red-50 border border-red-200 text-red-700 text-xs p-3 rounded-lg">
                       {fieldErrors.crypto}
@@ -1115,7 +1115,7 @@ GetContact: {
                   ) : null}
 
                   <div className="mt-3">
-                    <label className="text-xs text-gray-600">Pilih Coin</label>
+                    <label className="text-xs text-white">Pilih Coin</label>
                     <select
                       className="mt-2 w-full border rounded-lg p-3 focus:ring-2 focus:ring-indigo-600"
                       value={cryptoCoin}
@@ -1130,7 +1130,7 @@ GetContact: {
 
                   {cryptoCoin === "USDT" && (
                     <div className="mt-3">
-                      <label className="text-xs text-gray-600">Network USDT</label>
+                      <label className="text-xs text-white">Network USDT</label>
                       <select
                         className="mt-2 w-full border rounded-lg p-3 focus:ring-2 focus:ring-indigo-600"
                         value={cryptoNetwork}
@@ -1139,7 +1139,7 @@ GetContact: {
                         <option value="TRC20">TRC20 (TRON)</option>
                         <option value="BEP20">BEP20 (BSC)</option>
                       </select>
-                      <p className="mt-2 text-[11px] text-gray-500">
+                      <p className="mt-2 text-[11px] text-white">
                         Pastikan network sama saat transfer. Salah network = dana bisa hilang.
                       </p>
                     </div>
@@ -1174,7 +1174,7 @@ GetContact: {
                   </div>
 
                   <div className="mt-3 border rounded-xl p-3">
-                    <p className="text-xs text-gray-500 mb-2">
+                    <p className="text-xs text-white mb-2">
                       Alamat Wallet ({cryptoCoin} - {getCryptoNetworkLabel()})
                     </p>
                     <div className="flex items-center justify-between gap-3">
@@ -1191,7 +1191,7 @@ GetContact: {
                         Copy
                       </button>
                     </div>
-                    <p className="mt-2 text-[11px] text-gray-500">
+                    <p className="mt-2 text-[11px] text-white">
                       Setelah transfer, kirim bukti & TXID/hash via WhatsApp.
                     </p>
                   </div>
