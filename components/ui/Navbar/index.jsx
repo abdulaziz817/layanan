@@ -41,14 +41,22 @@ const end = new Date('2026-05-17T23:59:59')
     ...(pwa ? [{ title: 'Reward', path: '/reward' }] : []),
   ]
 
-  const pwaMoreMenu = [
-    { title: 'Kelas Nusantara', desc: 'Belajar materi digital', path: '/kelas-nusantara', icon: '🎓' },
-    { title: 'Tentang', desc: 'Lihat profil layanan', path: '/#cta', icon: 'ⓘ' },
-    { title: 'Software', desc: 'Tools yang digunakan', path: '/#toolkit', icon: '⌘' },
-    { title: 'Testimoni', desc: 'Review pengguna', path: '/#testimonials', icon: '★' },
-    ...(isDiskonEvent ? [{ title: 'Diskon', desc: 'Promo khusus aplikasi', path: '/order/diskon', icon: '%' }] : []),
-    { title: 'Nusantara AI', desc: 'Buka asisten AI', action: 'ai', icon: '✦' },
-  ]
+const pwaMoreMenu = [
+  // { title: 'Kelas Nusantara', desc: 'Belajar materi digital', path: '/kelas-nusantara', icon: '🎓' },
+
+  // { title: 'Tentang', desc: 'Lihat profil layanan', path: '/#cta', icon: 'ⓘ' },
+
+  // { title: 'Software', desc: 'Tools yang digunakan', path: '/#toolkit', icon: '⌘' },
+
+  // { title: 'Testimoni', desc: 'Review pengguna', path: '/#testimonials', icon: '★' },
+    { title: 'Blog', desc: 'Artikel & update terbaru', path: '/blog', icon: '📰' },
+
+  ...(isDiskonEvent
+    ? [{ title: 'Diskon', desc: 'Promo khusus aplikasi', path: '/order/diskon', icon: '%' }]
+    : []),
+
+  { title: 'Nusantara AI', desc: 'Buka asisten AI', action: 'ai', icon: '✦' },
+]
 
   const isActive = (path) => {
     if (path === '/') return pathname === '/'
@@ -293,11 +301,11 @@ if (
 
             <div className="w-[70px]" />
 
-            {/* BLOG */}
-            <button
-              onClick={() => handleNavClick('/blog')}
+          {/* KELAS NUSANTARA */}
+<button
+  onClick={() => handleNavClick('/kelas-nusantara')}
               className={`relative w-[56px] flex flex-col items-center justify-center gap-1 active:scale-95 transition-all duration-300 ${
-                isActive('/blog') ? 'text-black -translate-y-1' : 'text-gray-400'
+                isActive('/kelas-nusantara') ? 'text-black -translate-y-1' : 'text-gray-400'
               }`}
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
@@ -305,9 +313,9 @@ if (
                 <path d="M8 9h8M8 13h5" />
               </svg>
 
-              <span className="text-[11px] font-medium">Blog</span>
+      <span className="text-[11px] font-medium">Kelas</span>
 
-              {isActive('/blog') && (
+              {isActive('/kelas-nusantara') && (
                 <span className="absolute -bottom-2 h-1 w-5 rounded-full bg-black transition-all" />
               )}
             </button>

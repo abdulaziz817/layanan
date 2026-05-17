@@ -353,15 +353,9 @@ GetContact: {
     "YouTube Premium": {
       "1 Bulan · Pribadi · Garansi": "35000",
       "1 Bulan · Keluarga · Sharing": "30000",
-      "1 Bulan · Pelajar · Garansi": "26000",
-      "1 Bulan · Pelajar · Non Garansi": "13000",
     },
 
     "Netflix Premium": {
-     "1 Hari · Sharing · 1 Perangkat": "10000",
-     "3 Hari · Sharing · 1 Perangkat": "15000",
-     "7 Hari · Sharing · 1 Perangkat": "24000",
-     "14 Hari · Sharing · 1 Perangkat": "35000",
      "1 Bulan · Sharing · 2 Perangkat": "48000",
      "1 Bulan · Semi Private": "64000",
      "2 Bulan · Semi Private": "870000",
@@ -485,17 +479,15 @@ GetContact: {
     },
 
     "Canva Pro": {
-      "1 Bulan · Member · Non Garansi": "15000",
       "1 Bulan · Member · Garansi": "25000",
       "Lifitime · Garansi 6 Bulan": "50000",
     },
 
     "CapCut Pro": {
-      "7 Hari · Private": "10000",
       "14 Hari · Private": "14000",
-      "28 Hari · Private": "19000",
+      "32 Hari · Private": "26000",
       "42 Hari · Private": "29000",
-      "7  Bulan · Private · Garansi ": "49000",
+      "7  Bulan · Private · Garansi ": "69000",
     },
 
     "Google Gemini": {
@@ -510,11 +502,6 @@ GetContact: {
       "14 Hari · Private": "16000",
       "28 Hari · Private": "40000",
 
-    },
-
-    "TikTok Premium": {
-      "1 Bulan · Non Garansi": "15000",
-      "1 Bulan · Garansi": "20000",
     },
 
     "HBO GO": {
