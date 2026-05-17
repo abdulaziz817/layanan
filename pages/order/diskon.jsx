@@ -61,60 +61,88 @@ const isDiskonEvent = useMemo(() => {
 
 
   const IdulFitriDecor = () => {
-    const stars = Array.from({ length: 10 });
+     const stars = Array.from({ length: 14 });
 
-    return (
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-24 -right-24 h-56 w-56 rounded-full bg-indigo-100/40 blur-3xl" />
-        <div className="absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-emerald-100/30 blur-3xl" />
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
 
-        <motion.div
-          initial={{ opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="absolute -top-6 right-6"
-        >
-          <div className="relative">
-            <svg width="84" height="84" viewBox="0 0 84 84" fill="none">
-              <circle cx="42" cy="42" r="28" stroke="rgba(17,24,39,0.18)" strokeWidth="2" />
-              <circle cx="52" cy="36" r="28" fill="white" />
-              <circle cx="52" cy="36" r="28" stroke="rgba(17,24,39,0.06)" strokeWidth="2" />
-            </svg>
+      {/* ORNAMEN BULAT SOFT */}
+      <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-stone-100 opacity-70" />
 
-            <motion.div
-              animate={{ y: [0, 4, 0] }}
-              transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute -left-12 top-10"
-            >
-              <div className="h-10 w-7 rounded-xl border border-gray-200 bg-white shadow-sm flex items-center justify-center">
-                <div className="h-2 w-2 rounded-full bg-indigo-200" />
-              </div>
-              <div className="mx-auto mt-1 h-6 w-px bg-gray-200" />
-            </motion.div>
-          </div>
-        </motion.div>
+      <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full border border-stone-200" />
 
-        {stars.map((_, i) => (
-          <motion.span
-            key={i}
-            className="absolute inline-block h-1.5 w-1.5 rounded-full bg-gray-400"
-            style={{
-              left: `${10 + i * 8}%`,
-              top: `${8 + (i % 4) * 10}%`,
-              opacity: 0.2,
-            }}
-            animate={{ opacity: [0.12, 0.35, 0.12], scale: [1, 1.4, 1] }}
-            transition={{
-              duration: 2 + (i % 3) * 0.6,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: i * 0.08,
-            }}
+      {/* BULAN SABIT */}
+      <div className="absolute top-8 right-8">
+        <svg width="110" height="110" viewBox="0 0 110 110" fill="none">
+          <circle
+            cx="52"
+            cy="52"
+            r="34"
+            stroke="#D6D3D1"
+            strokeWidth="3"
           />
-        ))}
+          <circle
+            cx="66"
+            cy="45"
+            r="34"
+            fill="white"
+          />
+        </svg>
       </div>
-    );
-  };
+
+      {/* LANTERA */}
+      <motion.div
+        animate={{ y: [0, 6, 0] }}
+        transition={{
+          duration: 3,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        className="absolute top-16 right-44"
+      >
+        <div className="w-9 h-14 rounded-2xl border border-stone-300 bg-white shadow-sm flex items-center justify-center">
+          <div className="w-2 h-2 rounded-full bg-amber-300" />
+        </div>
+
+        <div className="mx-auto h-10 w-px bg-stone-300" />
+      </motion.div>
+
+      {/* BINTANG */}
+      {stars.map((_, i) => (
+        <motion.span
+          key={i}
+          className="absolute rounded-full bg-stone-400"
+          style={{
+            width: `${2 + (i % 2)}px`,
+            height: `${2 + (i % 2)}px`,
+            left: `${6 + i * 6}%`,
+            top: `${5 + (i % 5) * 8}%`,
+            opacity: 0.18,
+          }}
+          animate={{
+            opacity: [0.1, 0.35, 0.1],
+            scale: [1, 1.4, 1],
+          }}
+          transition={{
+            duration: 2.5 + i * 0.15,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+      ))}
+
+      {/* SILUET MASJID */}
+      <div className="absolute bottom-0 left-0 w-full opacity-[0.04]">
+        <svg
+          viewBox="0 0 1440 220"
+          className="w-full h-auto fill-stone-900"
+        >
+          <path d="M0 220V160H120V110C120 90 136 74 156 74C176 74 192 90 192 110V160H280V80L360 20L440 80V160H520V120C520 100 536 84 556 84C576 84 592 100 592 120V160H720V100L820 30L920 100V160H1040V130C1040 110 1056 94 1076 94C1096 94 1112 110 1112 130V160H1240V90L1320 40L1400 90V220Z" />
+        </svg>
+      </div>
+    </div>
+  );
+};
 
   // ✅ GATE PALING AWAL: PWA + event
   useEffect(() => {
@@ -456,7 +484,7 @@ const isDiskonEvent = useMemo(() => {
     // ⚠️ FIX BUG: kamu tulis diskonPrice tapi variabelnya gak ada → pakai promoPrice
     const encodedMessage = encodeURIComponent(
       `*Hai Layanan Nusantara!* 👋\n` +
-      `Saya ingin melakukan pemesanan melalui Diskon Hari Raya Idul Fitri 🎉\n` +
+      `Saya ingin melakukan pemesanan melalui Diskon Hari Raya Idul Adha 🎉\n` +
       `*Diskon Spesial: 30% OFF*\n\n` +
 
       `━━━━━━━━━━━━━━━━\n` +
@@ -519,9 +547,9 @@ const isDiskonEvent = useMemo(() => {
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <h1 className="text-2xl font-bold text-gray-900">Diskon Idul Fitri</h1>
+                <h1 className="text-2xl font-bold text-gray-900">Diskon Idul Adha</h1>
                 <p className="text-sm text-gray-500 mt-1">
-                  Diskon <b>{discountLabel}</b> aktif <b>20 – 22 Mar 2026</b>.
+                  Diskon <b>{discountLabel}</b> aktif <b>27 – 29 Mei 2026</b>.
                 </p>
               </div>
 
