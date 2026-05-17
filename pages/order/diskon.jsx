@@ -760,30 +760,114 @@ GetContact: {
         <title>Diskon Spesial - Layanan Nusantara</title>
       </Head>
 
-      <div className="pt-28 pb-12 bg-white min-h-screen relative">
-        <IdulFitriDecor />
-        <div className="max-w-xl mx-auto px-4 text-gray-700">
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="border border-gray-200 rounded-2xl shadow-sm p-6 bg-white relative overflow-hidden"
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <h1 className="text-2xl font-bold text-gray-900">Diskon Idul Adha</h1>
-                <p className="text-sm text-gray-500 mt-1">
-                  Diskon <b>{discountLabel}</b> aktif <b>27 – 29 Mei 2026</b>.
-                </p>
-              </div>
+     <div className="pt-28 pb-12 min-h-screen relative overflow-hidden bg-gradient-to-b from-emerald-950 via-emerald-900 to-[#f8faf8]">
 
-              <Link
-                href="/profil?returnTo=/order/diskon"
-                className="text-sm font-semibold text-indigo-700 hover:underline whitespace-nowrap"
-              >
-                Edit Profil
-              </Link>
-            </div>
+  {/* DECOR */}
+  <IdulFitriDecor />
+
+  {/* GLOW */}
+  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-emerald-400/20 blur-3xl rounded-full pointer-events-none" />
+
+  <div className="max-w-xl mx-auto px-4 relative z-10 text-gray-700">
+    <motion.div
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="
+        rounded-[30px]
+        border border-white/20
+        bg-white/88
+        backdrop-blur-xl
+        shadow-[0_20px_60px_rgba(0,0,0,0.15)]
+        overflow-hidden
+      "
+    >
+          <div className="relative px-6 pt-6 pb-5 bg-gradient-to-r from-emerald-600 via-green-600 to-emerald-700 text-white overflow-hidden">
+
+  {/* PATTERN */}
+  <div className="absolute inset-0 opacity-10">
+    <svg
+      viewBox="0 0 800 300"
+      className="w-full h-full"
+      fill="none"
+    >
+      <path
+        d="M0 150Q100 80 200 150T400 150T600 150T800 150"
+        stroke="white"
+        strokeWidth="2"
+      />
+      <path
+        d="M0 190Q100 120 200 190T400 190T600 190T800 190"
+        stroke="white"
+        strokeWidth="2"
+      />
+    </svg>
+  </div>
+
+  {/* BULAN */}
+  <div className="absolute top-4 right-20 opacity-20">
+    <div className="relative w-24 h-24">
+
+      <div className="absolute inset-0 rounded-full border-[5px] border-yellow-200" />
+
+      <div className="absolute left-4 top-0 w-24 h-24 rounded-full bg-emerald-700" />
+
+    </div>
+  </div>
+
+  <div className="relative flex items-start justify-between gap-3">
+
+    <div className="min-w-0">
+
+      {/* BADGE */}
+      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 border border-white/20 text-xs font-semibold tracking-wide mb-4">
+
+        <span className="w-2 h-2 rounded-full bg-yellow-300 animate-pulse" />
+
+        PROMO SPESIAL IDUL ADHA
+      </div>
+
+      {/* TITLE */}
+      <h1 className="text-3xl font-black leading-tight">
+        Diskon Idul Adha 🐐
+      </h1>
+
+      <p className="text-sm text-emerald-50/90 mt-2 leading-relaxed">
+        Diskon <b>{discountLabel}</b> aktif
+        selama <b>27 – 29 Mei 2026</b>.
+      </p>
+
+      <div className="flex items-center gap-2 mt-4 flex-wrap">
+
+        <div className="px-3 py-1 rounded-full bg-white/15 border border-white/20 text-xs font-medium">
+          Auto Apply
+        </div>
+
+        <div className="px-3 py-1 rounded-full bg-yellow-300 text-emerald-950 text-xs font-bold">
+          Limited Event
+        </div>
+
+      </div>
+    </div>
+
+    <Link
+      href="/profil?returnTo=/order/diskon"
+      className="
+        shrink-0
+        px-4 py-2
+        rounded-xl
+        bg-white text-emerald-700
+        text-sm font-bold
+        shadow-lg
+        hover:scale-105
+        transition
+      "
+    >
+      Edit Profil
+    </Link>
+
+  </div>
+</div>
 
             {!isDiskonEvent ? (
               <div className="mt-4 bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm p-3 rounded-lg">
@@ -804,7 +888,7 @@ GetContact: {
                 {fieldErrors?.diskon ? <div className="mt-2 text-xs">{fieldErrors.diskon}</div> : null}
               </div>
             ) : null}
-
+<div className="p-6">
             <form onSubmit={handleSubmit} className="mt-6 space-y-4 text-sm">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full border overflow-hidden bg-gray-50 flex items-center justify-center">
@@ -1129,6 +1213,7 @@ GetContact: {
                 {isSubmitting ? "Mengirim..." : "Kirim Pesanan Diskon via WhatsApp"}
               </button>
             </form>
+            </div>
           </motion.div>
         </div>
       </div>
