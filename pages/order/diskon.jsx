@@ -63,83 +63,107 @@ const isDiskonEvent = useMemo(() => {
   const IdulFitriDecor = () => {
      const stars = Array.from({ length: 14 });
 
-  return (
+ return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
 
-      {/* ORNAMEN BULAT SOFT */}
-      <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-stone-100 opacity-70" />
+      {/* BACKGROUND SOFT */}
+      <div className="absolute inset-0 bg-[#fafaf8]" />
 
-      <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full border border-stone-200" />
+      {/* BULAT ORNAMEN */}
+      <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full border border-stone-200 opacity-70" />
 
       {/* BULAN SABIT */}
-      <div className="absolute top-8 right-8">
-        <svg width="110" height="110" viewBox="0 0 110 110" fill="none">
+      <div className="absolute top-8 right-8 opacity-90">
+        <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
           <circle
-            cx="52"
-            cy="52"
+            cx="55"
+            cy="55"
             r="34"
-            stroke="#D6D3D1"
-            strokeWidth="3"
+            stroke="#d6d3d1"
+            strokeWidth="4"
           />
           <circle
-            cx="66"
-            cy="45"
+            cx="70"
+            cy="48"
             r="34"
-            fill="white"
+            fill="#fafaf8"
           />
         </svg>
       </div>
 
-      {/* LANTERA */}
-      <motion.div
-        animate={{ y: [0, 6, 0] }}
-        transition={{
-          duration: 3,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        className="absolute top-16 right-44"
-      >
-        <div className="w-9 h-14 rounded-2xl border border-stone-300 bg-white shadow-sm flex items-center justify-center">
-          <div className="w-2 h-2 rounded-full bg-amber-300" />
-        </div>
+      {/* SILUET KAMBING */}
+      <div className="absolute bottom-0 right-10 opacity-[0.06]">
+        <svg
+          width="280"
+          height="180"
+          viewBox="0 0 280 180"
+          fill="none"
+        >
+          <path
+            d="M50 120
+               C40 90, 70 70, 100 80
+               L130 70
+               C170 60, 210 80, 220 110
+               L240 120
+               L230 140
+               L210 140
+               L205 170
+               L190 170
+               L185 145
+               L120 145
+               L115 170
+               L100 170
+               L95 145
+               L60 140
+               Z"
+            fill="#44403c"
+          />
 
-        <div className="mx-auto h-10 w-px bg-stone-300" />
-      </motion.div>
+          {/* kepala */}
+          <circle cx="58" cy="98" r="24" fill="#44403c" />
 
-      {/* BINTANG */}
-      {stars.map((_, i) => (
-        <motion.span
+          {/* tanduk */}
+          <path
+            d="M42 78
+               C20 60, 25 40, 50 50"
+            stroke="#44403c"
+            strokeWidth="8"
+            strokeLinecap="round"
+          />
+
+          <path
+            d="M70 78
+               C92 60, 88 40, 64 50"
+            stroke="#44403c"
+            strokeWidth="8"
+            strokeLinecap="round"
+          />
+        </svg>
+      </div>
+
+      {/* SILUET MASJID */}
+      <div className="absolute bottom-0 left-0 w-full opacity-[0.05]">
+        <svg
+          viewBox="0 0 1440 240"
+          className="w-full h-auto fill-stone-900"
+        >
+          <path d="M0 240V170H100V120C100 95 120 75 145 75C170 75 190 95 190 120V170H280V95L360 30L440 95V170H540V130C540 105 560 85 585 85C610 85 630 105 630 130V170H760V100L860 20L960 100V170H1080V140C1080 115 1100 95 1125 95C1150 95 1170 115 1170 140V170H1280V100L1360 50L1440 100V240Z" />
+        </svg>
+      </div>
+
+      {/* BINTANG KECIL */}
+      {[...Array(15)].map((_, i) => (
+        <div
           key={i}
-          className="absolute rounded-full bg-stone-400"
+          className="absolute rounded-full bg-stone-400 opacity-20"
           style={{
             width: `${2 + (i % 2)}px`,
             height: `${2 + (i % 2)}px`,
-            left: `${6 + i * 6}%`,
             top: `${5 + (i % 5) * 8}%`,
-            opacity: 0.18,
-          }}
-          animate={{
-            opacity: [0.1, 0.35, 0.1],
-            scale: [1, 1.4, 1],
-          }}
-          transition={{
-            duration: 2.5 + i * 0.15,
-            repeat: Infinity,
-            ease: "easeInOut",
+            left: `${8 + i * 6}%`,
           }}
         />
       ))}
-
-      {/* SILUET MASJID */}
-      <div className="absolute bottom-0 left-0 w-full opacity-[0.04]">
-        <svg
-          viewBox="0 0 1440 220"
-          className="w-full h-auto fill-stone-900"
-        >
-          <path d="M0 220V160H120V110C120 90 136 74 156 74C176 74 192 90 192 110V160H280V80L360 20L440 80V160H520V120C520 100 536 84 556 84C576 84 592 100 592 120V160H720V100L820 30L920 100V160H1040V130C1040 110 1056 94 1076 94C1096 94 1112 110 1112 130V160H1240V90L1320 40L1400 90V220Z" />
-        </svg>
-      </div>
     </div>
   );
 };
