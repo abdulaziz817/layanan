@@ -65,6 +65,9 @@ const videoTotal = useMemo(() => {
   const [showGopay, setShowGopay] = useState(false);
   const [showPaypal, setShowPaypal] = useState(false);
   const [showBCA, setShowBCA] = useState(false);
+  const [showMandiri, setShowMandiri] = useState(false);
+
+  
 
   // ✅ Fee hanya untuk Web Development (HARUS setelah selectedService)
   const shouldApplyFee = selectedService === "Web Development";
@@ -894,6 +897,7 @@ const totalIDR = useMemo(() => {
     setShowGopay(method === "GoPay");
     setShowPaypal(method === "PayPal");
     setShowBCA(method === "BCA");
+     setShowMandiri(method === "Mandiri");
     setShowCrypto(method === "Crypto");
 
     setFieldErrors((prev) => ({ ...prev, paymentMethod: "" }));
@@ -2165,6 +2169,7 @@ setTimeout(() => {
                     <option value="">-- Pilih Metode Pembayaran --</option>
                     <option value="QRIS">QRIS</option>
                     <option value="BCA">Transfer Bank (BCA)</option>
+                     <option value="Mandiri">Transfer Bank (Mandiri)</option>
                     <option value="GoPay">GoPay</option>
                     <option value="PayPal">PayPal</option>
                     <option value="Crypto">Crypto (USDT/BTC/ETH/BNB)</option>
@@ -2304,6 +2309,48 @@ setTimeout(() => {
                     </div>
                   </div>
                 )}
+
+                {/* Mandiri */}
+{showMandiri && (
+  <div className="mt-4 w-full p-6 rounded-2xl border border-gray-100 shadow-sm bg-white">
+    <div className="flex flex-col items-center">
+      <div className="flex items-center gap-2">
+        <h3 className="text-lg font-semibold text-gray-900">
+          Mandiri Transfer
+        </h3>
+
+        <span className="px-2 py-0.5 text-[10px] rounded-md bg-gray-100 text-gray-500">
+          Secure
+        </span>
+      </div>
+
+      <span className="text-xs text-gray-500 mt-1">
+        Transfer melalui bank Mandiri ke nomor berikut
+      </span>
+
+      <div className="mt-5 w-full p-4 rounded-xl bg-gray-50 border flex justify-between items-center">
+       <div>
+                          <p className="font-semibold text-gray-900 text-base">1730021291985</p>
+                          <p className="text-xs text-gray-500 -mt-0.5">a.n A***l A**z</p>
+                        </div>
+
+        <button
+          type="button"
+          onClick={() =>
+            navigator.clipboard.writeText("1730021291985")
+          }
+          className="text-sm px-3 py-1.5 rounded-lg bg-gray-900 text-white hover:bg-black transition active:scale-[0.97]"
+        >
+          Copy
+        </button>
+      </div>
+
+      <p className="text-[11px] text-gray-400 mt-3">
+        Gunakan transfer antar bank bila berbeda bank
+      </p>
+    </div>
+  </div>
+)}
 
                 {/* ✅ CRYPTO */}
                 {showCrypto && (
