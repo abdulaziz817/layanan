@@ -824,7 +824,7 @@ GetContact: {
 
         <span className="w-2 h-2 rounded-full bg-yellow-300 animate-pulse" />
 
-        PROMO SPESIAL IDUL ADHA
+        PROMO
       </div>
 
       {/* TITLE */}
@@ -839,14 +839,7 @@ GetContact: {
 
       <div className="flex items-center gap-2 mt-4 flex-wrap">
 
-        <div className="px-3 py-1 rounded-full bg-white/15 border border-white/20 text-xs font-medium">
-          Auto Apply
-        </div>
-
-        <div className="px-3 py-1 rounded-full bg-yellow-300 text-emerald-950 text-xs font-bold">
-          Limited Event
-        </div>
-
+      
       </div>
     </div>
 
