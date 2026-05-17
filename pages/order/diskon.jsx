@@ -898,7 +898,7 @@ GetContact: {
                 </div>
 
                 <div>
-                  <p className="font-semibold text-gray-900">{user?.name || "-"}</p>
+                  <p className="font-semibold text-white">{user?.name || "-"}</p>
                   <p className="text-xs text-white">{user?.phone || "-"}</p>
                 </div>
               </div>
@@ -1191,7 +1191,7 @@ GetContact: {
                         Copy
                       </button>
                     </div>
-                    <p className="mt-2 text-[11px] text-white">
+                    <p className="mt-2 text-[11px] text-black">
                       Setelah transfer, kirim bukti & TXID/hash via WhatsApp.
                     </p>
                   </div>
