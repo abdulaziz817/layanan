@@ -64,107 +64,112 @@ const isDiskonEvent = useMemo(() => {
      const stars = Array.from({ length: 14 });
 
  return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+  <div className="pointer-events-none absolute inset-0 overflow-hidden">
 
-      {/* BACKGROUND SOFT */}
-      <div className="absolute inset-0 bg-[#fafaf8]" />
+  {/* BACKGROUND */}
+  <div className="absolute inset-0 bg-gradient-to-b from-emerald-950 via-emerald-900 to-white" />
 
-      {/* BULAT ORNAMEN */}
-      <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full border border-stone-200 opacity-70" />
+  {/* GLOW */}
+  <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[420px] h-[420px] rounded-full bg-emerald-400/20 blur-3xl" />
 
-      {/* BULAN SABIT */}
-      <div className="absolute top-8 right-8 opacity-90">
-        <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
-          <circle
-            cx="55"
-            cy="55"
-            r="34"
-            stroke="#d6d3d1"
-            strokeWidth="4"
-          />
-          <circle
-            cx="70"
-            cy="48"
-            r="34"
-            fill="#fafaf8"
-          />
-        </svg>
-      </div>
+  {/* ORNAMEN ISLAMI */}
+  <div className="absolute top-0 left-0 w-full h-72 opacity-10">
+    <svg
+      viewBox="0 0 800 400"
+      className="w-full h-full"
+      fill="none"
+    >
+      <path
+        d="M0 200Q100 100 200 200T400 200T600 200T800 200"
+        stroke="white"
+        strokeWidth="2"
+      />
+      <path
+        d="M0 240Q100 140 200 240T400 240T600 240T800 240"
+        stroke="white"
+        strokeWidth="2"
+      />
+    </svg>
+  </div>
 
-      {/* SILUET KAMBING */}
-      <div className="absolute bottom-0 right-10 opacity-[0.06]">
-        <svg
-          width="280"
-          height="180"
-          viewBox="0 0 280 180"
-          fill="none"
-        >
-          <path
-            d="M50 120
-               C40 90, 70 70, 100 80
-               L130 70
-               C170 60, 210 80, 220 110
-               L240 120
-               L230 140
-               L210 140
-               L205 170
-               L190 170
-               L185 145
-               L120 145
-               L115 170
-               L100 170
-               L95 145
-               L60 140
-               Z"
-            fill="#44403c"
-          />
+  {/* BULAN SABIT */}
+  <div className="absolute top-10 right-6">
+    <div className="relative w-28 h-28">
 
-          {/* kepala */}
-          <circle cx="58" cy="98" r="24" fill="#44403c" />
+      <div className="absolute inset-0 rounded-full border-[6px] border-yellow-300 opacity-90" />
 
-          {/* tanduk */}
-          <path
-            d="M42 78
-               C20 60, 25 40, 50 50"
-            stroke="#44403c"
-            strokeWidth="8"
-            strokeLinecap="round"
-          />
+      <div className="absolute top-0 left-5 w-28 h-28 rounded-full bg-emerald-900" />
 
-          <path
-            d="M70 78
-               C92 60, 88 40, 64 50"
-            stroke="#44403c"
-            strokeWidth="8"
-            strokeLinecap="round"
-          />
-        </svg>
-      </div>
-
-      {/* SILUET MASJID */}
-      <div className="absolute bottom-0 left-0 w-full opacity-[0.05]">
-        <svg
-          viewBox="0 0 1440 240"
-          className="w-full h-auto fill-stone-900"
-        >
-          <path d="M0 240V170H100V120C100 95 120 75 145 75C170 75 190 95 190 120V170H280V95L360 30L440 95V170H540V130C540 105 560 85 585 85C610 85 630 105 630 130V170H760V100L860 20L960 100V170H1080V140C1080 115 1100 95 1125 95C1150 95 1170 115 1170 140V170H1280V100L1360 50L1440 100V240Z" />
-        </svg>
-      </div>
-
-      {/* BINTANG KECIL */}
-      {[...Array(15)].map((_, i) => (
-        <div
-          key={i}
-          className="absolute rounded-full bg-stone-400 opacity-20"
-          style={{
-            width: `${2 + (i % 2)}px`,
-            height: `${2 + (i % 2)}px`,
-            top: `${5 + (i % 5) * 8}%`,
-            left: `${8 + i * 6}%`,
-          }}
-        />
-      ))}
     </div>
+  </div>
+
+  {/* BINTANG */}
+  {[...Array(20)].map((_, i) => (
+    <div
+      key={i}
+      className="absolute bg-yellow-200 rounded-full animate-pulse"
+      style={{
+        width: `${2 + (i % 3)}px`,
+        height: `${2 + (i % 3)}px`,
+        top: `${5 + (i * 4)}%`,
+        left: `${(i * 7) % 100}%`,
+        opacity: 0.7,
+      }}
+    />
+  ))}
+
+  {/* LANTERN */}
+  <div className="absolute top-24 left-6 opacity-80">
+    <svg width="60" height="100" viewBox="0 0 60 100" fill="none">
+      <line
+        x1="30"
+        y1="0"
+        x2="30"
+        y2="18"
+        stroke="#fde68a"
+        strokeWidth="2"
+      />
+
+      <rect
+        x="15"
+        y="18"
+        width="30"
+        height="45"
+        rx="8"
+        fill="#facc15"
+      />
+
+      <rect
+        x="20"
+        y="28"
+        width="20"
+        height="25"
+        rx="4"
+        fill="#fff7cc"
+      />
+
+      <line
+        x1="20"
+        y1="72"
+        x2="40"
+        y2="72"
+        stroke="#fde68a"
+        strokeWidth="3"
+      />
+    </svg>
+  </div>
+
+  {/* SILUET MASJID BAWAH */}
+  <div className="absolute bottom-0 left-0 w-full opacity-[0.08]">
+    <svg
+      viewBox="0 0 1440 260"
+      className="w-full h-auto fill-emerald-950"
+    >
+      <path d="M0 260V180H110V130C110 100 130 80 160 80C190 80 210 100 210 130V180H320V100L400 40L480 100V180H620V140C620 110 640 90 670 90C700 90 720 110 720 140V180H860V110L980 20L1100 110V180H1240V130C1240 100 1260 80 1290 80C1320 80 1340 100 1340 130V180H1440V260Z" />
+    </svg>
+  </div>
+
+</div>
   );
 };
 
