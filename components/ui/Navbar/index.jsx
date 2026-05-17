@@ -263,23 +263,33 @@ if (
               )}
             </button>
 
-            {/* CENTER PESAN */}
-            <button
-              onClick={handleCTA}
-              aria-label="Pesan Sekarang"
-              className={`absolute left-1/2 -translate-x-1/2 -top-7 w-[70px] h-[70px] rounded-full flex flex-col items-center justify-center border-[6px] border-white active:scale-95 transition-all duration-300 ${
-                isActive('/order')
-                  ? 'bg-black text-white shadow-[0_14px_36px_rgba(0,0,0,0.42)] -translate-y-1'
-                  : 'bg-black text-white shadow-[0_12px_30px_rgba(0,0,0,0.35)]'
-              }`}
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path d="M6 8h12l-1 13H7L6 8z" />
-                <path d="M9 8a3 3 0 0 1 6 0" />
-              </svg>
+          {/* CENTER PESAN */}
+<button
+  onClick={handleCTA}
+  aria-label="Pesan Sekarang"
+  className={`absolute left-1/2 -translate-x-1/2 -top-7 w-[70px] h-[70px] rounded-full flex flex-col items-center justify-center border-[6px] border-white active:scale-95 transition-all duration-300 ${
+    isActive('/order')
+      ? 'bg-black text-white shadow-[0_14px_36px_rgba(0,0,0,0.42)] -translate-y-1'
+      : 'bg-black text-white shadow-[0_12px_30px_rgba(0,0,0,0.35)]'
+  }`}
+>
+  <svg
+    className="w-6 h-6"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M6 7h12l-1 12H7L6 7Z" />
+    <path d="M9 7a3 3 0 0 1 6 0" />
+  </svg>
 
-              <span className="text-[10px] font-semibold mt-1">Pesan</span>
-            </button>
+  <span className="text-[10px] font-semibold mt-1">
+    Pesan
+  </span>
+</button>
 
             <div className="w-[70px]" />
 
